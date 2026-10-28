@@ -88,6 +88,10 @@ Test results and operational documentation will be used to assess system behavio
 
 Components will be implemented and validated incrementally. Architecture diagrams, deployment instructions, test results, and operational documentation will be updated as the project progresses.
 
-## Goals
+## Engineering Principles
 
-Build a practical, reproducible Azure platform that demonstrates production-oriented DevOps and SRE engineering, from infrastructure provisioning and secure delivery to observability, incident response, and service recovery.
+- **Automation First:** Minimize repetitive manual operations through automation and Infrastructure as Code.
+- **Reliability by Design:** Build for failure detection, service continuity, and recovery.
+- **Security by Default:** Apply least privilege, secure identity management, and defense in depth.
+- **Observability Driven:** Use actionable telemetry to understand system behavior and troubleshoot incidents.
+- **Continuous Improvement:** Validate changes, learn from failures, and improve operational practices.
