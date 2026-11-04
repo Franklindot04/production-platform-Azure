@@ -51,6 +51,7 @@ Assumptions:
 5. The Kubernetes API server is public with an authorized IP range. (ADR 0005)
 6. Infrastructure changes are applied from the maintainer's machine at first. Pipelines run checks and plans. (ADR 0007)
 7. Alerts go to email. (ADR 0008)
+8. Environments are separated by resource group inside the one subscription. The state storage account is shared. (ADR 0010)
 
 Unknowns:
 
@@ -67,8 +68,10 @@ All components in this diagram are planned. Nothing is deployed.
 
 The platform has two Terraform layers:
 
-- **Persistent layer.** Small resources that must outlive a session: state storage, Key Vault, monitoring workspaces and (possibly) the container registry.
+- **Persistent layer.** Small resources that must outlive a session: Key Vault, monitoring workspaces and (possibly) the container registry.
 - **Session layer.** Resources created at the start of a session and destroyed at the end: virtual network, AKS cluster and everything inside it.
+
+Both layers exist once per environment. The state storage is shared by all environments and sits outside both layers. The diagram shows one environment. See section 9 and ADR 0010.
 
 ```mermaid
 flowchart LR
@@ -77,9 +80,9 @@ flowchart LR
     actions -->|"OIDC token"| entra["Microsoft Entra ID"]
     actions -->|"build and push image"| acr["Container registry"]
     maint -->|"terraform apply and destroy"| tf["Terraform"]
+    state["State storage (shared by all environments)"]
 
     subgraph persistent ["Persistent layer"]
-        state["State storage"]
         kv["Key Vault"]
         mon["Azure Monitor and Log Analytics workspaces"]
         acr
@@ -115,7 +118,7 @@ Every component below is planned. The status column is `planned` for all of them
 | Component | Role | Layer | Epic | Status |
 |---|---|---|---|---|
 | Terraform | Creates all Azure resources | n/a | 2 (#2) | planned |
-| State storage | Holds Terraform state | persistent | 2 (#2) | planned |
+| State storage | Holds Terraform state | shared | 2 (#2) | planned |
 | Virtual network | Network for nodes | session | 2 (#2) | planned |
 | Container registry | Stores images | persistent (assumption) | 2 (#2) | planned |
 | Key Vault | Holds secrets | persistent | 6 (#6) | planned |
@@ -168,14 +171,60 @@ Notes:
 
 Infrastructure changes follow a separate path: pull request, plan, review, merge, then apply from the maintainer's machine (assumption, ADR 0007).
 
+Promotion between environments is described in section 9.
+
 ## 9. Environments
 
-The intended environments are `dev`, `staging` and `prod`. How they are separated (subscriptions or resource groups), how state is laid out per environment, who can access each one, and how a change moves between them is **pending in issue #16**. Nothing in this document decides it.
+The environments are `dev`, `staging` and `prod`. They are separated by resource group inside one subscription. The decision is ADR 0010, which is proposed. All of it is planned. Only `dev` is created first. `staging` and `prod` are defined here and are not created until they are needed.
 
-Until #16 is done:
+### Resource groups
 
-- Names include `<env>` so a split is possible later. (ADR 0003)
-- Only one environment is expected to exist at a time, starting with `dev`.
+| Resource group | Holds | Created |
+|---|---|---|
+| `pp-shared-state-rg` | State storage account, by a manual bootstrap step | once |
+| `pp-<env>-persistent-rg` | Key Vault, monitoring workspaces, possibly the container registry | per environment |
+| `pp-<env>-session-rg` | Virtual network, AKS cluster | per environment, each session |
+| `pp-<env>-aks-nodes-rg` | AKS node resources, named by Terraform | with the cluster |
+
+Names follow ADR 0003. `shared` takes the place of `<env>` for the state storage only.
+
+### State
+
+- One blob container per environment in the shared storage account: `tfstate-<env>`.
+- Two state files per environment, one per layer: `persistent.tfstate` and `session.tfstate`. (ADR 0004)
+- Each environment is its own Terraform root. Terraform workspaces are not used. Environment inputs are written in `.tf` files, because `.gitignore` excludes `*.tfvars`.
+
+### Access
+
+- Role assignments for an environment are scoped to its resource groups, plus a data role on its state container.
+- Each environment has its own pipeline identity, tied to the GitHub environment with the same name. Pull request runs use a read-only identity. (ADR 0007)
+- The maintainer is Owner of the subscription. This is not a boundary between environments.
+
+### Cost, quota and policy
+
+- Resources carry the `env` tag, so cost can be filtered by environment. Per-environment budgets are planned once an amount is set. (ADR 0009)
+- Quota and credit are shared by all environments. Only one environment is expected to run at a time.
+- Policy is assigned per environment resource group where the policy tool allows it. A subscription-wide assignment is used only for a rule that applies to every environment.
+
+### Promotion
+
+- Infrastructure: pull request, plan, review, merge, apply to `dev`, then `staging`, then `prod`. Each step waits until the previous environment is checked.
+- Workloads: a pull request changes the values under `gitops/<env>/`, in the same order. How the image tag is updated is an open question.
+- Rollback is a Git revert in both paths.
+- The check between environments is not defined. It is written when the sample service and its health checks exist.
+
+### Teardown
+
+The end-of-session teardown in ADR 0009 applies to every environment, including `prod`. Keeping `prod` running between sessions means revisiting ADR 0009.
+
+### Limits
+
+- Quota is shared by all environments in the subscription and region.
+- The credit is one pool.
+- A subscription-level failure affects every environment. Examples are a disabled subscription, a deny policy at subscription scope and exhausted quota.
+- The tenant is shared.
+- The state storage account is shared. Losing it loses the state of every environment.
+- `prod` is a name for the most protected environment. It is not a service with uptime.
 
 ## 10. Identity and secrets
 
@@ -186,7 +235,7 @@ All planned.
 - **Workloads.** Pods use workload identity to read Key Vault. No Azure credentials are stored in the cluster.
 - **Secrets.** Secrets live in Key Vault. They are not committed. `.gitignore` covers common secret files, and GitHub secret scanning and push protection are on for this repository.
 - **Terraform state.** Access with Entra ID only. Shared key access is turned off. (ADR 0004)
-- **Least privilege.** Each identity gets the lowest role that works, scoped as narrowly as possible.
+- **Least privilege.** Each identity gets the lowest role that works, scoped as narrowly as possible. Roles for an environment are scoped to its resource groups. (ADR 0010)
 
 Open: how Argo CD's own admin credential is created and stored.
 
@@ -213,6 +262,7 @@ Plan:
 - Use small nodes and few of them.
 - Tag all resources.
 - Add an Azure budget with alerts once a monthly amount is set.
+- Budgets and cost views per environment are planned. The credit is shared by all environments. (ADR 0010)
 
 Main cost drivers to check in the Azure pricing calculator, at the time of use:
 
@@ -235,6 +285,8 @@ If a free credit account is used, check at sign-up: the credit amount, how long 
 | State lost or corrupted | Infrastructure cannot be managed from code | Versioning and soft delete on the state container. |
 | Key Vault name held after deletion | Cannot re-create it | Keep Key Vault in the persistent layer. |
 | Public API server | Larger attack surface | Authorized IP range, Entra ID authentication. |
+| Shared subscription: quota, credit, subscription-level failure | All environments affected together | Run one environment at a time. Check quota and credit terms at sign-up. Revisit separate subscriptions if the project outgrows this model. (ADR 0010) |
+| Shared state storage account | State of every environment lost or exposed | Versioning and soft delete, a container per environment, Entra ID access only. (ADR 0004, ADR 0010) |
 | One maintainer, and admin bypass on `main` | No second reviewer | Follow the pull request flow in CONTRIBUTING.md anyway. |
 | Leaked credential in a public repository | Account access | Secret scanning, push protection, no stored secrets. Report as in SECURITY.md. |
 | Tool versions drift | Builds break | Pin versions in Terraform and in pipelines when they exist. |
@@ -251,12 +303,13 @@ If a free credit account is used, check at sign-up: the credit amount, how long 
 | [0007](adr/0007-github-actions-oidc-to-azure.md) | Authenticate GitHub Actions to Azure with OIDC | proposed |
 | [0008](adr/0008-observability-stack.md) | Choose the metrics and dashboard stack | proposed |
 | [0009](adr/0009-cost-guardrails.md) | Set cost guardrails and teardown policy | proposed |
+| [0010](adr/0010-environment-separation.md) | Separate environments by resource group | proposed |
 
-Still to be decided and recorded: environment separation (#16).
+Other open decisions are listed in section 15.
 
 ## 15. Open questions
 
-1. Which separation model for dev, staging and prod? (#16)
+1. When is `staging` created, and what check must `dev` pass before a change moves on? (ADR 0010)
 2. What monthly budget? Is it set before the first apply?
 3. Does the container registry stay between sessions?
 4. What is the sample service, and in which language?
