@@ -14,9 +14,9 @@ No Azure subscription exists yet.
 
 - Region: `northeurope`. All resources go in this one region.
 - Prefix: `pp`.
-- Pattern for resources that allow hyphens: `pp-<env>-<resource>`, for example `pp-dev-aks` or `pp-dev-rg`.
+- Pattern for resources that allow hyphens: `pp-<env>-<resource>`, for example `pp-dev-aks` or `pp-dev-session-rg`.
 - Pattern for resources that do not allow hyphens or need global uniqueness: `pp<env><resource><suffix>`, for example `ppdevacr` plus a short random suffix. Terraform creates the suffix.
-- `<env>` is `dev`, `staging` or `prod`. The environment model itself is decided in #16.
+- `<env>` is `dev`, `staging` or `prod`. The state storage serves all environments and uses `shared` in that position. The environment model is in ADR 0010.
 - Every resource gets these tags where Azure allows tags: `project=production-platform-azure`, `env=<env>`, `managed-by=terraform`.
 
 Assumptions:
