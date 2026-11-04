@@ -12,6 +12,7 @@ Terraform needs a place to keep state. The cluster is created and destroyed each
 
 - Store state in an Azure Storage account using the `azurerm` backend, with one blob container per environment, named `tfstate-<env>`.
 - Two state files per environment, one per layer, with the keys `persistent.tfstate` and `session.tfstate` in each container. The layers are described in the architecture document.
+- The storage account is in `northeurope`. The workloads are in `swedencentral` (ADR 0003). State in a different region from the workloads is acceptable, because state is small and Terraform reads and writes it by API.
 - Authenticate with Microsoft Entra ID, not account keys. Shared key access on the storage account is turned off.
 - Turn on blob versioning and soft delete, so an overwritten or deleted state file can be recovered.
 - Rely on blob lease locking, which the backend provides, to stop two runs from writing at once.

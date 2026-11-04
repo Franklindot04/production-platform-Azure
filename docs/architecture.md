@@ -198,12 +198,12 @@ The environments are `dev`, `staging` and `prod`. They are separated by resource
 
 | Resource group | Holds | Created |
 |---|---|---|
-| `pp-shared-state-rg` | State storage account, by a manual bootstrap step | once |
+| `pp-shared-state-rg` | State storage account in `northeurope`, by a manual bootstrap step | once |
 | `pp-<env>-persistent-rg` | Key Vault, monitoring workspaces, possibly the container registry | per environment |
 | `pp-<env>-session-rg` | Virtual network, AKS cluster | per environment, each session |
 | `pp-<env>-aks-nodes-rg` | AKS node resources, named by Terraform | with the cluster |
 
-Names follow ADR 0003. `shared` takes the place of `<env>` for the state storage only.
+Names follow ADR 0003. `shared` takes the place of `<env>` for the state storage only. The environment resource groups are in `swedencentral`.
 
 ### State
 

@@ -18,7 +18,7 @@ Resource groups:
 
 - Per environment, two resource groups: `pp-<env>-persistent-rg` and `pp-<env>-session-rg`. The persistent layer and the session layer are described in the architecture document.
 - AKS also creates a node resource group. Terraform names it `pp-<env>-aks-nodes-rg`.
-- The state storage account serves all environments, so it sits in its own resource group, `pp-shared-state-rg`. The account is named `ppsharedstate` plus a suffix drawn by the bootstrap script. `shared` is used as the name segment where `<env>` would be. It is not an environment. Resources there carry the tag `env=shared`.
+- The state storage account serves all environments, so it sits in its own resource group, `pp-shared-state-rg`, in `northeurope`. The environment resource groups are in `swedencentral`. The account is named `ppsharedstate` plus a suffix drawn by the bootstrap script. `shared` is used as the name segment where `<env>` would be. It is not an environment. Resources there carry the tag `env=shared`.
 
 Persistent layer per environment: Key Vault and the Azure Monitor and Log Analytics workspaces. Each environment has its own. Whether the container registry is per environment or shared is not decided. It is an open question in the architecture document.
 
