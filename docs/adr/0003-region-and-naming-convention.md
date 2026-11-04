@@ -15,9 +15,9 @@ The target subscription has a regional vCPU quota of 4 in `northeurope`. This li
 - Region: `northeurope`. All resources go in this one region.
 - Prefix: `pp`.
 - Pattern for resources that allow hyphens: `pp-<env>-<resource>`, for example `pp-dev-aks` or `pp-dev-session-rg`.
-- Pattern for resources that do not allow hyphens or need global uniqueness: `pp<env><resource><suffix>`, for example `ppdevacr` plus a short random suffix. Terraform creates the suffix.
+- Pattern for resources that do not allow hyphens or need global uniqueness: `pp<env><resource><suffix>`, for example `ppdevacr` plus a short random suffix. Terraform creates the suffix. The state storage account is the exception: the bootstrap script draws its 6-character suffix (ADR 0004).
 - `<env>` is `dev`, `staging` or `prod`. The state storage serves all environments and uses `shared` in that position. The environment model is in ADR 0010.
-- Every resource gets these tags where Azure allows tags: `project=production-platform-azure`, `env=<env>`, `managed-by=terraform`.
+- Every resource gets these tags where Azure allows tags: `project=production-platform-azure`, `env=<env>`, `managed-by=terraform`. The resources made by the bootstrap script (ADR 0004) carry `managed-by=azure-cli`, because Terraform does not manage them.
 
 Assumptions:
 
