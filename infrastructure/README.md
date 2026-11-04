@@ -1,6 +1,6 @@
 # infrastructure
 
-Terraform for the platform. Planned. No resources are defined yet.
+Terraform for the platform. The `dev` roots define resources and have been planned. Nothing has been applied.
 
 - `bootstrap/`: the Azure CLI script that creates the state backend. It is not a Terraform root.
 - `modules/`: shared modules. Planned.

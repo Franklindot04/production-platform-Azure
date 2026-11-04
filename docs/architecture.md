@@ -4,7 +4,7 @@
 
 This document describes the intended design of the platform. It is the first version.
 
-**Built today:** the repository setup (templates, contribution rules, license, security policy, decision records), the `infrastructure/` folders with two Terraform roots that have version constraints and no resources, the bootstrap script and the state backend it created in Azure (a resource group, a storage account and the `tfstate-dev` container), and a workflow that checks Terraform format and validity on pull requests. **Everything else in this document is planned.** No Terraform resources are defined yet.
+**Built today:** the repository setup (templates, contribution rules, license, security policy, decision records), the `infrastructure/` folders with two Terraform roots for `dev` that define a resource group, a virtual network, a node subnet and an AKS cluster (planned with `terraform plan` and not applied), the bootstrap script and the state backend it created in Azure (a resource group, a storage account and the `tfstate-dev` container), and a workflow that checks Terraform format and validity on pull requests. **Everything else in this document is planned.** No resource from the `dev` roots exists in Azure.
 
 Where a choice is not made, the text says so. Where a choice is made but not yet tested, it is marked as an assumption. Decisions are recorded as ADRs in [docs/adr/](adr/) and listed in section 14.
 
@@ -59,7 +59,7 @@ Assumptions:
 
 Unknowns:
 
-- Which VM sizes and families are available in `swedencentral`, and the vCPU quota per family. Only the total of 4 is a design limit.
+- Whether two `Standard_D2s_v5` nodes, or one `Standard_D4s_v5` node, are accepted as the AKS system pool. Both break an AKS guideline, and the setup is unproven until a real create. (ADR 0012)
 - Whether the quota can be raised.
 - The language and shape of the sample service.
 - The trace backend and the Grafana hosting choice. (ADR 0008)
@@ -143,13 +143,13 @@ Every component below is planned. The status column is `planned` for all of them
 The target subscription has a regional vCPU quota of 4 in `swedencentral`. This is a design limit. It limits the plan:
 
 - One cluster at a time. A second cluster would use most or all of the quota.
-- The node pools together stay within 4 vCPU, for example one node with 4 vCPU or two nodes with 2 vCPU. System pool nodes are expected to need at least 2 vCPU. This is checked at plan time.
-- An upgrade or a node replacement creates an extra node first (surge). It needs free quota, and it cannot run when all 4 vCPU are in use. The plan is to pin versions, turn automatic upgrades off, and re-create the cluster instead of upgrading it. This is checked at plan time.
+- The node pools together stay within 4 vCPU. ADR 0012 plans two nodes with 2 vCPU. The alternative is one node with 4 vCPU. The AKS documentation asks for system pool nodes of at least 4 vCPU and at least two nodes, so each option breaks a guideline.
+- An upgrade or a node replacement creates an extra node first (surge). It needs free quota, and it cannot run when all 4 vCPU are in use. The plan is to pin versions, turn automatic upgrades off, and re-create the cluster instead of upgrading it. (ADR 0012)
 - The cluster autoscaler cannot add nodes beyond the quota.
 - Argo CD, the metrics agent, the OpenTelemetry Collector and the sample service must fit in the capacity that is left. This is not measured.
 - Nodes left behind by a failed destroy keep using quota and block the next create.
 
-Node sizing is decided in the first AKS plan under Epic 2 (#2).
+The first AKS plan is ADR 0012. A plan does not check sizes or quota against Azure, so the pool is unproven until a real create under Epic 3 (#3). The saved plans are in [docs/plans/](plans/README.md).
 
 ### Planned repository layout
 
@@ -298,7 +298,7 @@ The target subscription has a regional vCPU quota of 4, which limits node sizes 
 |---|---|---|
 | Cluster left running after a session | Unplanned cost. Quota stays in use, so the next cluster cannot be created | End-of-session resource check. Budget alerts are planned. |
 | Budget exceeded | Unplanned cost | A budget with alerts is planned. Resources are tagged. The session layer is destroyed after each session. (ADR 0009) |
-| Regional vCPU quota of 4 | A cluster over 4 vCPU cannot be created. Upgrades and node replacement need spare quota | Size the cluster within 4 vCPU. Do not upgrade in place. Check VM sizes and per-family quota before the first AKS plan. |
+| Regional vCPU quota of 4 | A cluster over 4 vCPU cannot be created. Upgrades and node replacement need spare quota | Size the cluster within 4 vCPU. Do not upgrade in place. The system pool in ADR 0012 breaks an AKS guideline and is unproven until a real create. |
 | State lost or corrupted | Infrastructure cannot be managed from code | Versioning and soft delete on the state container. |
 | Key Vault name held after deletion | Cannot re-create it | Keep Key Vault in the persistent layer. |
 | Public API server | Larger attack surface | Authorized IP range, Entra ID authentication. |
@@ -321,6 +321,8 @@ The target subscription has a regional vCPU quota of 4, which limits node sizes 
 | [0008](adr/0008-observability-stack.md) | Choose the metrics and dashboard stack | proposed |
 | [0009](adr/0009-cost-guardrails.md) | Set cost guardrails and teardown policy | proposed |
 | [0010](adr/0010-environment-separation.md) | Separate environments by resource group | proposed |
+| [0011](adr/0011-session-network-design.md) | Design the session network | proposed |
+| [0012](adr/0012-first-aks-plan.md) | Plan the first AKS cluster | proposed |
 
 Other open decisions are listed in section 15.
 
@@ -336,3 +338,4 @@ Other open decisions are listed in section 15.
 8. How is the image tag updated after a build?
 9. What SLO targets and window fit a service that is only up during sessions?
 10. How long does a full create take? This is measured once the code exists, and it sets the recovery time that Epic 7 (#7) can claim.
+11. Does AKS accept the system pool in ADR 0012, and how much capacity is left for the tools?
