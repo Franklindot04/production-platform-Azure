@@ -4,7 +4,7 @@
 
 This document describes the intended design of the platform. It is the first version.
 
-**Built today:** the repository setup (templates, contribution rules, license, security policy, decision records), the `infrastructure/` folders with Terraform version constraints and no resources, and a workflow that checks Terraform format and validity on pull requests. **Everything else in this document is planned.** No Terraform resources are defined yet.
+**Built today:** the repository setup (templates, contribution rules, license, security policy, decision records), the `infrastructure/` folders with two Terraform roots that have version constraints and no resources, the bootstrap script and the state backend it created in Azure (a resource group, a storage account and the `tfstate-dev` container), and a workflow that checks Terraform format and validity on pull requests. **Everything else in this document is planned.** No Terraform resources are defined yet.
 
 Where a choice is not made, the text says so. Where a choice is made but not yet tested, it is marked as an assumption. Decisions are recorded as ADRs in [docs/adr/](adr/) and listed in section 14.
 
