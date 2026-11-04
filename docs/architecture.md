@@ -44,13 +44,13 @@ The design covers:
 
 Design limit:
 
-- The target subscription has a regional vCPU quota of 4 in `northeurope`. Section 7 describes its effects.
+- The target subscription has a regional vCPU quota of 4 in `swedencentral`. Section 7 describes its effects.
 
 Assumptions:
 
 1. One maintainer, working in sessions.
 2. One Azure subscription and one Entra ID tenant.
-3. Region is `northeurope`. Resource prefix is `pp`. (ADR 0003)
+3. The workload region is `swedencentral`. The state storage account is in `northeurope`. Resource prefix is `pp`. (ADR 0003)
 4. Only one environment runs at a time. The 4 vCPU quota makes this a requirement.
 5. The Kubernetes API server is public with an authorized IP range. (ADR 0005)
 6. Infrastructure changes are applied from the maintainer's machine at first. Pipelines run checks and plans. (ADR 0007)
@@ -59,7 +59,7 @@ Assumptions:
 
 Unknowns:
 
-- Which VM sizes and families are available in `northeurope`, and the vCPU quota per family. Only the total of 4 is a design limit.
+- Which VM sizes and families are available in `swedencentral`, and the vCPU quota per family. Only the total of 4 is a design limit.
 - Whether the quota can be raised.
 - The language and shape of the sample service.
 - The trace backend and the Grafana hosting choice. (ADR 0008)
@@ -140,7 +140,7 @@ Every component below is planned. The status column is `planned` for all of them
 
 ### Capacity limit
 
-The target subscription has a regional vCPU quota of 4 in `northeurope`. This is a design limit. It limits the plan:
+The target subscription has a regional vCPU quota of 4 in `swedencentral`. This is a design limit. It limits the plan:
 
 - One cluster at a time. A second cluster would use most or all of the quota.
 - The node pools together stay within 4 vCPU, for example one node with 4 vCPU or two nodes with 2 vCPU. System pool nodes are expected to need at least 2 vCPU. This is checked at plan time.
