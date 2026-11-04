@@ -31,6 +31,8 @@ These are the tools planned for the project. None is in use yet.
 
 Tool choices may change. Changes will be recorded as ADRs.
 
+The planned design is described in [docs/architecture.md](docs/architecture.md).
+
 ## Planned repository layout
 
 Only `docs/` exists today. The other folders are planned. Names may change when the work starts.
