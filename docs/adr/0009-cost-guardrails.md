@@ -6,7 +6,7 @@
 
 ## Context
 
-The project runs on one Azure subscription. Cost is controlled by tagging every resource, by destroying the session layer after each session, and by a budget with alerts. The target subscription has a regional vCPU quota of 4 in `northeurope`, which also limits how much compute can run.
+The project runs on one Azure subscription. Cost is controlled by tagging every resource, by destroying the session layer after each session, and by a budget with alerts. The target subscription has a regional vCPU quota of 4 in `swedencentral`, which also limits how much compute can run.
 
 ## Decision
 
