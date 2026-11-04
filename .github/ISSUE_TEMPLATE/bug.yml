@@ -1,0 +1,43 @@
+name: Bug
+description: Something does not work as described
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you saw.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Tool versions, environment name, region, commit hash.
+    validations:
+      required: false
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Fixed when
+      description: A checkbox list of what must be true to close this issue.
+      value: |
+        - [ ]
+    validations:
+      required: false
