@@ -56,7 +56,7 @@ Assumptions:
 1. One maintainer, working in sessions.
 2. One Azure subscription, on a personal tenant. The tenant type has not been checked.
 3. Region is `northeurope`. Resource prefix is `pp`. (ADR 0003)
-4. Only one environment runs at a time.
+4. Only one environment runs at a time. The 4 vCPU quota makes this a requirement.
 5. The Kubernetes API server is public with an authorized IP range. (ADR 0005)
 6. Infrastructure changes are applied from the maintainer's machine at first. Pipelines run checks and plans. (ADR 0007)
 7. Alerts go to email. (ADR 0008)
@@ -145,6 +145,19 @@ Every component below is planned. The status column is `planned` for all of them
 | Policy checks | Block unsafe changes | n/a | 6 (#6) | planned |
 | Runbooks and postmortems | Incident handling | n/a | 7 (#7) | planned |
 
+### Capacity limit
+
+The total regional vCPU quota in `northeurope` is 4. This is a fact. It limits the plan:
+
+- One cluster at a time. A second cluster would use most or all of the quota.
+- The node pools together stay within 4 vCPU, for example one node with 4 vCPU or two nodes with 2 vCPU. System pool nodes are expected to need at least 2 vCPU. This is checked at plan time.
+- An upgrade or a node replacement creates an extra node first (surge). It needs free quota, and it cannot run when all 4 vCPU are in use. The plan is to pin versions, turn automatic upgrades off, and re-create the cluster instead of upgrading it. This is checked at plan time.
+- The cluster autoscaler cannot add nodes beyond the quota.
+- Argo CD, the metrics agent, the OpenTelemetry Collector and the sample service must fit in the capacity that is left. This is not measured.
+- Nodes left behind by a failed destroy keep using quota and block the next create.
+
+Node sizing is decided in the first AKS plan under Epic 2 (#2).
+
 ### Planned repository layout
 
 Only `docs/` exists today. These are planned and may change. The rule for the three folders that overlap:
@@ -214,7 +227,7 @@ Names follow ADR 0003. `shared` takes the place of `<env>` for the state storage
 ### Cost, quota and policy
 
 - Resources carry the `env` tag, so cost can be filtered by environment. Per-environment budgets are planned once an amount is set. (ADR 0009)
-- Quota and credit are shared by all environments. Only one environment is expected to run at a time.
+- Quota and credit are shared by all environments. The regional vCPU quota is 4, so only one environment runs at a time. See the capacity limit in section 7.
 - Policy is assigned per environment resource group where the policy tool allows it. A subscription-wide assignment is used only for a rule that applies to every environment.
 
 ### Promotion
@@ -230,8 +243,8 @@ The end-of-session teardown in ADR 0009 applies to every environment, including 
 
 ### Limits
 
-- Quota is shared by all environments in the subscription and region.
-- The credit is one pool.
+- Quota is shared by all environments in the subscription and region. The total regional vCPU quota is 4.
+- The credit is one pool. Its amount is unknown.
 - A subscription-level failure affects every environment. Examples are a disabled subscription, a deny policy at subscription scope and exhausted quota.
 - The tenant is shared.
 - The state storage account is shared. Losing it loses the state of every environment.
@@ -290,13 +303,13 @@ The subscription is a free trial with the spending limit on. The credit amount a
 
 | Risk | Effect | Mitigation |
 |---|---|---|
-| Cluster left running after a session | Unplanned cost | End-of-session resource check. Budget alert once an amount is set. |
-| Credit runs out or expires early | Work stops, resources may be disabled | Check terms at sign-up. Track spend. |
-| Low VM quota on a new account | Cluster cannot be created | Check quota in `northeurope` before the first apply. |
+| Cluster left running after a session | Unplanned cost. Quota stays in use, so the next cluster cannot be created | End-of-session resource check. Budget alert once an amount is set. |
+| Credit runs out or the trial ends | Work stops. With the spending limit on, resources are expected to be disabled (offer terms, not checked) | Record the credit amount and end date when the portal shows them. Track spend. |
+| Regional vCPU quota is 4 | A cluster over 4 vCPU cannot be created. Upgrades and node replacement need spare quota | Size the cluster within 4 vCPU. Do not upgrade in place. Check VM sizes and per-family quota before the first AKS plan. |
 | State lost or corrupted | Infrastructure cannot be managed from code | Versioning and soft delete on the state container. |
 | Key Vault name held after deletion | Cannot re-create it | Keep Key Vault in the persistent layer. |
 | Public API server | Larger attack surface | Authorized IP range, Entra ID authentication. |
-| Shared subscription: quota, credit, subscription-level failure | All environments affected together | Run one environment at a time. Check quota and credit terms at sign-up. Revisit separate subscriptions if the project outgrows this model. (ADR 0010) |
+| Shared subscription: quota, credit, subscription-level failure | All environments affected together | Run one environment at a time. Record the credit amount and end date when the portal shows them. Revisit separate subscriptions if the project outgrows this model. (ADR 0010) |
 | Shared state storage account | State of every environment lost or exposed | Versioning and soft delete, a container per environment, Entra ID access only. (ADR 0004, ADR 0010) |
 | One maintainer, and admin bypass on `main` | No second reviewer | Follow the pull request flow in CONTRIBUTING.md anyway. |
 | Leaked credential in a public repository | Account access | Secret scanning, push protection, no stored secrets. Report as in SECURITY.md. |
