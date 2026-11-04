@@ -67,3 +67,6 @@ service-principal*.json
 *.log
 tmp/
 temp/
+
+# Bootstrap
+infrastructure/bootstrap/.state-account-name
