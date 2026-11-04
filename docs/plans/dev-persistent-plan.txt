@@ -1,0 +1,30 @@
+Root: infrastructure/environments/dev/persistent
+Command: terraform plan -input=false -no-color -lock=false
+Terraform 1.14.5 and azurerm 5.12.0, run from a copy of the root with local state. Not applied.
+GUIDs are masked as xxxx.
+
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # azurerm_resource_group.persistent will be created
+  + resource "azurerm_resource_group" "persistent" {
+      + id       = (known after apply)
+      + location = "swedencentral"
+      + name     = "pp-dev-persistent-rg"
+      + tags     = {
+          + "env"        = "dev"
+          + "managed-by" = "terraform"
+          + "project"    = "production-platform-azure"
+        }
+    }
+
+Plan: 1 to add, 0 to change, 0 to destroy.
+
+─────────────────────────────────────────────────────────────────────────────
+
+Note: You didn't use the -out option to save this plan, so Terraform can't
+guarantee to take exactly these actions if you run "terraform apply" now.
