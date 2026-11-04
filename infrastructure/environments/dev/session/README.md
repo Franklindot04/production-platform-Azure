@@ -1,7 +1,7 @@
 # dev session layer
 
-Planned. Will hold the resources of `dev` that are created at the start of a session and destroyed at the end: the virtual network and the AKS cluster.
+The resources of `dev` that are created at the start of a session and destroyed at the end. The configuration defines the resource group `pp-dev-session-rg`, the virtual network `pp-dev-vnet` and the node subnet `pp-dev-aks-nodes-snet`, all in `swedencentral`. The ranges are in [ADR 0011](../../../../docs/adr/0011-session-network-design.md).
 
-State file: `session.tfstate` in the `tfstate-dev` container. The backend is not configured yet.
+State file: `session.tfstate` in the `tfstate-dev` container. The backend is not configured in this root. Plans are run from a copy of the root with local state.
 
-The root has version constraints only. It defines no resources yet.
+Nothing in this root has been applied. The provider block does not register resource providers, and it holds no credentials. Terraform reads the subscription from `ARM_SUBSCRIPTION_ID` and the Azure CLI login.
