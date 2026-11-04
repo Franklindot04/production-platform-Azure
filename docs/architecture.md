@@ -4,7 +4,7 @@
 
 This document describes the intended design of the platform. It is the first version.
 
-**Built today:** the repository setup only (templates, contribution rules, license, security policy, decision records). **Everything else in this document is planned.** No Azure subscription exists yet, and no cloud resources have been created.
+**Built today:** the repository setup only (templates, contribution rules, license, security policy, decision records). **Everything else in this document is planned.** A free trial subscription exists. It holds no resources. No Terraform code exists.
 
 Where a choice is not made, the text says so. Where a choice is made but not yet tested, it is marked as an assumption. Decisions are recorded as ADRs in [docs/adr/](adr/) and listed in section 14.
 
@@ -40,12 +40,21 @@ The design covers:
 - An on-call rotation. There is one maintainer.
 - High availability beyond what one small AKS cluster gives.
 
-## 5. Assumptions and unknowns
+## 5. Facts, assumptions and unknowns
+
+Facts, read by the maintainer on 2026-11-04:
+
+- The Azure offer is a free trial. The spending limit is on.
+- The region `northeurope` accepts resources.
+- The total regional vCPU quota in `northeurope` is 4.
+- The subscription holds no resources. The portal shows none. A test resource group was created and deleted.
+- The Azure CLI is installed on the maintainer's machine.
+- No Terraform code exists yet.
 
 Assumptions:
 
 1. One maintainer, working in sessions.
-2. One Azure subscription on a personal tenant. It is not created yet. If it is created, it is expected to be a free credit account. The credit amount, its duration, and what happens when it ends must be checked at sign-up.
+2. One Azure subscription, on a personal tenant. The tenant type has not been checked.
 3. Region is `northeurope`. Resource prefix is `pp`. (ADR 0003)
 4. Only one environment runs at a time.
 5. The Kubernetes API server is public with an authorized IP range. (ADR 0005)
@@ -55,8 +64,10 @@ Assumptions:
 
 Unknowns:
 
-- Whether the chosen region has the VM sizes and quota the project needs. Check at sign-up.
-- The monthly budget. It is not set.
+- Which VM sizes and families the trial allows in `northeurope`, and the vCPU quota per family. Only the total of 4 is known.
+- Whether the quota can be raised on this offer.
+- The credit amount and the trial end date. The portal does not show them yet.
+- The monthly budget. This is an open item. It is not set.
 - The language and shape of the sample service.
 - The trace backend and the Grafana hosting choice. (ADR 0008)
 - Whether the container registry stays between sessions or is rebuilt each time.
@@ -273,7 +284,7 @@ Main cost drivers to check in the Azure pricing calculator, at the time of use:
 - Grafana, if the managed service is used.
 - State storage, which is expected to be small.
 
-If a free credit account is used, check at sign-up: the credit amount, how long it lasts, which services it covers, and what happens to resources when it ends.
+The subscription is a free trial with the spending limit on. The credit amount and the trial end date are unknown, because the portal does not show them yet. When the portal shows them, record the credit amount, how long it lasts, which services it covers, and what happens to resources when it ends.
 
 ## 13. Risks
 
@@ -310,7 +321,7 @@ Other open decisions are listed in section 15.
 ## 15. Open questions
 
 1. When is `staging` created, and what check must `dev` pass before a change moves on? (ADR 0010)
-2. What monthly budget? Is it set before the first apply?
+2. What monthly budget? It is an open item. It is not set, and the credit amount and trial end date are unknown. The first AKS plan under Epic 2 (#2) waits for them.
 3. Does the container registry stay between sessions?
 4. What is the sample service, and in which language?
 5. Which trace backend, and which Grafana hosting?
