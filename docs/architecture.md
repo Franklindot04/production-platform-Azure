@@ -4,7 +4,7 @@
 
 This document describes the intended design of the platform. It is the first version.
 
-**Built today:** the repository setup only (templates, contribution rules, license, security policy, decision records). **Everything else in this document is planned.** A free trial subscription exists. It holds no resources. No Terraform code exists.
+**Built today:** the repository setup (templates, contribution rules, license, security policy, decision records), the `infrastructure/` folders with Terraform version constraints and no resources, and a workflow that checks Terraform format and validity on pull requests. **Everything else in this document is planned.** A free trial subscription exists. It holds no resources. No Terraform code exists.
 
 Where a choice is not made, the text says so. Where a choice is made but not yet tested, it is marked as an assumption. Decisions are recorded as ADRs in [docs/adr/](adr/) and listed in section 14.
 
@@ -160,7 +160,7 @@ Node sizing is decided in the first AKS plan under Epic 2 (#2).
 
 ### Planned repository layout
 
-Only `docs/` exists today. These are planned and may change. The rule for the three folders that overlap:
+Only `docs/` and `infrastructure/` exist today. The rest is planned and may change. The rule for the three folders that overlap:
 
 - `kubernetes/` holds plain manifests for cluster-level resources, such as namespaces and quotas.
 - `helm/` holds charts written in this repository.
