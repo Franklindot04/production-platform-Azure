@@ -12,9 +12,11 @@ What exists today:
 
 - Repository files: `.gitignore`, `.editorconfig`, issue and PR templates, `CONTRIBUTING.md`, `LICENSE`, `CODE_OF_CONDUCT.md`, `SECURITY.md`.
 - A decision record process in `docs/adr/`.
+- `infrastructure/`: folders for the Terraform roots, with version constraints and no resources.
+- A GitHub Actions workflow that checks Terraform format and validity on pull requests.
 - Planned work, written up as GitHub issues.
 
-What does not exist yet: Terraform code, a cluster, pipelines, dashboards, runbooks. The README will change as each of these is built.
+What does not exist yet: Terraform resources, a cluster, build and deploy pipelines, dashboards, runbooks. The README will change as each of these is built.
 
 ## Planned tools
 
@@ -35,7 +37,7 @@ The planned design is described in [docs/architecture.md](docs/architecture.md).
 
 ## Planned repository layout
 
-Only `docs/` exists today. The other folders are planned. Names may change when the work starts.
+Only `docs/` and `infrastructure/` exist today. The other folders are planned. Names may change when the work starts.
 
 - `infrastructure/`: Terraform modules and environments.
 - `applications/`: a sample service and its tests.

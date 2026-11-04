@@ -8,7 +8,7 @@
 
 Every Azure resource is created in a region, and most resource names cannot be changed after creation. Names also need to be readable in the portal and in billing reports. Some names, such as storage accounts and container registries, must be unique across all of Azure and cannot contain hyphens.
 
-The subscription is a free trial with the spending limit on. It holds no resources. The region `northeurope` accepts resources, and the total regional vCPU quota there is 4 (read by the maintainer on 2026-11-04).
+The target subscription has a regional vCPU quota of 4 in `northeurope`. This limits the node pools of any cluster in the region. See section 7 of the architecture document.
 
 ## Decision
 
@@ -22,7 +22,7 @@ The subscription is a free trial with the spending limit on. It holds no resourc
 Assumptions:
 
 - The region name does not appear in resource names, because only one region is used. If a second region is added, this ADR is superseded.
-- The region offers the VM sizes the project needs. This is not checked. The trial may limit sizes and families. Check before the first AKS plan.
+- The region offers the VM sizes the project needs. This is not checked. Sizes and families can be limited per subscription. Check before the first AKS plan.
 
 ## Consequences
 

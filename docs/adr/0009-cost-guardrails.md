@@ -6,21 +6,21 @@
 
 ## Context
 
-The project runs on a personal Azure subscription. The subscription is a free trial with the spending limit on (read by the maintainer on 2026-11-04). The credit amount and the trial end date are unknown, because the portal does not show them yet. No monthly budget is set. It is an open item.
+The project runs on one Azure subscription. Cost is controlled by tagging every resource, by destroying the session layer after each session, and by a budget with alerts. The target subscription has a regional vCPU quota of 4 in `northeurope`, which also limits how much compute can run.
 
 ## Decision
 
 - The cluster and everything that depends on it are created at the start of a work session and destroyed at the end with `terraform destroy`.
 - Anything that must outlive a session lives in a separate persistent layer, and is kept small: state storage, Key Vault, the Azure Monitor and Log Analytics workspaces, and possibly the container registry.
-- When a budget amount is set, create an Azure budget with alerts at fixed percentages, defined in Terraform. Until then, the amount is an open question.
-- Use small node sizes and the fewest nodes that work. The regional vCPU quota is 4 (ADR 0003).
+- Define an Azure budget with alerts at fixed percentages in Terraform. The amount and the percentages are set in the code.
+- Use small node sizes and the fewest nodes that work. The target subscription has a regional vCPU quota of 4 (ADR 0003).
 - At the end of each session, check the resource group list in the portal or with the CLI for resources that were not destroyed.
 - Tag every resource, so cost can be filtered by project and environment.
 
 Assumptions:
 
-- Only one environment runs at a time. With a 4 vCPU quota, a second cluster would use most or all of it.
-- Sessions are short enough that the credit lasts. This is not verified.
+- Only one environment runs at a time. With a regional quota of 4 vCPU, a second cluster would use most or all of it.
+- Sessions are short enough that cost stays within the budget. This is not verified.
 
 ## Consequences
 

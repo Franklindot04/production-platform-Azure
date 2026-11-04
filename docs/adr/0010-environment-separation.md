@@ -6,9 +6,9 @@
 
 ## Context
 
-The project plans three environments: `dev`, `staging` and `prod`. They need a boundary for names, state, access, cost, quota and policy. The project has one maintainer, one personal Azure tenant and one planned subscription. The subscription is a free trial with the spending limit on.
+The project plans three environments: `dev`, `staging` and `prod`. They need a boundary for names, state, access, cost, quota and policy. The project has one maintainer, one Entra ID tenant and one planned subscription.
 
-Azure offers two common boundaries: one subscription per environment, or one subscription with one set of resource groups per environment. Separate subscriptions are a stronger boundary. They also need more setup, and it is not known how a free credit account treats more than one subscription.
+Azure offers two common boundaries: one subscription per environment, or one subscription with one set of resource groups per environment. Separate subscriptions are a stronger boundary. They also need more setup.
 
 ## Decision
 
@@ -43,8 +43,8 @@ Access:
 Cost:
 
 - Every resource carries the tags from ADR 0003, so cost can be filtered by environment.
-- Per-environment budgets are planned once a budget amount is set (ADR 0009). Whether a budget can be scoped to a resource group is not checked.
-- The credit is one pool for all environments.
+- A budget with alerts is planned for each environment (ADR 0009). Whether a budget can be scoped to a resource group is not checked.
+- Resources are tagged, and the session layer is destroyed after each session (ADR 0009).
 
 Policy: policy is assigned per environment resource group where the policy tool allows it. A subscription-wide assignment is used only for a rule that applies to every environment. The policy tool is not chosen. It is an open question in the architecture document.
 
@@ -79,8 +79,8 @@ What gets easier:
 
 Limits of this model:
 
-- Quota is per subscription and region, so all environments share it. The regional quota is 4 vCPU. A second cluster would use most or all of it, so only one environment runs at a time.
-- The credit is shared. One environment can use up what the others need.
+- Quota is per subscription and region, so all environments share it. The target subscription has a regional vCPU quota of 4. A second cluster would use most or all of it, so only one environment runs at a time.
+- The budget is shared. One environment can use up what the others need.
 - A subscription-level failure affects every environment. Examples are a disabled subscription, a deny policy at subscription scope, and exhausted quota.
 - The tenant is shared. A mistake in tenant-level identity settings affects every environment.
 - The state storage account is shared. Losing it loses the state of every environment. Versioning and soft delete reduce that risk but do not remove it.
@@ -95,7 +95,7 @@ What gets harder:
 
 ## Alternatives considered
 
-- One subscription per environment. Stronger boundary for quota, credit and subscription-level failure. More setup, and the behavior of a free credit account with several subscriptions is unknown. Can be revisited if the project outgrows this model.
+- One subscription per environment. Stronger boundary for quota, budget and subscription-level failure. More setup. Can be revisited if the project outgrows this model.
 - One resource group with tags only. No access boundary, and a destroy could reach other environments.
 - Terraform workspaces. All environments share one backend configuration, and it is easy to apply to the wrong environment.
 - One state storage account per environment. Listed in ADR 0004. Not chosen, because there is one maintainer and per-environment containers already separate access to state.

@@ -20,7 +20,7 @@ Terraform needs a place to keep state. The cluster is created and destroyed each
 Assumptions:
 
 - One storage account serves all environments. This is an assumption, recorded in ADR 0010.
-- The bootstrap uses the Azure CLI. It is installed on the maintainer's machine (read on 2026-11-04).
+- The bootstrap uses the Azure CLI.
 
 ## Consequences
 
