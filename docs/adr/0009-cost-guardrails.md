@@ -6,20 +6,20 @@
 
 ## Context
 
-The project runs on a personal Azure subscription. The subscription is not created yet. If it is created, it is expected to be a free credit account. The credit amount, its duration, and what happens when it ends must be checked at sign-up. No monthly budget is set.
+The project runs on a personal Azure subscription. The subscription is a free trial with the spending limit on (read by the maintainer on 2026-11-04). The credit amount and the trial end date are unknown, because the portal does not show them yet. No monthly budget is set. It is an open item.
 
 ## Decision
 
 - The cluster and everything that depends on it are created at the start of a work session and destroyed at the end with `terraform destroy`.
 - Anything that must outlive a session lives in a separate persistent layer, and is kept small: state storage, Key Vault, the Azure Monitor and Log Analytics workspaces, and possibly the container registry.
 - When a budget amount is set, create an Azure budget with alerts at fixed percentages, defined in Terraform. Until then, the amount is an open question.
-- Use small node sizes and the fewest nodes that work.
+- Use small node sizes and the fewest nodes that work. The regional vCPU quota is 4 (ADR 0003).
 - At the end of each session, check the resource group list in the portal or with the CLI for resources that were not destroyed.
 - Tag every resource, so cost can be filtered by project and environment.
 
 Assumptions:
 
-- Only one environment runs at a time.
+- Only one environment runs at a time. With a 4 vCPU quota, a second cluster would use most or all of it.
 - Sessions are short enough that the credit lasts. This is not verified.
 
 ## Consequences

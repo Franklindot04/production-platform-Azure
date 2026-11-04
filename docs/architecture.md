@@ -4,7 +4,7 @@
 
 This document describes the intended design of the platform. It is the first version.
 
-**Built today:** the repository setup only (templates, contribution rules, license, security policy, decision records). **Everything else in this document is planned.** No Azure subscription exists yet, and no cloud resources have been created.
+**Built today:** the repository setup only (templates, contribution rules, license, security policy, decision records). **Everything else in this document is planned.** A free trial subscription exists. It holds no resources. No Terraform code exists.
 
 Where a choice is not made, the text says so. Where a choice is made but not yet tested, it is marked as an assumption. Decisions are recorded as ADRs in [docs/adr/](adr/) and listed in section 14.
 
@@ -40,14 +40,23 @@ The design covers:
 - An on-call rotation. There is one maintainer.
 - High availability beyond what one small AKS cluster gives.
 
-## 5. Assumptions and unknowns
+## 5. Facts, assumptions and unknowns
+
+Facts, read by the maintainer on 2026-11-04:
+
+- The Azure offer is a free trial. The spending limit is on.
+- The region `northeurope` accepts resources.
+- The total regional vCPU quota in `northeurope` is 4.
+- The subscription holds no resources. The portal shows none. A test resource group was created and deleted.
+- The Azure CLI is installed on the maintainer's machine.
+- No Terraform code exists yet.
 
 Assumptions:
 
 1. One maintainer, working in sessions.
-2. One Azure subscription on a personal tenant. It is not created yet. If it is created, it is expected to be a free credit account. The credit amount, its duration, and what happens when it ends must be checked at sign-up.
+2. One Azure subscription, on a personal tenant. The tenant type has not been checked.
 3. Region is `northeurope`. Resource prefix is `pp`. (ADR 0003)
-4. Only one environment runs at a time.
+4. Only one environment runs at a time. The 4 vCPU quota makes this a requirement.
 5. The Kubernetes API server is public with an authorized IP range. (ADR 0005)
 6. Infrastructure changes are applied from the maintainer's machine at first. Pipelines run checks and plans. (ADR 0007)
 7. Alerts go to email. (ADR 0008)
@@ -55,8 +64,10 @@ Assumptions:
 
 Unknowns:
 
-- Whether the chosen region has the VM sizes and quota the project needs. Check at sign-up.
-- The monthly budget. It is not set.
+- Which VM sizes and families the trial allows in `northeurope`, and the vCPU quota per family. Only the total of 4 is known.
+- Whether the quota can be raised on this offer.
+- The credit amount and the trial end date. The portal does not show them yet.
+- The monthly budget. This is an open item. It is not set.
 - The language and shape of the sample service.
 - The trace backend and the Grafana hosting choice. (ADR 0008)
 - Whether the container registry stays between sessions or is rebuilt each time.
@@ -134,6 +145,19 @@ Every component below is planned. The status column is `planned` for all of them
 | Policy checks | Block unsafe changes | n/a | 6 (#6) | planned |
 | Runbooks and postmortems | Incident handling | n/a | 7 (#7) | planned |
 
+### Capacity limit
+
+The total regional vCPU quota in `northeurope` is 4. This is a fact. It limits the plan:
+
+- One cluster at a time. A second cluster would use most or all of the quota.
+- The node pools together stay within 4 vCPU, for example one node with 4 vCPU or two nodes with 2 vCPU. System pool nodes are expected to need at least 2 vCPU. This is checked at plan time.
+- An upgrade or a node replacement creates an extra node first (surge). It needs free quota, and it cannot run when all 4 vCPU are in use. The plan is to pin versions, turn automatic upgrades off, and re-create the cluster instead of upgrading it. This is checked at plan time.
+- The cluster autoscaler cannot add nodes beyond the quota.
+- Argo CD, the metrics agent, the OpenTelemetry Collector and the sample service must fit in the capacity that is left. This is not measured.
+- Nodes left behind by a failed destroy keep using quota and block the next create.
+
+Node sizing is decided in the first AKS plan under Epic 2 (#2).
+
 ### Planned repository layout
 
 Only `docs/` exists today. These are planned and may change. The rule for the three folders that overlap:
@@ -203,7 +227,7 @@ Names follow ADR 0003. `shared` takes the place of `<env>` for the state storage
 ### Cost, quota and policy
 
 - Resources carry the `env` tag, so cost can be filtered by environment. Per-environment budgets are planned once an amount is set. (ADR 0009)
-- Quota and credit are shared by all environments. Only one environment is expected to run at a time.
+- Quota and credit are shared by all environments. The regional vCPU quota is 4, so only one environment runs at a time. See the capacity limit in section 7.
 - Policy is assigned per environment resource group where the policy tool allows it. A subscription-wide assignment is used only for a rule that applies to every environment.
 
 ### Promotion
@@ -219,8 +243,8 @@ The end-of-session teardown in ADR 0009 applies to every environment, including 
 
 ### Limits
 
-- Quota is shared by all environments in the subscription and region.
-- The credit is one pool.
+- Quota is shared by all environments in the subscription and region. The total regional vCPU quota is 4.
+- The credit is one pool. Its amount is unknown.
 - A subscription-level failure affects every environment. Examples are a disabled subscription, a deny policy at subscription scope and exhausted quota.
 - The tenant is shared.
 - The state storage account is shared. Losing it loses the state of every environment.
@@ -273,19 +297,19 @@ Main cost drivers to check in the Azure pricing calculator, at the time of use:
 - Grafana, if the managed service is used.
 - State storage, which is expected to be small.
 
-If a free credit account is used, check at sign-up: the credit amount, how long it lasts, which services it covers, and what happens to resources when it ends.
+The subscription is a free trial with the spending limit on. The credit amount and the trial end date are unknown, because the portal does not show them yet. When the portal shows them, record the credit amount, how long it lasts, which services it covers, and what happens to resources when it ends.
 
 ## 13. Risks
 
 | Risk | Effect | Mitigation |
 |---|---|---|
-| Cluster left running after a session | Unplanned cost | End-of-session resource check. Budget alert once an amount is set. |
-| Credit runs out or expires early | Work stops, resources may be disabled | Check terms at sign-up. Track spend. |
-| Low VM quota on a new account | Cluster cannot be created | Check quota in `northeurope` before the first apply. |
+| Cluster left running after a session | Unplanned cost. Quota stays in use, so the next cluster cannot be created | End-of-session resource check. Budget alert once an amount is set. |
+| Credit runs out or the trial ends | Work stops. With the spending limit on, resources are expected to be disabled (offer terms, not checked) | Record the credit amount and end date when the portal shows them. Track spend. |
+| Regional vCPU quota is 4 | A cluster over 4 vCPU cannot be created. Upgrades and node replacement need spare quota | Size the cluster within 4 vCPU. Do not upgrade in place. Check VM sizes and per-family quota before the first AKS plan. |
 | State lost or corrupted | Infrastructure cannot be managed from code | Versioning and soft delete on the state container. |
 | Key Vault name held after deletion | Cannot re-create it | Keep Key Vault in the persistent layer. |
 | Public API server | Larger attack surface | Authorized IP range, Entra ID authentication. |
-| Shared subscription: quota, credit, subscription-level failure | All environments affected together | Run one environment at a time. Check quota and credit terms at sign-up. Revisit separate subscriptions if the project outgrows this model. (ADR 0010) |
+| Shared subscription: quota, credit, subscription-level failure | All environments affected together | Run one environment at a time. Record the credit amount and end date when the portal shows them. Revisit separate subscriptions if the project outgrows this model. (ADR 0010) |
 | Shared state storage account | State of every environment lost or exposed | Versioning and soft delete, a container per environment, Entra ID access only. (ADR 0004, ADR 0010) |
 | One maintainer, and admin bypass on `main` | No second reviewer | Follow the pull request flow in CONTRIBUTING.md anyway. |
 | Leaked credential in a public repository | Account access | Secret scanning, push protection, no stored secrets. Report as in SECURITY.md. |
@@ -310,7 +334,7 @@ Other open decisions are listed in section 15.
 ## 15. Open questions
 
 1. When is `staging` created, and what check must `dev` pass before a change moves on? (ADR 0010)
-2. What monthly budget? Is it set before the first apply?
+2. What monthly budget? It is an open item. It is not set, and the credit amount and trial end date are unknown. The first AKS plan under Epic 2 (#2) waits for them.
 3. Does the container registry stay between sessions?
 4. What is the sample service, and in which language?
 5. Which trace backend, and which Grafana hosting?

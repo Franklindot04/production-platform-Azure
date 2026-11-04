@@ -6,7 +6,7 @@
 
 ## Context
 
-The project plans three environments: `dev`, `staging` and `prod`. They need a boundary for names, state, access, cost, quota and policy. The project has one maintainer, one personal Azure tenant and one planned subscription. The subscription does not exist yet.
+The project plans three environments: `dev`, `staging` and `prod`. They need a boundary for names, state, access, cost, quota and policy. The project has one maintainer, one personal Azure tenant and one planned subscription. The subscription is a free trial with the spending limit on.
 
 Azure offers two common boundaries: one subscription per environment, or one subscription with one set of resource groups per environment. Separate subscriptions are a stronger boundary. They also need more setup, and it is not known how a free credit account treats more than one subscription.
 
@@ -79,7 +79,7 @@ What gets easier:
 
 Limits of this model:
 
-- Quota is per subscription and region, so all environments share it. Running two environments at once can hit the limit.
+- Quota is per subscription and region, so all environments share it. The regional quota is 4 vCPU. A second cluster would use most or all of it, so only one environment runs at a time.
 - The credit is shared. One environment can use up what the others need.
 - A subscription-level failure affects every environment. Examples are a disabled subscription, a deny policy at subscription scope, and exhausted quota.
 - The tenant is shared. A mistake in tenant-level identity settings affects every environment.

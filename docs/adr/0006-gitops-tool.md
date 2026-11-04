@@ -19,7 +19,7 @@ The project plans to deploy cluster workloads from Git. A GitOps controller insi
 - Each new cluster rebuilds its workloads from Git. This tests the GitOps flow every session.
 - Argo CD is self-managed, not an AKS-managed extension. Upgrades and the admin credential are our job.
 - Argo CD has a web UI and an API. Access must be limited, and the exposure choice is made in the Epic 4 (#4) issues.
-- Argo CD uses cluster resources. Node size must allow for it.
+- Argo CD uses cluster resources. Node size must allow for it. The regional vCPU quota is 4 (ADR 0003), so the room for Argo CD is small.
 
 ## Alternatives considered
 
