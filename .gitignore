@@ -1,0 +1,69 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Editors and IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.iml
+
+# Terraform
+.terraform/
+.terraform.lock.hcl.bak
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfvars
+*.tfvars.json
+!example.tfvars
+!*.example.tfvars
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+*.tfplan
+tfplan
+
+# Kubernetes and Helm
+kubeconfig
+*.kubeconfig
+.kube/
+charts/*.tgz
+*.tgz
+helm-values-local*.yaml
+*.local.yaml
+
+# Environment files
+.env
+.env.*
+!.env.example
+*.env
+
+# Secrets and keys
+*.pem
+*.key
+*.pfx
+*.p12
+*.crt
+id_rsa*
+id_ed25519*
+secrets/
+*.secret
+*.secrets
+credentials.json
+service-principal*.json
+
+# Logs and temp files
+*.log
+tmp/
+temp/
