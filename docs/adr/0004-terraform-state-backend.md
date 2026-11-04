@@ -15,12 +15,13 @@ Terraform needs a place to keep state. The cluster is created and destroyed each
 - Authenticate with Microsoft Entra ID, not account keys. Shared key access on the storage account is turned off.
 - Turn on blob versioning and soft delete, so an overwritten or deleted state file can be recovered.
 - Rely on blob lease locking, which the backend provides, to stop two runs from writing at once.
-- The storage account is created once by a bootstrap step that is run by hand. That step is the only place that uses local state, and it is documented when it is written.
+- The storage account is created once by a bootstrap script, `infrastructure/bootstrap/bootstrap.sh`, that is run by hand. It uses the Azure CLI and keeps no Terraform state. The script draws the 6-character suffix of the account name. The steps and checks are in `infrastructure/bootstrap/README.md`.
 
 Assumptions:
 
 - One storage account serves all environments. This is an assumption, recorded in ADR 0010.
 - The bootstrap uses the Azure CLI.
+- Blob and container soft delete keep deleted data for 14 days.
 
 ## Consequences
 

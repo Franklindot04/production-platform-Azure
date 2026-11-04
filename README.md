@@ -12,7 +12,8 @@ What exists today:
 
 - Repository files: `.gitignore`, `.editorconfig`, issue and PR templates, `CONTRIBUTING.md`, `LICENSE`, `CODE_OF_CONDUCT.md`, `SECURITY.md`.
 - A decision record process in `docs/adr/`.
-- `infrastructure/`: folders for the Terraform roots, with version constraints and no resources.
+- `infrastructure/`: two Terraform roots for `dev` with version constraints and no resources, and the bootstrap script for the state backend.
+- The state backend in Azure: one resource group, one storage account and the `tfstate-dev` container, created with `infrastructure/bootstrap/bootstrap.sh`.
 - A GitHub Actions workflow that checks Terraform format and validity on pull requests.
 - Planned work, written up as GitHub issues.
 
