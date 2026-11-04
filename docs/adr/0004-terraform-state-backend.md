@@ -10,8 +10,8 @@ Terraform needs a place to keep state. The cluster is created and destroyed each
 
 ## Decision
 
-- Store state in an Azure Storage account using the `azurerm` backend, in a blob container.
-- One state file per layer and environment, with keys like `persistent/dev.tfstate` and `session/dev.tfstate`. The layers are described in the architecture document.
+- Store state in an Azure Storage account using the `azurerm` backend, with one blob container per environment, named `tfstate-<env>`.
+- Two state files per environment, one per layer, with the keys `persistent.tfstate` and `session.tfstate` in each container. The layers are described in the architecture document.
 - Authenticate with Microsoft Entra ID, not account keys. Shared key access on the storage account is turned off.
 - Turn on blob versioning and soft delete, so an overwritten or deleted state file can be recovered.
 - Rely on blob lease locking, which the backend provides, to stop two runs from writing at once.
@@ -19,7 +19,7 @@ Terraform needs a place to keep state. The cluster is created and destroyed each
 
 Assumptions:
 
-- One storage account serves all environments for now. Whether each environment gets its own is part of #16.
+- One storage account serves all environments. This is an assumption, recorded in ADR 0010.
 - The bootstrap uses the Azure CLI, which is not installed on the maintainer's machine yet.
 
 ## Consequences
@@ -33,4 +33,4 @@ Assumptions:
 
 - HCP Terraform. Needs another account and service. Not needed for a single maintainer.
 - Local state committed to the repository. State can hold secrets, and it does not work with pipelines.
-- One storage account per environment. Stronger separation, but it depends on the #16 decision.
+- One storage account per environment. Stronger separation. Not chosen in ADR 0010, because there is one maintainer and a container per environment already separates access to state.
