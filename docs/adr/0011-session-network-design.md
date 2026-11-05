@@ -10,7 +10,7 @@ The session layer holds the virtual network and the AKS cluster. ADR 0005 chose 
 
 With Azure CNI Overlay, each node gets a fixed /24 from the pod range. The size of that block cannot be changed. The pod range must not overlap the cluster subnet or any network connected to the virtual network. The service range must not overlap the pod range, the cluster subnet or connected networks.
 
-No resource described here exists in Azure. The ranges are inputs of the `dev` session root, and nothing has been applied.
+The ranges are inputs of the `dev` session root. Azure accepted them in the first create (ADR 0012): the network and the cluster were created with these ranges. The session layer was then destroyed, so no resource described here exists now.
 
 ## Decision
 

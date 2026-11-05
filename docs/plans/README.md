@@ -1,6 +1,6 @@
 # Saved plans
 
-Text output of `terraform plan` for the `dev` roots. Nothing was applied, and no resource from these plans exists in Azure.
+Text output of `terraform plan` for the `dev` roots, run before the first create. They were run from copies of the roots with local state. The first create used new plans from the real backend, and its results are in [ADR 0012](../adr/0012-first-aks-plan.md).
 
 | File | Root | Result |
 |---|---|---|
@@ -16,7 +16,7 @@ How they were produced:
 
 What a plan does not show:
 
-- It does not check the VM size, the Kubernetes version or the vCPU quota against Azure. A real create does. See [ADR 0012](../adr/0012-first-aks-plan.md).
+- It does not check the VM size, the Kubernetes version or the vCPU quota against Azure. A real create does. The first create is in [ADR 0012](../adr/0012-first-aks-plan.md).
 - Values marked `known after apply` are set by Azure.
 
 To run a plan again, copy the root and its `.terraform.lock.hcl` to an empty folder, run `terraform init`, then `terraform plan`.
