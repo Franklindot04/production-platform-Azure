@@ -10,9 +10,9 @@ The target subscription has a regional vCPU quota of 4 in `swedencentral` (ADR 0
 
 Facts read with the Azure CLI and the Azure API, without creating anything:
 
-- In `swedencentral`, `Standard_D2s_v5` (2 vCPU, 8 GB) and `Standard_D4s_v5` (4 vCPU, 16 GB) are not restricted for the subscription. Both are in the `DSv5` family, whose quota is 4. The total regional quota is 4. Nothing is in use.
+- In `swedencentral`, `Standard_D2s_v5` (2 vCPU, 8 GB) and `Standard_D4s_v5` (4 vCPU, 16 GB) are available. Both are in the `DSv5` family, whose quota is 4. The total regional quota is 4. Nothing is in use.
 - Neither size supports ephemeral OS disks, so the pool uses a managed OS disk.
-- In `northeurope`, the standard sizes with 2 or 4 vCPU were restricted for the subscription. Only confidential-computing sizes were open there. That is why the workloads are in `swedencentral`.
+- In `northeurope`, the standard sizes with 2 or 4 vCPU were not available. Only confidential-computing sizes were available there. That is why the workloads are in `swedencentral`.
 - The default Kubernetes minor version in `swedencentral` is 1.36. Its newest patch is 1.36.5. Version 1.37 exists and is not the default.
 
 Facts read from the AKS documentation:
@@ -33,7 +33,7 @@ The first plan is one system pool and no user pool.
 | OS disk | managed, 32 GB |
 | Pool upgrade surge | `max_surge = "1"` (the default, written down) |
 | Kubernetes version | 1.36.5, pinned |
-| Cluster upgrade channel | not set, so no automatic cluster upgrades |
+| Cluster upgrade channel | not set (see the limitations) |
 | Node OS upgrade channel | `None` |
 | Node provisioning | `Manual`, no default node pools |
 | Tier | `Free` |
@@ -59,6 +59,7 @@ Limitations of this plan:
 
 - Entra ID RBAC for the cluster is left for Epic 6 (#6). The cluster keeps local accounts for now.
 - The provider turns the OIDC issuer on by default. Workload identity is off.
+- `automatic_upgrade_channel` is left unset because the provider rejected `"none"`. That unset means no automatic upgrades is not confirmed. The first real create confirms it or not.
 - Zones are not set.
 - No network policy engine is set. It is chosen in Epic 3 (#3).
 
@@ -85,4 +86,4 @@ The plan output is saved in [docs/plans/](../plans/README.md). Nothing is applie
 - A separate user pool. Needs more quota than exists.
 - Autoscaler on. It cannot add nodes beyond the quota.
 - Automatic upgrade channels. They need surge room, which does not exist.
-- Confidential-computing sizes in `northeurope`. Open for the subscription. Not needed once `swedencentral` was available, and the price is not checked.
+- Confidential-computing sizes in `northeurope`. Not needed, because standard sizes are available in `swedencentral`. Price not checked.
