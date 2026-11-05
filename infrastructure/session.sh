@@ -8,7 +8,7 @@
 #   check           List every resource by resource group and report what remains.
 # env is dev, staging or prod. Default: dev.
 # Exit codes: 0 nothing remains, 1 something remains, 2 error or wrong use.
-# Output is masked: GUIDs and the authorized range are replaced. See infrastructure/README.md.
+# Output is masked: GUIDs and every /32 host range are replaced. See infrastructure/README.md.
 set -euo pipefail
 
 STEP="${1:-}"
@@ -34,7 +34,9 @@ NAME_FILE="${SCRIPT_DIR}/bootstrap/.state-account-name"
 STATE_RG="pp-shared-state-rg"
 
 # Build the sed expressions that hide GUIDs and the authorized range.
-MASK_SED=(-E -e 's/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/xxxx/g')
+MASK_SED=(-E
+  -e 's/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/xxxx/g'
+  -e 's#([0-9]{1,3}\.){3}[0-9]{1,3}/32#<authorized-ip>/32#g')
 build_mask() {
   local ip
   while read -r ip; do

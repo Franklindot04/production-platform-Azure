@@ -10,7 +10,7 @@ There are two Terraform roots today, `environments/dev/persistent` and `environm
 
 ## Session script
 
-`session.sh` creates, destroys and checks the session layer of an environment. It needs the Azure CLI signed in, Terraform, and the state backend from `bootstrap/`. It reads the state account name from `bootstrap/.state-account-name`, which is not committed. Output is masked: GUIDs and the authorized range are replaced.
+`session.sh` creates, destroys and checks the session layer of an environment. It needs the Azure CLI signed in, Terraform, and the state backend from `bootstrap/`. It reads the state account name from `bootstrap/.state-account-name`, which is not committed. Output is masked: GUIDs and every `/32` host range are replaced.
 
 | Command | What it does |
 |---|---|
