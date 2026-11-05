@@ -4,7 +4,7 @@
 
 This document describes the intended design of the platform. It is the first version.
 
-**Built today:** the repository setup (templates, contribution rules, license, security policy, decision records), the `infrastructure/` folders with two Terraform roots for `dev` that define a resource group, a virtual network, a node subnet and an AKS cluster (planned with `terraform plan` and not applied), the bootstrap script and the state backend it created in Azure (a resource group, a storage account and the `tfstate-dev` container), and a workflow that checks Terraform format and validity on pull requests. **Everything else in this document is planned.** No resource from the `dev` roots exists in Azure.
+**Built today:** the repository setup (templates, contribution rules, license, security policy, decision records), the `infrastructure/` folders with two Terraform roots for `dev` that define a resource group, a virtual network, a node subnet and an AKS cluster (applied once in the first create; the session layer was destroyed afterwards), the bootstrap script and the state backend it created in Azure (a resource group, a storage account and the `tfstate-dev` container), and a workflow that checks Terraform format and validity on pull requests. **Everything else in this document is planned.** Of the `dev` roots, only the empty resource group `pp-dev-persistent-rg` exists in Azure.
 
 Where a choice is not made, the text says so. Where a choice is made but not yet tested, it is marked as an assumption. Decisions are recorded as ADRs in [docs/adr/](adr/) and listed in section 14.
 
@@ -59,7 +59,7 @@ Assumptions:
 
 Unknowns:
 
-- Whether two `Standard_D2s_v5` nodes, or one `Standard_D4s_v5` node, are accepted as the AKS system pool. Both break an AKS guideline, and the setup is unproven until a real create. (ADR 0012)
+- Whether the tools fit next to the system pods, and whether the pool can take an upgrade or a node replacement with all 4 vCPU in use. AKS accepted the pool in the first create. (ADR 0012)
 - Whether the quota can be raised.
 - The language and shape of the sample service.
 - The trace backend and the Grafana hosting choice. (ADR 0008)
@@ -149,7 +149,7 @@ The target subscription has a regional vCPU quota of 4 in `swedencentral`. This 
 - Argo CD, the metrics agent, the OpenTelemetry Collector and the sample service must fit in the capacity that is left. This is not measured.
 - Nodes left behind by a failed destroy keep using quota and block the next create.
 
-The first AKS plan is ADR 0012. A plan does not check sizes or quota against Azure, so the pool is unproven until a real create under Epic 3 (#3). The saved plans are in [docs/plans/](plans/README.md).
+The first AKS plan and the result of the first create are in ADR 0012. AKS accepted two `Standard_D2s_v5` nodes. The allocatable capacity is 3.8 vCPU and about 11.3 GiB, and the fit of the tools is not measured. The saved plans are in [docs/plans/](plans/README.md).
 
 ### Planned repository layout
 
@@ -298,7 +298,7 @@ The target subscription has a regional vCPU quota of 4, which limits node sizes 
 |---|---|---|
 | Cluster left running after a session | Unplanned cost. Quota stays in use, so the next cluster cannot be created | End-of-session resource check. Budget alerts are planned. |
 | Budget exceeded | Unplanned cost | A budget with alerts is planned. Resources are tagged. The session layer is destroyed after each session. (ADR 0009) |
-| Regional vCPU quota of 4 | A cluster over 4 vCPU cannot be created. Upgrades and node replacement need spare quota | Size the cluster within 4 vCPU. Do not upgrade in place. The system pool in ADR 0012 breaks an AKS guideline and is unproven until a real create. |
+| Regional vCPU quota of 4 | A cluster over 4 vCPU cannot be created. Upgrades and node replacement need spare quota | Size the cluster within 4 vCPU. Do not upgrade in place. The system pool in ADR 0012 breaks an AKS guideline. AKS accepted it in the first create. An upgrade or a node replacement is not tested. |
 | State lost or corrupted | Infrastructure cannot be managed from code | Versioning and soft delete on the state container. |
 | Key Vault name held after deletion | Cannot re-create it | Keep Key Vault in the persistent layer. |
 | Public API server | Larger attack surface | Authorized IP range, Entra ID authentication. |
@@ -337,5 +337,5 @@ Other open decisions are listed in section 15.
 7. How is the Argo CD admin credential handled?
 8. How is the image tag updated after a build?
 9. What SLO targets and window fit a service that is only up during sessions?
-10. How long does a full create take? This is measured once the code exists, and it sets the recovery time that Epic 7 (#7) can claim.
-11. Does AKS accept the system pool in ADR 0012, and how much capacity is left for the tools?
+10. How long does a full create take? The session layer took about 7 minutes to create and about 7 minutes to destroy in single runs (ADR 0012). The full platform is measured once it exists, and it sets the recovery time that Epic 7 (#7) can claim.
+11. Do the tools fit in the capacity that is left after the system pods? (ADR 0012)

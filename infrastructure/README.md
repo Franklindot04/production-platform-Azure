@@ -1,6 +1,6 @@
 # infrastructure
 
-Terraform for the platform. The `dev` roots define resources and have been planned. Nothing has been applied.
+Terraform for the platform. The `dev` roots were applied once. The persistent resource group exists and is empty. The session layer was destroyed after the first create.
 
 - `bootstrap/`: the Azure CLI script that creates the state backend. It is not a Terraform root.
 - `modules/`: shared modules. Planned.
