@@ -13,4 +13,4 @@ terraform -chdir=infrastructure/environments/dev/persistent init \
 The state account name is not committed. `.state-account-name` is written by `infrastructure/bootstrap/bootstrap.sh`. Access uses Microsoft Entra ID, so the signed-in user needs Storage Blob Data Contributor on the `tfstate-dev` container. The format and validate workflow runs `init -backend=false`, so it does not use the backend.
 
 
-Nothing in this root has been applied. The provider block does not register resource providers, and it holds no credentials. Terraform reads the subscription from `ARM_SUBSCRIPTION_ID` and the Azure CLI login.
+This root was applied once. The resource group `pp-dev-persistent-rg` exists and is empty. The provider block does not register resource providers, and it holds no credentials. Terraform reads the subscription from `ARM_SUBSCRIPTION_ID` and the Azure CLI login.

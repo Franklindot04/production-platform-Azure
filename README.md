@@ -12,12 +12,12 @@ What exists today:
 
 - Repository files: `.gitignore`, `.editorconfig`, issue and PR templates, `CONTRIBUTING.md`, `LICENSE`, `CODE_OF_CONDUCT.md`, `SECURITY.md`.
 - A decision record process in `docs/adr/`.
-- `infrastructure/`: two Terraform roots for `dev` and the bootstrap script for the state backend. The roots define a resource group, a virtual network, a subnet and an AKS cluster. They are planned and not applied. Saved plans are in `docs/plans/`.
+- `infrastructure/`: two Terraform roots for `dev` and the bootstrap script for the state backend. The roots define resource groups, a virtual network, a subnet and an AKS cluster. They were applied once. The session layer was destroyed afterwards, and only the empty persistent resource group exists. `session.sh` creates, destroys and checks the session layer. Plans and the first create are in `docs/plans/` and ADR 0012.
 - The state backend in Azure: one resource group, one storage account and the `tfstate-dev` container, created with `infrastructure/bootstrap/bootstrap.sh`.
 - A GitHub Actions workflow that checks Terraform format and validity on pull requests.
 - Planned work, written up as GitHub issues.
 
-What does not exist yet: anything applied by Terraform, a cluster, build and deploy pipelines, dashboards, runbooks. The README will change as each of these is built.
+What does not exist yet: a running cluster, build and deploy pipelines, dashboards, runbooks. The README will change as each of these is built.
 
 ## Planned tools
 

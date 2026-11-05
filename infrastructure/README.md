@@ -1,6 +1,6 @@
 # infrastructure
 
-Terraform for the platform. The `dev` roots define resources and have been planned. Nothing has been applied.
+Terraform for the platform. The `dev` roots were applied once. The persistent resource group exists and is empty. The session layer was destroyed after the first create.
 
 - `bootstrap/`: the Azure CLI script that creates the state backend. It is not a Terraform root.
 - `modules/`: shared modules. Planned.
@@ -32,5 +32,10 @@ There are two Terraform roots today, `environments/dev/persistent` and `environm
 - a resource group that is not `pp-shared-state-rg`, the persistent group of the environment, or `NetworkWatcherRG`.
 
 Azure creates `NetworkWatcherRG` when a virtual network exists in a region, and it is not counted. `check` prints names and counts, never IDs. Run it at the end of every session (ADR 0009).
+
+Seen in the first run:
+
+- The first `session.sh up` against a state key that did not exist yet stopped with "Error acquiring the state lock" and a connection reset. Nothing was created. Running it again worked. The cause is not confirmed.
+- `session.sh down` needs no authorized range. It uses a documentation address for the variable, and the real range comes from the state. The mask replaces every `/32` range, so the address is not printed.
 
 See [ADR 0010](../docs/adr/0010-environment-separation.md) and section 9 of [the architecture document](../docs/architecture.md).
