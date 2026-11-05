@@ -33,4 +33,9 @@ There are two Terraform roots today, `environments/dev/persistent` and `environm
 
 Azure creates `NetworkWatcherRG` when a virtual network exists in a region, and it is not counted. `check` prints names and counts, never IDs. Run it at the end of every session (ADR 0009).
 
+Seen in the first run:
+
+- The first `session.sh up` against a state key that did not exist yet stopped with "Error acquiring the state lock" and a connection reset. Nothing was created. Running it again worked. The cause is not confirmed.
+- `session.sh down` needs no authorized range. It uses a documentation address for the variable, and the real range comes from the state. The mask replaces every `/32` range, so the address is not printed.
+
 See [ADR 0010](../docs/adr/0010-environment-separation.md) and section 9 of [the architecture document](../docs/architecture.md).
