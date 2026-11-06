@@ -1,0 +1,10 @@
+# Values of the sample service in `dev`. The image tag is the commit SHA of the
+# build. A pull request opened by a workflow changes it (ADR 0018). Until the
+# first image is published the tag is a placeholder, and the pods cannot pull.
+image:
+  repository: ghcr.io/franklindot04/sample-service
+  tag: unpublished
+
+ingress:
+  enabled: true
+  className: nginx.approuting.kubernetes.azure.com

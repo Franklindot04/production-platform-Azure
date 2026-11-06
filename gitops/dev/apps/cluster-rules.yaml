@@ -1,0 +1,22 @@
+# Namespaces, quotas and network policies. Synced first.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cluster-rules
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Franklindot04/production-platform-Azure.git
+    targetRevision: main
+    path: kubernetes
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
