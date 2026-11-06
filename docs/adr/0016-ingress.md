@@ -20,10 +20,10 @@ Facts read from the documentation:
 
 ## Decision
 
-- Use the application routing add-on with its managed NGINX controller. It is the lighter option. Enable it in the session Terraform with the `web_app_routing` block and no DNS zone.
+- Use the application routing add-on with its managed NGINX controller. It is the lighter option. Enable it in the session Terraform with the `web_app_routing` block, no DNS zone and `default_nginx_controller = "External"`.
 - Serve plain HTTP on the public address of the load balancer. There is no domain and no certificate.
-- Reduce the controller to one replica through the `scaling` field of the `NginxIngressController` resource, if AKS allows it on the default controller. This is not checked.
-- Limit the source addresses to the maintainer's range, set at run time. How the limit is applied to the controller's Service is not stated in the pages read. It is settled when issue #42 is written and checked in Session 1.
+- The bootstrap step (ADR 0017) sets `minReplicas` to 1 and `maxReplicas` to 2 in the `scaling` field of the default `NginxIngressController` resource. If AKS refuses it, the step goes on with a warning. This is not checked on AKS.
+- Limit the source addresses to the maintainer's range, set at run time. The bootstrap step puts the range in the `loadBalancerAnnotations` field of the default `NginxIngressController` resource, as the annotation `service.beta.kubernetes.io/azure-allowed-ip-ranges`. The step stops if no range is given or if the range is open to everyone. The documentation pages read do not state that the add-on passes the annotation to the Service, or that the load balancer enforces it. Session 1 checks both.
 - Argo CD has no ingress (ADR 0017).
 
 This is a short-lived choice. Support for the add-on ends in November 2026. The exposure is limited to one address, and the cluster exists only during a session, so the project accepts the risk for its planned life. Anything that lasts longer needs a new decision.
@@ -37,7 +37,7 @@ This is a short-lived choice. Support for the add-on ends in November 2026. The 
 
 ## Open questions
 
-- How is the source range applied to the controller's Service?
+- Does the annotation limit the load balancer to the range?
 - Can the default controller be scaled to one replica?
 - Which ingress replaces the add-on once its support ends?
 

@@ -2,11 +2,14 @@
 # Checks the sample service, the chart, the cluster rules and the GitOps files
 # without Azure. Static checks run on the files. Live checks run in a local
 # kind cluster that is created and deleted by this script.
-# Usage: check.sh [--static] [--keep] [--reuse]
-#   --static  Run the static checks only. No cluster is created.
-#   --keep    Keep the kind cluster after the checks.
-#   --reuse   Use the kind cluster if it exists, instead of creating a new one.
-#             Creating three nodes can take several minutes on a small Docker VM.
+# Usage: check.sh [--static] [--keep] [--reuse] [--bootstrap]
+#   --static     Run the static checks only. No cluster is created.
+#   --bootstrap  Also run the bootstrap step of infrastructure/session.sh and check it.
+#                It installs Argo CD, which needs more CPU than the other checks, and it
+#                needs network access to GitHub and the Helm repository.
+#   --keep       Keep the kind cluster after the checks.
+#   --reuse      Use the kind cluster if it exists, instead of creating a new one.
+#                Creating three nodes can take several minutes on a small Docker VM.
 # Exit code: 0 if every required check passed, 1 otherwise.
 # A kind cluster does not show the AKS load balancer, Azure CNI Overlay or
 # whether network policy is enforced on AKS. Lines marked info are not checks.
@@ -15,11 +18,13 @@ set -euo pipefail
 STATIC_ONLY=0
 KEEP=0
 REUSE=0
+BOOTSTRAP=0
 for arg in "$@"; do
   case "$arg" in
     --static) STATIC_ONLY=1 ;;
     --keep) KEEP=1 ;;
     --reuse) REUSE=1 ;;
+    --bootstrap) BOOTSTRAP=1 ;;
     *)
       echo "unknown argument: $arg" >&2
       exit 2
@@ -34,6 +39,7 @@ K8S_SCHEMA="1.36.0"
 CRD_CATALOG='https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
 FAILED=0
 PIDS=()
+CLUSTER_UP=0
 
 pass() { echo "pass: $*"; }
 info() { echo "info: $*"; }
@@ -172,6 +178,7 @@ live_checks() {
 
   if [ "$REUSE" = "1" ] && kind get clusters 2>/dev/null | grep -qx "$CLUSTER"; then
     info "reusing the existing kind cluster"
+    CLUSTER_UP=1
   else
     created=0
     for attempt in 1 2 3; do
@@ -183,6 +190,7 @@ live_checks() {
       info "kind cluster creation failed, attempt $attempt of 3"
     done
     if [ "$created" = "1" ]; then
+      CLUSTER_UP=1
       pass "kind cluster created with one control plane and two workers"
     else
       fail "kind cluster could not be created"
@@ -314,9 +322,120 @@ EOF"
   fi
 }
 
+# bootstrap_checks   Runs the bootstrap step of infrastructure/session.sh against
+# the kind cluster and checks what it installs. The step uses the kubectl context
+# of the kind cluster. Argo CD syncs the cluster rules from the main branch on
+# GitHub, so this part needs network access.
+bootstrap_checks() {
+  echo "== bootstrap checks in kind"
+  [ "$CLUSTER_UP" = "1" ] || {
+    fail "no kind cluster for the bootstrap checks"
+    return
+  }
+  local session="$REPO/infrastructure/session.sh" out
+  # The sample service is installed by Argo CD from here on.
+  helm --kube-context "$CTX" uninstall sample-service -n apps >/dev/null 2>&1 || true
+
+  if out="$(PP_KUBE_CONTEXT="$CTX" "$session" bootstrap 2>&1)"; then
+    pass "bootstrap step runs"
+  else
+    fail "bootstrap step runs"
+    echo "$out" | tail -5
+    return
+  fi
+  case "$out" in
+    *"ingress range is not set"*) pass "the ingress range is skipped on a cluster without the add-on" ;;
+    *) fail "the ingress range message was not found" ;;
+  esac
+
+  expect "the Argo CD server is available" "$(k -n argocd get deployment argocd-server -o jsonpath='{.status.availableReplicas}' || true)" "1"
+  expect "the Argo CD application controller is ready" "$(k -n argocd get statefulset argocd-application-controller -o jsonpath='{.status.readyReplicas}' || true)" "1"
+  expect "the ApplicationSet controller runs no replica" "$(k -n argocd get deployment argocd-applicationset-controller -o jsonpath='{.spec.replicas}' || true)" "0"
+  check "Dex is not installed" bash -c "! kubectl --context '$CTX' -n argocd get deployment argocd-dex-server"
+  check "the root Application exists" k -n argocd get application root
+  check "the admin credential exists in the cluster" k -n argocd get secret argocd-initial-admin-secret
+
+  local state="" _
+  for _ in $(seq 1 60); do
+    state="$(k -n argocd get application cluster-rules -o jsonpath='{.status.sync.status}/{.status.health.status}' 2>/dev/null || true)"
+    [ "$state" = "Synced/Healthy" ] && break
+    sleep 5
+  done
+  expect "Argo CD syncs the cluster rules from Git" "$state" "Synced/Healthy"
+
+  check "the credential is not printed when the output is not a terminal" bash -c "PP_KUBE_CONTEXT='$CTX' '$session' argocd-password; [ \$? = 2 ]"
+  # The credential is read through a pseudo terminal and only its length is checked.
+  check "the credential is printed on a terminal" env PP_KUBE_CONTEXT="$CTX" SESSION="$session" python3 -I -c '
+import os, pty
+data = bytearray()
+def read(fd):
+    chunk = os.read(fd, 1024)
+    data.extend(chunk)
+    return chunk
+status = pty.spawn([os.environ["SESSION"], "argocd-password"], read)
+raise SystemExit(0 if os.waitstatus_to_exitcode(status) == 0 and len(data.strip()) >= 8 else 1)
+'
+
+  check "the bootstrap step can be repeated" env PP_KUBE_CONTEXT="$CTX" "$session" bootstrap
+}
+
+# ingress_range_checks   Checks the part of the bootstrap step that limits the ingress
+# to the maintainer's range. A stand-in for the add-on's resource is created, so
+# the step takes its code path. This shows the step and not the add-on.
+ingress_range_checks() {
+  echo "== ingress range checks in kind"
+  [ "$CLUSTER_UP" = "1" ] || {
+    fail "no kind cluster for the ingress range checks"
+    return
+  }
+  local session="$REPO/infrastructure/session.sh"
+  k apply -f - >/dev/null <<'EOF2'
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: nginxingresscontrollers.approuting.kubernetes.azure.com
+spec:
+  group: approuting.kubernetes.azure.com
+  scope: Cluster
+  names:
+    plural: nginxingresscontrollers
+    singular: nginxingresscontroller
+    kind: NginxIngressController
+    listKind: NginxIngressControllerList
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          x-kubernetes-preserve-unknown-fields: true
+EOF2
+  k wait --for=condition=Established crd/nginxingresscontrollers.approuting.kubernetes.azure.com --timeout=60s >/dev/null
+  k apply -f - >/dev/null <<'EOF2'
+apiVersion: approuting.kubernetes.azure.com/v1alpha1
+kind: NginxIngressController
+metadata:
+  name: default
+spec:
+  controllerNamePrefix: nginx
+EOF2
+  check "the step stops when no ingress range is given" bash -c "env -u TF_VAR_api_authorized_ip_ranges -u PP_INGRESS_ALLOWED_RANGES PP_KUBE_CONTEXT='$CTX' '$session' bootstrap ingress; [ \$? = 2 ]"
+  check "the step stops when the ingress range is open to everyone" bash -c "PP_INGRESS_ALLOWED_RANGES=0.0.0.0/0 PP_KUBE_CONTEXT='$CTX' '$session' bootstrap ingress; [ \$? = 2 ]"
+  check "the step sets the ingress range" env PP_INGRESS_ALLOWED_RANGES=203.0.113.10/32 PP_KUBE_CONTEXT="$CTX" "$session" bootstrap ingress
+  expect "the range is on the controller's load balancer annotations" \
+    "$(k get nginxingresscontroller default -o jsonpath='{.spec.loadBalancerAnnotations.service\.beta\.kubernetes\.io/azure-allowed-ip-ranges}' || true)" "203.0.113.10/32"
+  k delete nginxingresscontroller default >/dev/null 2>&1 || true
+  k delete crd nginxingresscontrollers.approuting.kubernetes.azure.com >/dev/null 2>&1 || true
+}
+
 static_checks
 if [ "$STATIC_ONLY" = "0" ]; then
   live_checks
+  ingress_range_checks
+  if [ "$BOOTSTRAP" = "1" ]; then
+    bootstrap_checks
+  fi
 fi
 
 if [ "$FAILED" = "0" ]; then

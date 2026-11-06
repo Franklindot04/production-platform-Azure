@@ -67,6 +67,7 @@ resource "azurerm_kubernetes_cluster" "main" {
   network_profile {
     network_plugin      = "azure"
     network_plugin_mode = "overlay"
+    network_policy      = "azure"
     pod_cidr            = var.pod_cidr
     service_cidr        = var.service_cidr
     dns_service_ip      = var.dns_service_ip
@@ -76,6 +77,13 @@ resource "azurerm_kubernetes_cluster" "main" {
 
   api_server_access_profile {
     authorized_ip_ranges = var.api_authorized_ip_ranges
+  }
+
+  # The managed NGINX ingress (ADR 0016). No DNS zone: the service is reached
+  # by the public address of the load balancer, over HTTP.
+  web_app_routing {
+    dns_zone_ids             = []
+    default_nginx_controller = "External"
   }
 
   tags = local.tags
