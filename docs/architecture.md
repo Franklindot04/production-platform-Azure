@@ -128,7 +128,7 @@ The status column is `built` for a component that exists and `planned` for the r
 | Namespaces, quotas, network policy | Cluster rules | session | 3 (#3) | planned |
 | Sample service | The workload measured by SLOs | session | 3 (#3) | planned |
 | GitHub Actions | Build, test, scan, publish | n/a | 4 (#4) | planned |
-| Argo CD | Syncs cluster state from Git | session | 4 (#4) | planned |
+| Argo CD | Syncs cluster state from Git | session | 3 (#3) | planned |
 | Azure Monitor and Log Analytics | Metric and log storage, alert rules | persistent | 5 (#5) | planned |
 | OpenTelemetry Collector | Collects traces and metrics | session | 5 (#5) | planned |
 | Grafana | Dashboards | undecided | 5 (#5) | planned |
@@ -251,7 +251,7 @@ All planned.
 - **Terraform state.** Access with Entra ID only. Shared key access is turned off. (ADR 0004)
 - **Least privilege.** Each identity gets the lowest role that works, scoped as narrowly as possible. Roles for an environment are scoped to its resource groups. (ADR 0010)
 
-Open: how Argo CD's own admin credential is created and stored.
+Argo CD generates its admin credential when it starts. It is read at run time and is not stored (ADR 0017).
 
 ## 11. Observability and SLOs
 
@@ -323,6 +323,7 @@ The target subscription has a regional vCPU quota of 4, which limits node sizes 
 | [0014](adr/0014-sample-service.md) | Write the sample service in Go | proposed |
 | [0015](adr/0015-network-policy-engine.md) | Use Azure network policy | proposed |
 | [0016](adr/0016-ingress.md) | Choose the ingress | proposed |
+| [0017](adr/0017-argocd-bootstrap.md) | Bootstrap Argo CD from the session script | proposed |
 
 Other open decisions are listed in section 15.
 
@@ -332,10 +333,9 @@ Other open decisions are listed in section 15.
 2. Which alert thresholds does the planned budget use? (ADR 0009)
 3. Which trace backend, and which Grafana hosting?
 4. Which policy tool?
-5. How is the Argo CD admin credential handled?
-6. How is the image tag updated after a build?
-7. What SLO targets and window fit a service that is only up during sessions?
-8. How long does a full create take? The session layer took about 7 minutes to create and about 7 minutes to destroy in single runs (ADR 0012). The full platform is measured once it exists, and it sets the recovery time that Epic 7 (#7) can claim.
-9. Do the tools fit in the capacity that is left after the system pods? (ADR 0012)
-10. Does Azure Network Policy Manager work with Azure CNI Overlay on this cluster? (ADR 0015)
-11. Which ingress replaces the managed NGINX add-on after its support ends? (ADR 0016)
+5. How is the image tag updated after a build?
+6. What SLO targets and window fit a service that is only up during sessions?
+7. How long does a full create take? The session layer took about 7 minutes to create and about 7 minutes to destroy in single runs (ADR 0012). The full platform is measured once it exists, and it sets the recovery time that Epic 7 (#7) can claim.
+8. Do the tools fit in the capacity that is left after the system pods? (ADR 0012)
+9. Does Azure Network Policy Manager work with Azure CNI Overlay on this cluster? (ADR 0015)
+10. Which ingress replaces the managed NGINX add-on after its support ends? (ADR 0016)
