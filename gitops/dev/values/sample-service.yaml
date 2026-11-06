@@ -3,7 +3,7 @@
 # first image is published the tag is a placeholder, and the pods cannot pull.
 image:
   repository: ghcr.io/franklindot04/sample-service
-  tag: unpublished
+  tag: e2d19a23230af675e46bc971851470e51dd5cdca
 
 ingress:
   enabled: true
