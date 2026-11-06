@@ -12,8 +12,8 @@ SLOs need metric history. The cluster is destroyed after each session, so anythi
 
 - Metrics: Prometheus format. Send them to an Azure Monitor workspace using Azure Monitor managed service for Prometheus. The workspace is in the persistent layer, so metric history survives cluster teardown.
 - Logs: Log Analytics workspace, also in the persistent layer.
-- Traces: OpenTelemetry instrumentation in the sample service, sent through an OpenTelemetry Collector in the cluster. The trace backend is not chosen. It is an open question in the architecture document.
-- Dashboards: Grafana, with dashboards stored as code in `monitoring/`. Whether this is Azure Managed Grafana or Grafana in the cluster is not decided. Azure Managed Grafana is a separate paid service, and Grafana in the cluster is lost on teardown unless dashboards are provisioned from code. The choice is made in the Epic 5 (#5) issues.
+- Traces: OpenTelemetry instrumentation in the sample service, sent through an OpenTelemetry Collector in the cluster. The traces go to Application Insights (ADR 0019).
+- Dashboards: saved queries on the workspaces, stored as code in `monitoring/`. There is no Grafana (ADR 0019).
 - Alerts: Azure Monitor alert rules that notify an action group, with email as the first target. This is an assumption.
 
 ## Consequences

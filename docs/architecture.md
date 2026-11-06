@@ -61,7 +61,6 @@ Unknowns:
 
 - Whether the tools fit next to the system pods, and whether the pool can take an upgrade or a node replacement with all 4 vCPU in use. AKS accepted the pool in the first create. (ADR 0012)
 - Whether the quota can be raised.
-- The trace backend and the Grafana hosting choice. (ADR 0008)
 - The policy tool for Epic 6.
 
 ## 6. System context
@@ -131,7 +130,7 @@ The status column is `built` for a component that exists and `planned` for the r
 | Argo CD | Syncs cluster state from Git | session | 3 (#3) | planned |
 | Azure Monitor and Log Analytics | Metric and log storage, alert rules | persistent | 5 (#5) | planned |
 | OpenTelemetry Collector | Collects traces and metrics | session | 5 (#5) | planned |
-| Grafana | Dashboards | undecided | 5 (#5) | planned |
+| Dashboards | Saved queries on the workspaces, no Grafana | persistent | 5 (#5) | planned |
 | Policy checks | Block unsafe changes | n/a | 6 (#6) | planned |
 | Runbooks and postmortems | Incident handling | n/a | 7 (#7) | planned |
 
@@ -259,8 +258,8 @@ All planned. See ADR 0008.
 
 - Metrics in Prometheus format go to an Azure Monitor workspace in the persistent layer. History survives cluster teardown.
 - Logs go to a Log Analytics workspace.
-- Traces come from OpenTelemetry in the sample service. The backend is not chosen.
-- Dashboards in Grafana, stored as code in `monitoring/`.
+- Traces come from OpenTelemetry in the sample service and go through a Collector to Application Insights. (ADR 0019)
+- Dashboards are saved queries on the workspaces, stored as code in `monitoring/`. There is no Grafana. (ADR 0019)
 - The sample service gets two SLIs to start: availability and latency. Targets are not set yet. Error budget alerts are planned.
 - **SLO caveat.** The cluster is down between sessions. SLOs are measured over session time, with generated traffic. The window length is decided when the SLO is defined.
 - Alerts notify an action group. Email is the first target (assumption). With one maintainer, there is no paging rotation.
@@ -283,7 +282,6 @@ Main cost drivers to check in the Azure pricing calculator, at the time of use:
 - Node virtual machines while they run.
 - Disks and public IP addresses and load balancers attached to the cluster.
 - Log and metric ingestion and retention.
-- Grafana, if the managed service is used.
 - State storage, which is expected to be small.
 
 The target subscription has a regional vCPU quota of 4, which limits node sizes and counts (section 7).
@@ -325,6 +323,7 @@ The target subscription has a regional vCPU quota of 4, which limits node sizes 
 | [0016](adr/0016-ingress.md) | Choose the ingress | proposed |
 | [0017](adr/0017-argocd-bootstrap.md) | Bootstrap Argo CD from the session script | proposed |
 | [0018](adr/0018-image-tag-update.md) | Update the image tag with a pull request | proposed |
+| [0019](adr/0019-trace-backend-and-grafana.md) | Choose the trace backend and Grafana hosting | proposed |
 
 Other open decisions are listed in section 15.
 
@@ -332,10 +331,10 @@ Other open decisions are listed in section 15.
 
 1. When is `staging` created, and what check must `dev` pass before a change moves on? (ADR 0010)
 2. Which alert thresholds does the planned budget use? (ADR 0009)
-3. Which trace backend, and which Grafana hosting?
-4. Which policy tool?
-5. What SLO targets and window fit a service that is only up during sessions?
-6. How long does a full create take? The session layer took about 7 minutes to create and about 7 minutes to destroy in single runs (ADR 0012). The full platform is measured once it exists, and it sets the recovery time that Epic 7 (#7) can claim.
-7. Do the tools fit in the capacity that is left after the system pods? (ADR 0012)
-8. Does Azure Network Policy Manager work with Azure CNI Overlay on this cluster? (ADR 0015)
-9. Which ingress replaces the managed NGINX add-on after its support ends? (ADR 0016)
+3. Which policy tool?
+4. What SLO targets and window fit a service that is only up during sessions?
+5. How long does a full create take? The session layer took about 7 minutes to create and about 7 minutes to destroy in single runs (ADR 0012). The full platform is measured once it exists, and it sets the recovery time that Epic 7 (#7) can claim.
+6. Do the tools fit in the capacity that is left after the system pods? (ADR 0012)
+7. Does Azure Network Policy Manager work with Azure CNI Overlay on this cluster? (ADR 0015)
+8. Which ingress replaces the managed NGINX add-on after its support ends? (ADR 0016)
+9. Does the Collector send traces to Application Insights with workload identity in the capacity that is left? (ADR 0019)

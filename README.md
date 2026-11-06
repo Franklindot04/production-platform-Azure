@@ -29,7 +29,7 @@ These are the tools planned for the project. None is in use yet.
 - CI/CD: GitHub Actions
 - GitOps: Argo CD
 - Packaging: Docker and Helm
-- Observability: Azure Monitor, Prometheus, Grafana, OpenTelemetry
+- Observability: Azure Monitor, Prometheus, OpenTelemetry
 - Identity and secrets: Microsoft Entra ID, Azure Key Vault, Azure RBAC
 
 Tool choices may change. Changes will be recorded as ADRs.
