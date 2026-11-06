@@ -16,6 +16,13 @@ settings:
 service:
   port: 80
 
+# The PodMonitor needs the custom resource definition from the managed Prometheus
+# add-on, so it is off by default.
+metrics:
+  scrape:
+    enabled: false
+    interval: "30s"
+
 ingress:
   enabled: false
   className: ""
