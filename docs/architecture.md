@@ -322,6 +322,7 @@ The target subscription has a regional vCPU quota of 4, which limits node sizes 
 | [0013](adr/0013-container-registry.md) | Use GitHub Container Registry for images | proposed |
 | [0014](adr/0014-sample-service.md) | Write the sample service in Go | proposed |
 | [0015](adr/0015-network-policy-engine.md) | Use Azure network policy | proposed |
+| [0016](adr/0016-ingress.md) | Choose the ingress | proposed |
 
 Other open decisions are listed in section 15.
 
@@ -337,3 +338,4 @@ Other open decisions are listed in section 15.
 8. How long does a full create take? The session layer took about 7 minutes to create and about 7 minutes to destroy in single runs (ADR 0012). The full platform is measured once it exists, and it sets the recovery time that Epic 7 (#7) can claim.
 9. Do the tools fit in the capacity that is left after the system pods? (ADR 0012)
 10. Does Azure Network Policy Manager work with Azure CNI Overlay on this cluster? (ADR 0015)
+11. Which ingress replaces the managed NGINX add-on after its support ends? (ADR 0016)

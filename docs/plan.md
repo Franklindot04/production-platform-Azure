@@ -25,7 +25,7 @@ The plan covers the Kubernetes platform, delivery, observability, security, inci
 | Registry | `ghcr.io`, public package | [ADR 0013](adr/0013-container-registry.md) |
 | Sample service | Go, health endpoints, settable latency and error rate | [ADR 0014](adr/0014-sample-service.md) |
 | Network policy | Azure's own engine, set in the session Terraform | [ADR 0015](adr/0015-network-policy-engine.md) |
-| Ingress | The lighter of the AKS add-on or one controller, chosen from the documentation. HTTP on the plain IP, no domain, no certificate | ADR 0016 (planned) |
+| Ingress | The lighter of the AKS add-on or one controller, chosen from the documentation. HTTP on the plain IP, no domain, no certificate | [ADR 0016](adr/0016-ingress.md) |
 | Bootstrap | A `bootstrap` step in `session.sh` installs Argo CD with Helm and a root Application. No third Terraform root | ADR 0017 (planned) |
 | Argo CD | Part of Epic 3. Epic 4 covers CI. The admin credential is generated, read at run time and never stored. The UI is reached by port-forward only | ADR 0017 (planned) |
 | First image | Published by a GitHub Actions workflow | ADR 0018 (planned) |
@@ -103,7 +103,7 @@ Numbering continues from ADR 0012.
 | [0013](adr/0013-container-registry.md) | Use GitHub Container Registry for images |
 | [0014](adr/0014-sample-service.md) | Write the sample service in Go |
 | [0015](adr/0015-network-policy-engine.md) | Use Azure network policy |
-| 0016 | Choose the ingress |
+| [0016](adr/0016-ingress.md) | Choose the ingress |
 | 0017 | Bootstrap Argo CD from the session script |
 | 0018 | Update the image tag with a pull request |
 | 0019 | Choose the trace backend and Grafana hosting |
