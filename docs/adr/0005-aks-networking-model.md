@@ -11,7 +11,7 @@ AKS offers several network plugins. The choice affects IP address use, available
 ## Decision
 
 - Use Azure CNI Overlay. Nodes get addresses from the virtual network. Pods get addresses from a separate private range.
-- Use a network policy engine to restrict pod traffic. The specific engine is chosen when the cluster issue under Epic 3 (#3) is written.
+- Use Azure Network Policy Manager to restrict pod traffic (ADR 0015).
 - Assumption: the Kubernetes API server is public, with access limited to authorized IP ranges that contain the maintainer's address. A private cluster needs a VPN or jump host, which adds cost and setup time that the project does not need yet.
 
 ## Consequences

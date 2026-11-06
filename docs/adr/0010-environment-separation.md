@@ -20,7 +20,7 @@ Resource groups:
 - AKS also creates a node resource group. Terraform names it `pp-<env>-aks-nodes-rg`.
 - The state storage account serves all environments, so it sits in its own resource group, `pp-shared-state-rg`, in `northeurope`. The environment resource groups are in `swedencentral`. The account is named `ppsharedstate` plus a suffix drawn by the bootstrap script. `shared` is used as the name segment where `<env>` would be. It is not an environment. Resources there carry the tag `env=shared`.
 
-Persistent layer per environment: Key Vault and the Azure Monitor and Log Analytics workspaces. Each environment has its own. Whether the container registry is per environment or shared is not decided. It is an open question in the architecture document.
+Persistent layer per environment: Key Vault and the Azure Monitor and Log Analytics workspaces. Each environment has its own. The container registry is not in Azure (ADR 0013).
 
 Terraform layout:
 
@@ -46,7 +46,7 @@ Cost:
 - A budget with alerts is planned for each environment (ADR 0009). Whether a budget can be scoped to a resource group is not checked.
 - Resources are tagged, and the session layer is destroyed after each session (ADR 0009).
 
-Policy: policy is assigned per environment resource group where the policy tool allows it. A subscription-wide assignment is used only for a rule that applies to every environment. The policy tool is not chosen. It is an open question in the architecture document.
+Policy: policy is assigned per environment resource group where the policy tool allows it. A subscription-wide assignment is used only for a rule that applies to every environment. Scans run in CI and no admission policy engine runs in the cluster (ADR 0020).
 
 Creation:
 
@@ -56,7 +56,7 @@ Creation:
 Promotion path:
 
 - Infrastructure: pull request, plan, review, merge, then apply to `dev` from the maintainer's machine. The same change is applied to `staging`, then `prod`, only after the previous environment is checked.
-- Workloads: a pull request changes the values under `gitops/<env>/`, first for `dev`, then `staging`, then `prod`. How the image tag is updated is still an open question.
+- Workloads: a pull request changes the values under `gitops/<env>/`, first for `dev`, then `staging`, then `prod`. A workflow opens the pull request that changes the image tag (ADR 0018).
 - Rollback is a Git revert in both paths.
 - The check between environments is not defined yet. It is written when the sample service and its health checks exist.
 

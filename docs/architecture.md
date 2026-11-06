@@ -61,18 +61,14 @@ Unknowns:
 
 - Whether the tools fit next to the system pods, and whether the pool can take an upgrade or a node replacement with all 4 vCPU in use. AKS accepted the pool in the first create. (ADR 0012)
 - Whether the quota can be raised.
-- The language and shape of the sample service.
-- The trace backend and the Grafana hosting choice. (ADR 0008)
-- Whether the container registry stays between sessions or is rebuilt each time.
-- The network policy engine and the policy tool for Epic 6.
 
 ## 6. System context
 
-All components in this diagram are planned. Nothing is deployed.
+Section 7 gives the status of each component. Nothing is running now.
 
 The platform has two Terraform layers:
 
-- **Persistent layer.** Small resources that must outlive a session: Key Vault, monitoring workspaces and (possibly) the container registry.
+- **Persistent layer.** Small resources that must outlive a session: Key Vault and monitoring workspaces.
 - **Session layer.** Resources created at the start of a session and destroyed at the end: virtual network, AKS cluster and everything inside it.
 
 Both layers exist once per environment. The state storage is shared by all environments and sits outside both layers. The diagram shows one environment. See section 9 and ADR 0010.
@@ -82,14 +78,13 @@ flowchart LR
     maint["Maintainer"] -->|"push and pull request"| repo["GitHub repository"]
     repo --> actions["GitHub Actions"]
     actions -->|"OIDC token"| entra["Microsoft Entra ID"]
-    actions -->|"build and push image"| acr["Container registry"]
+    actions -->|"build and push image"| acr["Container registry (ghcr.io)"]
     maint -->|"terraform apply and destroy"| tf["Terraform"]
     state["State storage (shared by all environments)"]
 
     subgraph persistent ["Persistent layer"]
         kv["Key Vault"]
         mon["Azure Monitor and Log Analytics workspaces"]
-        acr
     end
 
     subgraph session ["Session layer: created and destroyed each session"]
@@ -117,24 +112,24 @@ flowchart LR
 
 ## 7. Components
 
-Every component below is planned. The status column is `planned` for all of them.
+The status column is `built` for a component that exists and `planned` for the rest. A `built` component of the session layer exists only while a session runs.
 
 | Component | Role | Layer | Epic | Status |
 |---|---|---|---|---|
-| Terraform | Creates all Azure resources | n/a | 2 (#2) | planned |
-| State storage | Holds Terraform state | shared | 2 (#2) | planned |
-| Virtual network | Network for nodes | session | 2 (#2) | planned |
-| Container registry | Stores images | persistent (assumption) | 2 (#2) | planned |
+| Terraform | Creates all Azure resources | n/a | 2 (#2) | built |
+| State storage | Holds Terraform state | shared | 2 (#2) | built |
+| Virtual network | Network for nodes | session | 2 (#2) | built |
+| Container registry | Stores images | outside Azure (`ghcr.io`) | 4 (#4) | planned |
 | Key Vault | Holds secrets | persistent | 6 (#6) | planned |
-| AKS cluster | Runs workloads | session | 3 (#3) | planned |
+| AKS cluster | Runs workloads | session | 3 (#3) | built |
 | Ingress | Routes outside traffic to the service | session | 3 (#3) | planned |
 | Namespaces, quotas, network policy | Cluster rules | session | 3 (#3) | planned |
 | Sample service | The workload measured by SLOs | session | 3 (#3) | planned |
 | GitHub Actions | Build, test, scan, publish | n/a | 4 (#4) | planned |
-| Argo CD | Syncs cluster state from Git | session | 4 (#4) | planned |
+| Argo CD | Syncs cluster state from Git | session | 3 (#3) | planned |
 | Azure Monitor and Log Analytics | Metric and log storage, alert rules | persistent | 5 (#5) | planned |
 | OpenTelemetry Collector | Collects traces and metrics | session | 5 (#5) | planned |
-| Grafana | Dashboards | undecided | 5 (#5) | planned |
+| Dashboards | Saved queries on the workspaces, no Grafana | persistent | 5 (#5) | planned |
 | Policy checks | Block unsafe changes | n/a | 6 (#6) | planned |
 | Runbooks and postmortems | Incident handling | n/a | 7 (#7) | planned |
 
@@ -183,7 +178,7 @@ Notes:
 
 - Rollback is a Git revert. Argo CD syncs the earlier state.
 - Pull request runs have read-only access to Azure.
-- How the image tag is updated (a commit by a pipeline or a manual commit) is not decided.
+- A workflow opens a pull request that changes the image tag, and a person merges it (ADR 0018).
 - Progressive delivery, such as canary releases, is not planned yet.
 
 Infrastructure changes follow a separate path: pull request, plan, review, merge, then apply from the maintainer's machine (assumption, ADR 0007).
@@ -199,7 +194,7 @@ The environments are `dev`, `staging` and `prod`. They are separated by resource
 | Resource group | Holds | Created |
 |---|---|---|
 | `pp-shared-state-rg` | State storage account in `northeurope`, by a manual bootstrap step | once |
-| `pp-<env>-persistent-rg` | Key Vault, monitoring workspaces, possibly the container registry | per environment |
+| `pp-<env>-persistent-rg` | Key Vault, monitoring workspaces | per environment |
 | `pp-<env>-session-rg` | Virtual network, AKS cluster | per environment, each session |
 | `pp-<env>-aks-nodes-rg` | AKS node resources, named by Terraform | with the cluster |
 
@@ -226,7 +221,7 @@ Names follow ADR 0003. `shared` takes the place of `<env>` for the state storage
 ### Promotion
 
 - Infrastructure: pull request, plan, review, merge, apply to `dev`, then `staging`, then `prod`. Each step waits until the previous environment is checked.
-- Workloads: a pull request changes the values under `gitops/<env>/`, in the same order. How the image tag is updated is an open question.
+- Workloads: a pull request changes the values under `gitops/<env>/`, in the same order. A workflow opens the pull request that changes the image tag (ADR 0018).
 - Rollback is a Git revert in both paths.
 - The check between environments is not defined. It is written when the sample service and its health checks exist.
 
@@ -245,16 +240,16 @@ The end-of-session teardown in ADR 0009 applies to every environment, including 
 
 ## 10. Identity and secrets
 
-All planned.
+Mostly planned. The access to the Terraform state is built.
 
-- **People.** The maintainer signs in with Microsoft Entra ID. Cluster access uses Entra ID and Azure RBAC.
+- **People.** The maintainer signs in with Microsoft Entra ID. Cluster access is planned to use Entra ID and Azure RBAC (ADR 0021). Until then the cluster uses local accounts.
 - **Pipelines.** GitHub Actions logs in to Azure using OIDC federation. No client secret is stored in GitHub. (ADR 0007)
 - **Workloads.** Pods use workload identity to read Key Vault. No Azure credentials are stored in the cluster.
 - **Secrets.** Secrets live in Key Vault. They are not committed. `.gitignore` covers common secret files, and GitHub secret scanning and push protection are on for this repository.
 - **Terraform state.** Access with Entra ID only. Shared key access is turned off. (ADR 0004)
 - **Least privilege.** Each identity gets the lowest role that works, scoped as narrowly as possible. Roles for an environment are scoped to its resource groups. (ADR 0010)
 
-Open: how Argo CD's own admin credential is created and stored.
+Argo CD generates its admin credential when it starts. It is read at run time and is not stored (ADR 0017).
 
 ## 11. Observability and SLOs
 
@@ -262,8 +257,8 @@ All planned. See ADR 0008.
 
 - Metrics in Prometheus format go to an Azure Monitor workspace in the persistent layer. History survives cluster teardown.
 - Logs go to a Log Analytics workspace.
-- Traces come from OpenTelemetry in the sample service. The backend is not chosen.
-- Dashboards in Grafana, stored as code in `monitoring/`.
+- Traces come from OpenTelemetry in the sample service and go through a Collector to Application Insights. (ADR 0019)
+- Dashboards are saved queries on the workspaces, stored as code in `monitoring/`. There is no Grafana. (ADR 0019)
 - The sample service gets two SLIs to start: availability and latency. Targets are not set yet. Error budget alerts are planned.
 - **SLO caveat.** The cluster is down between sessions. SLOs are measured over session time, with generated traffic. The window length is decided when the SLO is defined.
 - Alerts notify an action group. Email is the first target (assumption). With one maintainer, there is no paging rotation.
@@ -285,9 +280,7 @@ Main cost drivers to check in the Azure pricing calculator, at the time of use:
 
 - Node virtual machines while they run.
 - Disks and public IP addresses and load balancers attached to the cluster.
-- Container registry tier.
 - Log and metric ingestion and retention.
-- Grafana, if the managed service is used.
 - State storage, which is expected to be small.
 
 The target subscription has a regional vCPU quota of 4, which limits node sizes and counts (section 7).
@@ -323,6 +316,15 @@ The target subscription has a regional vCPU quota of 4, which limits node sizes 
 | [0010](adr/0010-environment-separation.md) | Separate environments by resource group | proposed |
 | [0011](adr/0011-session-network-design.md) | Design the session network | proposed |
 | [0012](adr/0012-first-aks-plan.md) | Plan the first AKS cluster | proposed |
+| [0013](adr/0013-container-registry.md) | Use GitHub Container Registry for images | proposed |
+| [0014](adr/0014-sample-service.md) | Write the sample service in Go | proposed |
+| [0015](adr/0015-network-policy-engine.md) | Use Azure network policy | proposed |
+| [0016](adr/0016-ingress.md) | Choose the ingress | proposed |
+| [0017](adr/0017-argocd-bootstrap.md) | Bootstrap Argo CD from the session script | proposed |
+| [0018](adr/0018-image-tag-update.md) | Update the image tag with a pull request | proposed |
+| [0019](adr/0019-trace-backend-and-grafana.md) | Choose the trace backend and Grafana hosting | proposed |
+| [0020](adr/0020-policy-and-scanning-tools.md) | Choose policy and scanning tools | proposed |
+| [0021](adr/0021-entra-id-cluster-access.md) | Sign in to the cluster with Entra ID | proposed |
 
 Other open decisions are listed in section 15.
 
@@ -330,12 +332,9 @@ Other open decisions are listed in section 15.
 
 1. When is `staging` created, and what check must `dev` pass before a change moves on? (ADR 0010)
 2. Which alert thresholds does the planned budget use? (ADR 0009)
-3. Does the container registry stay between sessions?
-4. What is the sample service, and in which language?
-5. Which trace backend, and which Grafana hosting?
-6. Which network policy engine and which policy tool?
-7. How is the Argo CD admin credential handled?
-8. How is the image tag updated after a build?
-9. What SLO targets and window fit a service that is only up during sessions?
-10. How long does a full create take? The session layer took about 7 minutes to create and about 7 minutes to destroy in single runs (ADR 0012). The full platform is measured once it exists, and it sets the recovery time that Epic 7 (#7) can claim.
-11. Do the tools fit in the capacity that is left after the system pods? (ADR 0012)
+3. What SLO targets and window fit a service that is only up during sessions?
+4. How long does a full create take? The session layer took about 7 minutes to create and about 7 minutes to destroy in single runs (ADR 0012). The full platform is measured once it exists, and it sets the recovery time that Epic 7 (#7) can claim.
+5. Do the tools fit in the capacity that is left after the system pods? (ADR 0012)
+6. Does Azure Network Policy Manager work with Azure CNI Overlay on this cluster? (ADR 0015)
+7. Which ingress replaces the managed NGINX add-on after its support ends? (ADR 0016)
+8. Does the Collector send traces to Application Insights with workload identity in the capacity that is left? (ADR 0019)

@@ -11,7 +11,7 @@ The project runs on one Azure subscription. Cost is controlled by tagging every 
 ## Decision
 
 - The cluster and everything that depends on it are created at the start of a work session and destroyed at the end with `terraform destroy`.
-- Anything that must outlive a session lives in a separate persistent layer, and is kept small: state storage, Key Vault, the Azure Monitor and Log Analytics workspaces, and possibly the container registry.
+- Anything that must outlive a session lives in a separate persistent layer, and is kept small: state storage, Key Vault, the Azure Monitor and Log Analytics workspaces.
 - Define an Azure budget with alerts at fixed percentages in Terraform. The amount and the percentages are set in the code.
 - Use small node sizes and the fewest nodes that work. The target subscription has a regional vCPU quota of 4 (ADR 0003).
 - At the end of each session, check the resource group list in the portal or with the CLI for resources that were not destroyed.
