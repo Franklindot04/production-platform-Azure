@@ -24,7 +24,15 @@ Builds `applications/sample-service` for `linux/amd64`, which the AKS nodes use,
 
 ## Open pull request for the image tag
 
-After Publish image succeeds on `main`, this workflow checks out `main`, sets the tag in `gitops/dev/values/sample-service.yaml` to the commit SHA with `.github/scripts/set-image-tag.sh`, pushes a branch named `chore/sample-service-image-<short SHA>`, and opens a pull request (ADR 0018). It then closes any open pull request from an earlier branch of that name. It never pushes to `main`.
+After Publish image succeeds on `main`, this workflow checks out `main` and sets the tag in `gitops/dev/values/sample-service.yaml` to the commit SHA with `.github/scripts/set-image-tag.sh`. `.github/scripts/open-image-tag-pr.sh` then commits it to a branch named `chore/sample-service-image-<short SHA>` and opens a pull request (ADR 0018). It never pushes to `main`.
+
+The branch is named after the SHA, so it can exist already:
+
+- If the branch is not on the remote, it is pushed.
+- If the branch holds the same change, which means the same tree on the same parent, it is not pushed.
+- If the branch holds something else, it is replaced with a force push that is checked against the commit that was read from the remote.
+
+The pull request is opened in each case. If one is already open for the branch, that one is used. Open pull requests from earlier branches of that name are closed.
 
 A pull request created with the built-in token does not start other workflows, so the checks do not run on it.
 

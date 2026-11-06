@@ -27,6 +27,7 @@ A cluster with one control plane and two workers is created, the image is built 
 - `/healthz`, `/readyz` and `/work` answer, the admin port changes the error rate, and the API port does not serve the admin path.
 - Pod Security rejects a privileged pod in `apps`.
 - The limit range gives default requests and rejects a container above its maximum, and the quota counts the pods.
+- The bootstrap step of `infrastructure/session.sh` installs Argo CD, and Argo CD syncs the cluster rules from the main branch on GitHub. The credential command refuses a non-terminal and prints on a terminal. The step stops without an ingress range, and it sets the range on a stand-in for the add-on's resource. These checks need network access to GitHub and the Helm repository.
 - A pod in the `default` namespace cannot reach the service, and a pod in `app-routing-system` can. These two lines are reported as information, as yes, no or unknown. If the cluster is unhealthy or does not enforce policies, the script says so and does not fail.
 
 ## Limits

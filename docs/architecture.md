@@ -4,7 +4,7 @@
 
 This document describes the intended design of the platform. It is the first version.
 
-**Built today:** the repository setup (templates, contribution rules, license, security policy, decision records), the `infrastructure/` folders with two Terraform roots for `dev` that define a resource group, a virtual network, a node subnet and an AKS cluster (applied once in the first create; the session layer was destroyed afterwards), the bootstrap script and the state backend it created in Azure (a resource group, a storage account and the `tfstate-dev` container), workflows that check Terraform, check the service, chart and manifests, publish the image and open the pull request for its tag (the last three had not run on GitHub when they were added), and the code of the sample service, its Helm chart, the cluster rules, the GitOps layout and a script that checks them in a local `kind` cluster (written, not yet run on AKS). **Everything else in this document is planned.** Of the `dev` roots, only the empty resource group `pp-dev-persistent-rg` exists in Azure.
+**Built today:** the repository setup (templates, contribution rules, license, security policy, decision records), the `infrastructure/` folders with two Terraform roots for `dev` that define a resource group, a virtual network, a node subnet and an AKS cluster (applied once in the first create; the session layer was destroyed afterwards; the Azure network policy and the ingress add-on were added to the session root afterwards and are planned, not applied), the bootstrap script and the state backend it created in Azure (a resource group, a storage account and the `tfstate-dev` container), workflows that check Terraform, check the service, chart and manifests, publish the image and open the pull request for its tag (the last three had not run on GitHub when they were added), and the code of the sample service, its Helm chart, the cluster rules, the GitOps layout a script that checks them in a local `kind` cluster, and the bootstrap step of the session script, which installs Argo CD (run against `kind`, not yet on AKS). **Everything else in this document is planned.** Of the `dev` roots, only the empty resource group `pp-dev-persistent-rg` exists in Azure.
 
 Where a choice is not made, the text says so. Where a choice is made but not yet tested, it is marked as an assumption. Decisions are recorded as ADRs in [docs/adr/](adr/) and listed in section 14.
 
@@ -122,11 +122,11 @@ The status column is `built` for a component that exists, `written` for a compon
 | Container registry | Stores images | outside Azure (`ghcr.io`) | 4 (#4) | planned |
 | Key Vault | Holds secrets | persistent | 6 (#6) | planned |
 | AKS cluster | Runs workloads | session | 3 (#3) | built |
-| Ingress | Routes outside traffic to the service | session | 3 (#3) | planned |
+| Ingress | Routes outside traffic to the service | session | 3 (#3) | written |
 | Namespaces, quotas, network policy | Cluster rules | session | 3 (#3) | written |
 | Sample service | The workload measured by SLOs | session | 3 (#3) | written |
 | GitHub Actions | Build, test, scan, publish | n/a | 4 (#4) | written |
-| Argo CD | Syncs cluster state from Git | session | 3 (#3) | planned |
+| Argo CD | Syncs cluster state from Git | session | 3 (#3) | written |
 | Azure Monitor and Log Analytics | Metric and log storage, alert rules | persistent | 5 (#5) | planned |
 | OpenTelemetry Collector | Collects traces and metrics | session | 5 (#5) | planned |
 | Dashboards | Saved queries on the workspaces, no Grafana | persistent | 5 (#5) | planned |
