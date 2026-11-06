@@ -1,11 +1,12 @@
 # Saved plans
 
-Text output of `terraform plan` for the `dev` roots, run before the first create. They were run from copies of the roots with local state. The first create used new plans from the real backend, and its results are in [ADR 0012](../adr/0012-first-aks-plan.md).
+Text output of `terraform plan` for the `dev` roots, run from copies of the roots with local state. None of these plans was applied. The first create used new plans from the real backend, and its results are in [ADR 0012](../adr/0012-first-aks-plan.md).
 
 | File | Root | Result |
 |---|---|---|
 | [dev-persistent-plan.txt](dev-persistent-plan.txt) | `infrastructure/environments/dev/persistent` | 1 to add |
 | [dev-session-plan.txt](dev-session-plan.txt) | `infrastructure/environments/dev/session` | 4 to add |
+| [dev-session-plan-network-policy-and-ingress.txt](dev-session-plan-network-policy-and-ingress.txt) | `infrastructure/environments/dev/session` | 4 to add, with the Azure network policy and the ingress add-on |
 
 How they were produced:
 
