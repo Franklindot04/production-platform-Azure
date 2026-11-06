@@ -24,7 +24,7 @@ The `argocd` namespace has no quota and no network policy, so that the bootstrap
 
 The engine is Azure Network Policy Manager (ADR 0015).
 
-- `apps`: ingress to the sample service on port 8080 from `app-routing-system`, egress to DNS, and egress to the Collector on ports 4317 and 4318.
+- `apps`: ingress to the sample service on port 8080 from `app-routing-system`, ingress on port 8081 from pods labelled `rsName: ama-metrics` in `kube-system` (the scrape rule), egress to DNS, and egress to the Collector on ports 4317 and 4318. The metrics add-on pods named by the scrape rule do not exist yet, and the label is checked on a cluster in Session 1.
 - `observability`: ingress to the Collector on ports 4317 and 4318 from `apps`, egress to DNS, and egress to port 443.
 
 The Collector and the ingress controller do not exist yet. The policies that name them allow nothing until they do.

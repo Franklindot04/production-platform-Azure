@@ -62,11 +62,11 @@ Epic 5, Observability and SRE (#5):
 
 | Issue | Title |
 |---|---|
-| #48 | Persistent monitoring layer |
-| #49 | Metrics |
-| #50 | Traces |
-| #51 | Dashboards as code |
-| #52 | SLIs, SLOs and alerts |
+| #37 | Persistent monitoring layer |
+| #38 | Metrics |
+| #39 | Traces |
+| #40 | Dashboards as code |
+| #41 | SLIs, SLOs and alerts |
 
 Epic 6, Security and Governance (#6):
 
@@ -119,8 +119,8 @@ Numbering continues from ADR 0012.
 | 3 | Sample service, chart, cluster rules, GitOps layout, `kind` checks | #40, #41 | 2 |
 | 4 | CI, image publish, tag update workflow | #45, #46 | 3 |
 | 5 | Session Terraform (policy engine, ingress) and the `bootstrap` step | #42, #43 | 3 |
-| 6 | Persistent layer and identities: workspaces, Key Vault, OIDC | #47, #48, #53 | 2 |
-| 7 | Observability code: scrape configuration, OpenTelemetry, dashboards, SLOs, alerts | #49, #50, #51, #52 | 3, 6 |
+| 6 | Persistent layer and identities: workspaces, Key Vault, OIDC | #37, #42, #35 | 2 |
+| 7 | Observability code: scrape configuration, OpenTelemetry, dashboards, SLOs, alerts | #38, #39, #40, #41 | 3, 6 |
 | 8 | Security: scans, role table, secret rules, Entra ID access | #54, #55, #56 | 4, 6 |
 | 9 | Session 1 record, screenshots, fixes | #44 | 3 to 8 |
 | 10 | Runbooks and incident process | #57, #58 | 9 |

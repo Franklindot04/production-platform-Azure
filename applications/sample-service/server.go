@@ -36,6 +36,7 @@ type server struct {
 	ready  atomic.Bool
 	chance func() float64
 	logger *slog.Logger
+	met    *metrics
 }
 
 func newServer(latency time.Duration, errorRate float64, logger *slog.Logger) (*server, error) {
@@ -43,7 +44,7 @@ func newServer(latency time.Duration, errorRate float64, logger *slog.Logger) (*
 	if err := cur.validate(); err != nil {
 		return nil, err
 	}
-	s := &server{cur: cur, chance: rand.Float64, logger: logger}
+	s := &server{cur: cur, chance: rand.Float64, logger: logger, met: newMetrics()}
 	s.ready.Store(true)
 	return s, nil
 }
@@ -59,23 +60,23 @@ func (s *server) settings() settings {
 // apiHandler serves the endpoints that the ingress and the probes reach.
 func (s *server) apiHandler() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
+	mux.HandleFunc("GET /healthz", s.met.instrument("/healthz", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("ok\n"))
-	})
-	mux.HandleFunc("GET /readyz", func(w http.ResponseWriter, _ *http.Request) {
+	}))
+	mux.HandleFunc("GET /readyz", s.met.instrument("/readyz", func(w http.ResponseWriter, _ *http.Request) {
 		if !s.ready.Load() {
 			http.Error(w, "not ready", http.StatusServiceUnavailable)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("ready\n"))
-	})
-	mux.HandleFunc("GET /work", s.work)
+	}))
+	mux.HandleFunc("GET /work", s.met.instrument("/work", s.work))
 	return mux
 }
 
-// adminHandler serves the settings. It listens on its own port, which the
+// adminHandler serves the settings and the metrics. It listens on its own port, which the
 // Service does not expose.
 func (s *server) adminHandler() http.Handler {
 	mux := http.NewServeMux()
@@ -83,6 +84,7 @@ func (s *server) adminHandler() http.Handler {
 		writeSettings(w, s.settings())
 	})
 	mux.HandleFunc("PUT /admin/config", s.putConfig)
+	mux.HandleFunc("GET /metrics", s.met.handler)
 	return mux
 }
 
@@ -94,6 +96,7 @@ func (s *server) work(w http.ResponseWriter, r *http.Request) {
 		select {
 		case <-timer.C:
 		case <-r.Context().Done():
+			// The client left. Nothing is written, and the metrics wrapper counts code 499.
 			return
 		}
 	}

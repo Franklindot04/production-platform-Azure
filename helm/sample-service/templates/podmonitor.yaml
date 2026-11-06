@@ -1,0 +1,21 @@
+{{- if .Values.metrics.scrape.enabled }}
+# Needs the PodMonitor custom resource definition (azmonitoring.coreos.com), which the
+# managed Prometheus add-on installs. Keep metrics.scrape.enabled false until that add-on
+# is enabled. The dev values do not enable it.
+# The agent scrapes the pods directly on the admin port. The Service and the ingress
+# do not carry /metrics.
+apiVersion: azmonitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ include "sample-service.name" . }}
+  labels:
+    {{- include "sample-service.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "sample-service.selectorLabels" . | nindent 6 }}
+  podMetricsEndpoints:
+    - port: admin
+      path: /metrics
+      interval: {{ .Values.metrics.scrape.interval | quote }}
+{{- end }}
