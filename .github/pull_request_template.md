@@ -8,7 +8,11 @@ Closes #
 
 ## How it was tested
 
-<!-- Commands you ran and what you saw. "Not tested" is a valid answer if it is true. -->
+<!-- Commands you ran and what you saw. -->
+
+## Not tested
+
+<!-- What you did not run or check. Write "Nothing" only if that is true. -->
 
 ## Limitations
 
