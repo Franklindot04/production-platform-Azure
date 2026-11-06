@@ -115,7 +115,7 @@ Limitations of this plan:
 - The provider turns the OIDC issuer on by default. Workload identity is off.
 - `automatic_upgrade_channel` is left unset because the provider rejected `"none"`. AKS reports the channel as `none`, so unset means no automatic upgrades. The first real create confirmed this.
 - Zones are not set.
-- No network policy engine is set. It is chosen in Epic 3 (#3).
+- No network policy engine is set in the first create. ADR 0015 chooses Azure Network Policy Manager.
 
 The plan output is saved in [docs/plans/](../plans/README.md). After the first create, the session layer was destroyed. The persistent resource group remains and is empty.
 
