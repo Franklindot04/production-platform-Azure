@@ -46,7 +46,7 @@ Cost:
 - A budget with alerts is planned for each environment (ADR 0009). Whether a budget can be scoped to a resource group is not checked.
 - Resources are tagged, and the session layer is destroyed after each session (ADR 0009).
 
-Policy: policy is assigned per environment resource group where the policy tool allows it. A subscription-wide assignment is used only for a rule that applies to every environment. The policy tool is not chosen. It is an open question in the architecture document.
+Policy: policy is assigned per environment resource group where the policy tool allows it. A subscription-wide assignment is used only for a rule that applies to every environment. Scans run in CI and no admission policy engine runs in the cluster (ADR 0020).
 
 Creation:
 

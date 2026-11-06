@@ -32,7 +32,7 @@ The plan covers the Kubernetes platform, delivery, observability, security, inci
 | Image tag update | A workflow opens a pull request that changes the tag | [ADR 0018](adr/0018-image-tag-update.md) |
 | Traces and dashboards | No paid managed Grafana. Dashboards are queries in the Azure Monitor workspace. The trace backend is chosen in the ADR | [ADR 0019](adr/0019-trace-backend-and-grafana.md) |
 | Logs | No cluster-wide log collection. Logs are read with `kubectl logs` | [ADR 0019](adr/0019-trace-backend-and-grafana.md) |
-| Policy and scanning | Tools chosen in the ADR | ADR 0020 (planned) |
+| Policy and scanning | Tools chosen in the ADR | [ADR 0020](adr/0020-policy-and-scanning-tools.md) |
 | Cluster sign-in | Entra ID and Azure RBAC, local accounts kept as a fallback | ADR 0021 (planned) |
 | Load generator | k6 from the maintainer's machine | Issue #60 |
 | Alert email | A run-time input, never committed | Issue #48 |
@@ -107,7 +107,7 @@ Numbering continues from ADR 0012.
 | [0017](adr/0017-argocd-bootstrap.md) | Bootstrap Argo CD from the session script |
 | [0018](adr/0018-image-tag-update.md) | Update the image tag with a pull request |
 | [0019](adr/0019-trace-backend-and-grafana.md) | Choose the trace backend and Grafana hosting |
-| 0020 | Choose policy and scanning tools |
+| [0020](adr/0020-policy-and-scanning-tools.md) | Choose policy and scanning tools |
 | 0021 | Sign in to the cluster with Entra ID |
 
 ## 5. Pull requests, in order

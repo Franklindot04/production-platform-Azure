@@ -61,7 +61,6 @@ Unknowns:
 
 - Whether the tools fit next to the system pods, and whether the pool can take an upgrade or a node replacement with all 4 vCPU in use. AKS accepted the pool in the first create. (ADR 0012)
 - Whether the quota can be raised.
-- The policy tool for Epic 6.
 
 ## 6. System context
 
@@ -324,6 +323,7 @@ The target subscription has a regional vCPU quota of 4, which limits node sizes 
 | [0017](adr/0017-argocd-bootstrap.md) | Bootstrap Argo CD from the session script | proposed |
 | [0018](adr/0018-image-tag-update.md) | Update the image tag with a pull request | proposed |
 | [0019](adr/0019-trace-backend-and-grafana.md) | Choose the trace backend and Grafana hosting | proposed |
+| [0020](adr/0020-policy-and-scanning-tools.md) | Choose policy and scanning tools | proposed |
 
 Other open decisions are listed in section 15.
 
@@ -331,10 +331,9 @@ Other open decisions are listed in section 15.
 
 1. When is `staging` created, and what check must `dev` pass before a change moves on? (ADR 0010)
 2. Which alert thresholds does the planned budget use? (ADR 0009)
-3. Which policy tool?
-4. What SLO targets and window fit a service that is only up during sessions?
-5. How long does a full create take? The session layer took about 7 minutes to create and about 7 minutes to destroy in single runs (ADR 0012). The full platform is measured once it exists, and it sets the recovery time that Epic 7 (#7) can claim.
-6. Do the tools fit in the capacity that is left after the system pods? (ADR 0012)
-7. Does Azure Network Policy Manager work with Azure CNI Overlay on this cluster? (ADR 0015)
-8. Which ingress replaces the managed NGINX add-on after its support ends? (ADR 0016)
-9. Does the Collector send traces to Application Insights with workload identity in the capacity that is left? (ADR 0019)
+3. What SLO targets and window fit a service that is only up during sessions?
+4. How long does a full create take? The session layer took about 7 minutes to create and about 7 minutes to destroy in single runs (ADR 0012). The full platform is measured once it exists, and it sets the recovery time that Epic 7 (#7) can claim.
+5. Do the tools fit in the capacity that is left after the system pods? (ADR 0012)
+6. Does Azure Network Policy Manager work with Azure CNI Overlay on this cluster? (ADR 0015)
+7. Which ingress replaces the managed NGINX add-on after its support ends? (ADR 0016)
+8. Does the Collector send traces to Application Insights with workload identity in the capacity that is left? (ADR 0019)
