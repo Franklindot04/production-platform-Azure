@@ -32,7 +32,7 @@ Where one PR closes several issues, use the main issue number or a short name fo
 ## Pull requests
 
 1. Open a pull request from your branch to `main`.
-2. Fill in the template: linked issue, what changed, how it was tested, limitations.
+2. Fill in the template: linked issue, what changed, how it was tested, what was not tested, limitations.
 3. Write `Closes #n` for each issue the PR completes.
 4. Wait for review and for checks to pass, once checks exist.
 5. Merge only after review. Delete the branch after merging.

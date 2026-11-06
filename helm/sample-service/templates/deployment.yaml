@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sample-service.name" . }}
+  labels:
+    {{- include "sample-service.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "sample-service.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "sample-service.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "sample-service.name" . }}
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              {{- include "sample-service.selectorLabels" . | nindent 14 }}
+      containers:
+        - name: sample-service
+          image: "{{ .Values.image.repository }}:{{ required "image.tag must be set" .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: LATENCY
+              value: {{ .Values.settings.latency | quote }}
+            - name: ERROR_RATE
+              value: {{ .Values.settings.errorRate | quote }}
+            - name: SHUTDOWN_DELAY
+              value: "5s"
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: admin
+              containerPort: 8081
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            periodSeconds: 5
+            failureThreshold: 2
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL

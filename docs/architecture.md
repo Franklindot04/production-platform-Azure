@@ -4,7 +4,7 @@
 
 This document describes the intended design of the platform. It is the first version.
 
-**Built today:** the repository setup (templates, contribution rules, license, security policy, decision records), the `infrastructure/` folders with two Terraform roots for `dev` that define a resource group, a virtual network, a node subnet and an AKS cluster (applied once in the first create; the session layer was destroyed afterwards), the bootstrap script and the state backend it created in Azure (a resource group, a storage account and the `tfstate-dev` container), and a workflow that checks Terraform format and validity on pull requests. **Everything else in this document is planned.** Of the `dev` roots, only the empty resource group `pp-dev-persistent-rg` exists in Azure.
+**Built today:** the repository setup (templates, contribution rules, license, security policy, decision records), the `infrastructure/` folders with two Terraform roots for `dev` that define a resource group, a virtual network, a node subnet and an AKS cluster (applied once in the first create; the session layer was destroyed afterwards), the bootstrap script and the state backend it created in Azure (a resource group, a storage account and the `tfstate-dev` container), a workflow that checks Terraform format and validity on pull requests, and the code of the sample service, its Helm chart, the cluster rules, the GitOps layout and a script that checks them in a local `kind` cluster (written, not yet run on AKS). **Everything else in this document is planned.** Of the `dev` roots, only the empty resource group `pp-dev-persistent-rg` exists in Azure.
 
 Where a choice is not made, the text says so. Where a choice is made but not yet tested, it is marked as an assumption. Decisions are recorded as ADRs in [docs/adr/](adr/) and listed in section 14.
 
@@ -112,7 +112,7 @@ flowchart LR
 
 ## 7. Components
 
-The status column is `built` for a component that exists and `planned` for the rest. A `built` component of the session layer exists only while a session runs.
+The status column is `built` for a component that exists, `written` for a component whose code is in the repository and has not run on AKS, and `planned` for the rest. A `built` component of the session layer exists only while a session runs.
 
 | Component | Role | Layer | Epic | Status |
 |---|---|---|---|---|
@@ -123,8 +123,8 @@ The status column is `built` for a component that exists and `planned` for the r
 | Key Vault | Holds secrets | persistent | 6 (#6) | planned |
 | AKS cluster | Runs workloads | session | 3 (#3) | built |
 | Ingress | Routes outside traffic to the service | session | 3 (#3) | planned |
-| Namespaces, quotas, network policy | Cluster rules | session | 3 (#3) | planned |
-| Sample service | The workload measured by SLOs | session | 3 (#3) | planned |
+| Namespaces, quotas, network policy | Cluster rules | session | 3 (#3) | written |
+| Sample service | The workload measured by SLOs | session | 3 (#3) | written |
 | GitHub Actions | Build, test, scan, publish | n/a | 4 (#4) | planned |
 | Argo CD | Syncs cluster state from Git | session | 3 (#3) | planned |
 | Azure Monitor and Log Analytics | Metric and log storage, alert rules | persistent | 5 (#5) | planned |
@@ -146,15 +146,15 @@ The target subscription has a regional vCPU quota of 4 in `swedencentral`. This 
 
 The first AKS plan and the result of the first create are in ADR 0012. AKS accepted two `Standard_D2s_v5` nodes. The allocatable capacity is 3.8 vCPU and about 11.3 GiB, and the fit of the tools is not measured. The saved plans are in [docs/plans/](plans/README.md).
 
-### Planned repository layout
+### Repository layout
 
-Only `docs/` and `infrastructure/` exist today. The rest is planned and may change. The rule for the three folders that overlap:
+The folders `docs/`, `infrastructure/`, `applications/`, `kubernetes/`, `helm/`, `gitops/` and `tests/` exist today. `monitoring/` and `security/` are planned, and names may change. The rule for the three folders that overlap:
 
 - `kubernetes/` holds plain manifests for cluster-level resources, such as namespaces and quotas.
 - `helm/` holds charts written in this repository.
 - `gitops/` holds Argo CD Application definitions and per-environment values. It points to the other two.
 
-Other folders: `infrastructure/` for Terraform, `applications/` for the sample service, `monitoring/` for dashboards, alert rules and SLO definitions, `security/` for policies and scanning configuration.
+Other folders: `infrastructure/` for Terraform, `applications/` for the sample service, `tests/` for checks that need no Azure, `monitoring/` for dashboards, alert rules and SLO definitions, `security/` for policies and scanning configuration.
 
 ## 8. Delivery flow
 

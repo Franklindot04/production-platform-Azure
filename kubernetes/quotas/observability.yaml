@@ -1,0 +1,31 @@
+# Initial budget for the `observability` namespace. Not measured. See apps.yaml.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: observability
+  namespace: observability
+spec:
+  hard:
+    requests.cpu: 300m
+    requests.memory: 512Mi
+    limits.cpu: 600m
+    limits.memory: 1Gi
+    pods: "10"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: observability
+  namespace: observability
+spec:
+  limits:
+    - type: Container
+      defaultRequest:
+        cpu: 25m
+        memory: 64Mi
+      default:
+        cpu: 200m
+        memory: 256Mi
+      max:
+        cpu: 500m
+        memory: 512Mi

@@ -1,0 +1,25 @@
+# The sample service chart with the `dev` values. Synced after the cluster rules.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sample-service
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Franklindot04/production-platform-Azure.git
+    targetRevision: main
+    path: helm/sample-service
+    helm:
+      releaseName: sample-service
+      valueFiles:
+        - ../../gitops/dev/values/sample-service.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: apps
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

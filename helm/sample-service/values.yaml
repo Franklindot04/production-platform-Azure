@@ -1,0 +1,34 @@
+# Values for the sample service chart. Environment values live under gitops/.
+
+replicaCount: 2
+
+image:
+  repository: ghcr.io/franklindot04/sample-service
+  # The tag is set per environment. The chart fails to render without it.
+  tag: ""
+  pullPolicy: IfNotPresent
+
+# Starting values. They can be changed at run time through the admin port.
+settings:
+  latency: "0s"
+  errorRate: "0"
+
+service:
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  path: /
+
+# Initial values. They are replaced by measured values.
+resources:
+  requests:
+    cpu: 25m
+    memory: 32Mi
+  limits:
+    cpu: 200m
+    memory: 64Mi
+
+podDisruptionBudget:
+  minAvailable: 1

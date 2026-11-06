@@ -1,0 +1,23 @@
+# The root Application of the `dev` environment. The bootstrap step of
+# infrastructure/session.sh applies this file once (ADR 0017). Argo CD then
+# syncs every Application under gitops/dev/apps/.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Franklindot04/production-platform-Azure.git
+    targetRevision: main
+    path: gitops/dev/apps
+    directory:
+      recurse: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

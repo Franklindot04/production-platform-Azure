@@ -1,0 +1,33 @@
+# Initial budget for the `apps` namespace. About 2.5 vCPU and 9.8 GiB of
+# requests are left on the two nodes after the system pods (ADR 0012). These
+# values are a first split, not measured, and are changed after Session 1.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: apps
+  namespace: apps
+spec:
+  hard:
+    requests.cpu: 500m
+    requests.memory: 1Gi
+    limits.cpu: "1"
+    limits.memory: 2Gi
+    pods: "20"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: apps
+  namespace: apps
+spec:
+  limits:
+    - type: Container
+      defaultRequest:
+        cpu: 25m
+        memory: 32Mi
+      default:
+        cpu: 200m
+        memory: 128Mi
+      max:
+        cpu: 500m
+        memory: 512Mi
