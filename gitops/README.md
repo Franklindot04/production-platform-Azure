@@ -11,7 +11,7 @@ Argo CD Application definitions and the values per environment. Only `dev` exist
 
 All Applications use automated sync with prune and self-heal. The repository is public, so Argo CD needs no repository credential.
 
-The image tag in `dev/values/sample-service.yaml` is `unpublished`. A workflow will replace it with a commit SHA through a pull request (ADR 0018). Until then the pods cannot pull the image.
+The image tag in `dev/values/sample-service.yaml` is `unpublished`. The workflow `image-tag-bump.yml` replaces it with a commit SHA through a pull request (ADR 0018) after an image is published. Until then the pods cannot pull the image.
 
 The ingress class is the one of the AKS application routing add-on (ADR 0016). How the ingress is limited to the maintainer's address is not settled.
 

@@ -50,4 +50,4 @@ The Dockerfile builds a static binary into an image with nothing else in it. The
 docker build -t sample-service:local applications/sample-service
 ```
 
-Images are published to `ghcr.io` by a workflow (ADR 0013). No workflow exists yet.
+The `Publish image` workflow builds the image for `linux/amd64` and pushes it to `ghcr.io` (ADR 0013). See [docs/workflows.md](../../docs/workflows.md).

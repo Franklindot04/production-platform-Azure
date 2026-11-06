@@ -8,6 +8,8 @@ Checks that need no Azure: static checks on the files and live checks in a local
 ./tests/kind/check.sh --reuse --keep   # reuse and keep the cluster between runs
 ```
 
+The workflow `app-checks.yml` runs this script on pull requests that change the service, the chart, the cluster rules or the GitOps files.
+
 It needs `go`, `helm`, `kubeconform`, `kind`, `kubectl` and `docker`. `yamllint` is used if it is installed.
 
 ## Static checks
