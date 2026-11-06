@@ -17,11 +17,23 @@ On the admin port (default 8081). The Kubernetes Service does not expose it, and
 | Path | Behaviour |
 |---|---|
 | `GET /admin/config` | Returns the current latency and error rate. |
+| `GET /metrics` | Metrics in the Prometheus text format (version 0.0.4). Served on the admin port only. |
 | `PUT /admin/config` | Sets `latency` (a duration such as `200ms`, 0 to 5s) and `error_rate` (0 to 1). Either field can be left out. Unknown fields are rejected. |
 
 A setting made through the admin port applies to one pod and is lost when the pod restarts.
 
-`/metrics` and traces are not part of the service yet.
+## Metrics
+
+The service writes the Prometheus text format itself, with the standard library only. `GET /metrics` on the admin port returns two metrics. Series are sorted, so the output order is fixed.
+
+| Metric | Type | Labels |
+|---|---|---|
+| `http_requests_total` | counter | `route`, `code` |
+| `http_request_duration_seconds` | histogram | `route` |
+
+`route` is `/healthz`, `/readyz` or `/work`. It is set where the handler is registered and is not taken from the request URL. `code` is the status code. A `/work` request that the client abandons before the response is counted with `499`. The histogram buckets are 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5 and 10 seconds, plus `+Inf`. Go runtime and process metrics are not exported.
+
+Traces are planned and are not part of the service yet.
 
 ## Settings
 
