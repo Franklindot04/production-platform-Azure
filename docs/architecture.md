@@ -240,9 +240,9 @@ The end-of-session teardown in ADR 0009 applies to every environment, including 
 
 ## 10. Identity and secrets
 
-All planned.
+Mostly planned. The access to the Terraform state is built.
 
-- **People.** The maintainer signs in with Microsoft Entra ID. Cluster access uses Entra ID and Azure RBAC.
+- **People.** The maintainer signs in with Microsoft Entra ID. Cluster access is planned to use Entra ID and Azure RBAC (ADR 0021). Until then the cluster uses local accounts.
 - **Pipelines.** GitHub Actions logs in to Azure using OIDC federation. No client secret is stored in GitHub. (ADR 0007)
 - **Workloads.** Pods use workload identity to read Key Vault. No Azure credentials are stored in the cluster.
 - **Secrets.** Secrets live in Key Vault. They are not committed. `.gitignore` covers common secret files, and GitHub secret scanning and push protection are on for this repository.
@@ -324,6 +324,7 @@ The target subscription has a regional vCPU quota of 4, which limits node sizes 
 | [0018](adr/0018-image-tag-update.md) | Update the image tag with a pull request | proposed |
 | [0019](adr/0019-trace-backend-and-grafana.md) | Choose the trace backend and Grafana hosting | proposed |
 | [0020](adr/0020-policy-and-scanning-tools.md) | Choose policy and scanning tools | proposed |
+| [0021](adr/0021-entra-id-cluster-access.md) | Sign in to the cluster with Entra ID | proposed |
 
 Other open decisions are listed in section 15.
 
