@@ -63,16 +63,15 @@ Unknowns:
 - Whether the quota can be raised.
 - The language and shape of the sample service.
 - The trace backend and the Grafana hosting choice. (ADR 0008)
-- Whether the container registry stays between sessions or is rebuilt each time.
 - The network policy engine and the policy tool for Epic 6.
 
 ## 6. System context
 
-All components in this diagram are planned. Nothing is deployed.
+Section 7 gives the status of each component. Nothing is running now.
 
 The platform has two Terraform layers:
 
-- **Persistent layer.** Small resources that must outlive a session: Key Vault, monitoring workspaces and (possibly) the container registry.
+- **Persistent layer.** Small resources that must outlive a session: Key Vault and monitoring workspaces.
 - **Session layer.** Resources created at the start of a session and destroyed at the end: virtual network, AKS cluster and everything inside it.
 
 Both layers exist once per environment. The state storage is shared by all environments and sits outside both layers. The diagram shows one environment. See section 9 and ADR 0010.
@@ -82,14 +81,13 @@ flowchart LR
     maint["Maintainer"] -->|"push and pull request"| repo["GitHub repository"]
     repo --> actions["GitHub Actions"]
     actions -->|"OIDC token"| entra["Microsoft Entra ID"]
-    actions -->|"build and push image"| acr["Container registry"]
+    actions -->|"build and push image"| acr["Container registry (ghcr.io)"]
     maint -->|"terraform apply and destroy"| tf["Terraform"]
     state["State storage (shared by all environments)"]
 
     subgraph persistent ["Persistent layer"]
         kv["Key Vault"]
         mon["Azure Monitor and Log Analytics workspaces"]
-        acr
     end
 
     subgraph session ["Session layer: created and destroyed each session"]
@@ -117,16 +115,16 @@ flowchart LR
 
 ## 7. Components
 
-Every component below is planned. The status column is `planned` for all of them.
+The status column is `built` for a component that exists and `planned` for the rest. A `built` component of the session layer exists only while a session runs.
 
 | Component | Role | Layer | Epic | Status |
 |---|---|---|---|---|
-| Terraform | Creates all Azure resources | n/a | 2 (#2) | planned |
-| State storage | Holds Terraform state | shared | 2 (#2) | planned |
-| Virtual network | Network for nodes | session | 2 (#2) | planned |
-| Container registry | Stores images | persistent (assumption) | 2 (#2) | planned |
+| Terraform | Creates all Azure resources | n/a | 2 (#2) | built |
+| State storage | Holds Terraform state | shared | 2 (#2) | built |
+| Virtual network | Network for nodes | session | 2 (#2) | built |
+| Container registry | Stores images | outside Azure (`ghcr.io`) | 4 (#4) | planned |
 | Key Vault | Holds secrets | persistent | 6 (#6) | planned |
-| AKS cluster | Runs workloads | session | 3 (#3) | planned |
+| AKS cluster | Runs workloads | session | 3 (#3) | built |
 | Ingress | Routes outside traffic to the service | session | 3 (#3) | planned |
 | Namespaces, quotas, network policy | Cluster rules | session | 3 (#3) | planned |
 | Sample service | The workload measured by SLOs | session | 3 (#3) | planned |
@@ -199,7 +197,7 @@ The environments are `dev`, `staging` and `prod`. They are separated by resource
 | Resource group | Holds | Created |
 |---|---|---|
 | `pp-shared-state-rg` | State storage account in `northeurope`, by a manual bootstrap step | once |
-| `pp-<env>-persistent-rg` | Key Vault, monitoring workspaces, possibly the container registry | per environment |
+| `pp-<env>-persistent-rg` | Key Vault, monitoring workspaces | per environment |
 | `pp-<env>-session-rg` | Virtual network, AKS cluster | per environment, each session |
 | `pp-<env>-aks-nodes-rg` | AKS node resources, named by Terraform | with the cluster |
 
@@ -285,7 +283,6 @@ Main cost drivers to check in the Azure pricing calculator, at the time of use:
 
 - Node virtual machines while they run.
 - Disks and public IP addresses and load balancers attached to the cluster.
-- Container registry tier.
 - Log and metric ingestion and retention.
 - Grafana, if the managed service is used.
 - State storage, which is expected to be small.
@@ -323,6 +320,7 @@ The target subscription has a regional vCPU quota of 4, which limits node sizes 
 | [0010](adr/0010-environment-separation.md) | Separate environments by resource group | proposed |
 | [0011](adr/0011-session-network-design.md) | Design the session network | proposed |
 | [0012](adr/0012-first-aks-plan.md) | Plan the first AKS cluster | proposed |
+| [0013](adr/0013-container-registry.md) | Use GitHub Container Registry for images | proposed |
 
 Other open decisions are listed in section 15.
 
@@ -330,12 +328,11 @@ Other open decisions are listed in section 15.
 
 1. When is `staging` created, and what check must `dev` pass before a change moves on? (ADR 0010)
 2. Which alert thresholds does the planned budget use? (ADR 0009)
-3. Does the container registry stay between sessions?
-4. What is the sample service, and in which language?
-5. Which trace backend, and which Grafana hosting?
-6. Which network policy engine and which policy tool?
-7. How is the Argo CD admin credential handled?
-8. How is the image tag updated after a build?
-9. What SLO targets and window fit a service that is only up during sessions?
-10. How long does a full create take? The session layer took about 7 minutes to create and about 7 minutes to destroy in single runs (ADR 0012). The full platform is measured once it exists, and it sets the recovery time that Epic 7 (#7) can claim.
-11. Do the tools fit in the capacity that is left after the system pods? (ADR 0012)
+3. What is the sample service, and in which language?
+4. Which trace backend, and which Grafana hosting?
+5. Which network policy engine and which policy tool?
+6. How is the Argo CD admin credential handled?
+7. How is the image tag updated after a build?
+8. What SLO targets and window fit a service that is only up during sessions?
+9. How long does a full create take? The session layer took about 7 minutes to create and about 7 minutes to destroy in single runs (ADR 0012). The full platform is measured once it exists, and it sets the recovery time that Epic 7 (#7) can claim.
+10. Do the tools fit in the capacity that is left after the system pods? (ADR 0012)

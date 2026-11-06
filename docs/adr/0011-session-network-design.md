@@ -68,7 +68,7 @@ Outbound traffic uses the default standard load balancer, which gets one public 
 ## Open questions
 
 - How does ingress reach the cluster, and which ports are open?
-- Is the reserved range used for private endpoints, for example to the container registry?
+- Is the reserved range used for private endpoints, for example to Key Vault?
 - Is a NAT gateway needed for outbound traffic?
 - Does the network policy engine need a different data plane setting?
 

@@ -16,14 +16,13 @@ The plan covers the Kubernetes platform, delivery, observability, security, inci
    - the sample service
 3. A create takes about 7 minutes and a destroy about 7 minutes (ADR 0012). Each live session pays that first.
 4. Anything that does not need Azure is checked first with `kind`, `helm lint`, `helm template` and `kubeconform`. `kind` does not show the AKS load balancer, Azure CNI Overlay behaviour or whether network policy is enforced there.
-5. There are two live sessions of about 2 hours each. A third session of 30 to 45 minutes is allowed if Session 1 fails a gate.
-6. Each pull request is based on `main`, so a pull request that depends on another waits for it to merge.
+5. Each pull request is based on `main`, so a pull request that depends on another waits for it to merge.
 
 ## 2. Decisions taken
 
 | Area | Decision | Record |
 |---|---|---|
-| Registry | `ghcr.io`, public package | ADR 0013 (planned) |
+| Registry | `ghcr.io`, public package | [ADR 0013](adr/0013-container-registry.md) |
 | Sample service | Go, health endpoints, settable latency and error rate | ADR 0014 (planned) |
 | Network policy | Azure's own engine, set in the session Terraform | ADR 0015 (planned) |
 | Ingress | The lighter of the AKS add-on or one controller, chosen from the documentation. HTTP on the plain IP, no domain, no certificate | ADR 0016 (planned) |
@@ -101,7 +100,7 @@ Numbering continues from ADR 0012.
 
 | ADR | Title |
 |---|---|
-| 0013 | Use GitHub Container Registry for images |
+| [0013](adr/0013-container-registry.md) | Use GitHub Container Registry for images |
 | 0014 | Write the sample service in Go |
 | 0015 | Use Azure network policy |
 | 0016 | Choose the ingress |
@@ -128,23 +127,7 @@ Numbering continues from ADR 0012.
 | 11 | Load tests, experiments, Session 2 record, recovery time, cost review | #59, #60, #61, #62 | 9, 10 |
 | 12 | Documentation site, changelog, release notes | #63 | 11 |
 
-PR 3 and PR 6 can be open at the same time. PR 4 and PR 5 can be open at the same time once PR 3 has merged. Corrections to rows of the architecture document that these changes touch are made in the same commits.
-
-## 6. Day plan
-
-Days are relative to the start.
-
-| Day | Work |
-|---|---|
-| 1 | PR 1 and PR 2 merged. PR 3 started. |
-| 2 | PR 3 and PR 4. The persistent Terraform for PR 6 is written and planned. |
-| 3 | PR 5, PR 6 and PR 7. The persistent layer is applied after the plan is approved. A dry run of the bootstrap on `kind`. |
-| 4 | PR 8, then Session 1 ([run sheet](sessions/session-1.md)). PR 9. |
-| 5 | Fixes from Session 1. PR 10. |
-| 6 | Session 2 ([run sheet](sessions/session-2.md)). |
-| 7 | PR 11 and PR 12. Tags and releases. |
-
-## 7. What is cut first
+## 6. What is cut first
 
 If Session 1 fails a gate or time runs out, the work is cut in this order:
 
@@ -155,17 +138,9 @@ If Session 1 fails a gate or time runs out, the work is cut in this order:
 
 Cluster-wide log collection and a managed Grafana are already out of scope.
 
-## 8. Steps only the maintainer can do
+## 7. Releases
 
-1. Make the `ghcr.io` package public in the GitHub settings after the first image is published.
-2. Allow Actions to create pull requests in the repository settings.
-3. Enable GitHub Pages for `docs/` in the repository settings.
-4. Set the Azure budget with alerts. None exists yet.
-5. Approve each plan before it is applied, and say when a release may be created.
-
-## 9. Releases
-
-A release is created only after the maintainer says so in chat.
+A release is created when the maintainer approves it.
 
 | Tag | After |
 |---|---|
