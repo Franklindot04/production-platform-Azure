@@ -180,7 +180,7 @@ Notes:
 
 - Rollback is a Git revert. Argo CD syncs the earlier state.
 - Pull request runs have read-only access to Azure.
-- How the image tag is updated (a commit by a pipeline or a manual commit) is not decided.
+- A workflow opens a pull request that changes the image tag, and a person merges it (ADR 0018).
 - Progressive delivery, such as canary releases, is not planned yet.
 
 Infrastructure changes follow a separate path: pull request, plan, review, merge, then apply from the maintainer's machine (assumption, ADR 0007).
@@ -223,7 +223,7 @@ Names follow ADR 0003. `shared` takes the place of `<env>` for the state storage
 ### Promotion
 
 - Infrastructure: pull request, plan, review, merge, apply to `dev`, then `staging`, then `prod`. Each step waits until the previous environment is checked.
-- Workloads: a pull request changes the values under `gitops/<env>/`, in the same order. How the image tag is updated is an open question.
+- Workloads: a pull request changes the values under `gitops/<env>/`, in the same order. A workflow opens the pull request that changes the image tag (ADR 0018).
 - Rollback is a Git revert in both paths.
 - The check between environments is not defined. It is written when the sample service and its health checks exist.
 
@@ -324,6 +324,7 @@ The target subscription has a regional vCPU quota of 4, which limits node sizes 
 | [0015](adr/0015-network-policy-engine.md) | Use Azure network policy | proposed |
 | [0016](adr/0016-ingress.md) | Choose the ingress | proposed |
 | [0017](adr/0017-argocd-bootstrap.md) | Bootstrap Argo CD from the session script | proposed |
+| [0018](adr/0018-image-tag-update.md) | Update the image tag with a pull request | proposed |
 
 Other open decisions are listed in section 15.
 
@@ -333,9 +334,8 @@ Other open decisions are listed in section 15.
 2. Which alert thresholds does the planned budget use? (ADR 0009)
 3. Which trace backend, and which Grafana hosting?
 4. Which policy tool?
-5. How is the image tag updated after a build?
-6. What SLO targets and window fit a service that is only up during sessions?
-7. How long does a full create take? The session layer took about 7 minutes to create and about 7 minutes to destroy in single runs (ADR 0012). The full platform is measured once it exists, and it sets the recovery time that Epic 7 (#7) can claim.
-8. Do the tools fit in the capacity that is left after the system pods? (ADR 0012)
-9. Does Azure Network Policy Manager work with Azure CNI Overlay on this cluster? (ADR 0015)
-10. Which ingress replaces the managed NGINX add-on after its support ends? (ADR 0016)
+5. What SLO targets and window fit a service that is only up during sessions?
+6. How long does a full create take? The session layer took about 7 minutes to create and about 7 minutes to destroy in single runs (ADR 0012). The full platform is measured once it exists, and it sets the recovery time that Epic 7 (#7) can claim.
+7. Do the tools fit in the capacity that is left after the system pods? (ADR 0012)
+8. Does Azure Network Policy Manager work with Azure CNI Overlay on this cluster? (ADR 0015)
+9. Which ingress replaces the managed NGINX add-on after its support ends? (ADR 0016)

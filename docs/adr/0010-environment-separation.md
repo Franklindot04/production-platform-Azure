@@ -56,7 +56,7 @@ Creation:
 Promotion path:
 
 - Infrastructure: pull request, plan, review, merge, then apply to `dev` from the maintainer's machine. The same change is applied to `staging`, then `prod`, only after the previous environment is checked.
-- Workloads: a pull request changes the values under `gitops/<env>/`, first for `dev`, then `staging`, then `prod`. How the image tag is updated is still an open question.
+- Workloads: a pull request changes the values under `gitops/<env>/`, first for `dev`, then `staging`, then `prod`. A workflow opens the pull request that changes the image tag (ADR 0018).
 - Rollback is a Git revert in both paths.
 - The check between environments is not defined yet. It is written when the sample service and its health checks exist.
 

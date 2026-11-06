@@ -28,8 +28,8 @@ The plan covers the Kubernetes platform, delivery, observability, security, inci
 | Ingress | The lighter of the AKS add-on or one controller, chosen from the documentation. HTTP on the plain IP, no domain, no certificate | [ADR 0016](adr/0016-ingress.md) |
 | Bootstrap | A `bootstrap` step in `session.sh` installs Argo CD with Helm and a root Application. No third Terraform root | [ADR 0017](adr/0017-argocd-bootstrap.md) |
 | Argo CD | Part of Epic 3. Epic 4 covers CI. The admin credential is generated, read at run time and never stored. The UI is reached by port-forward only | [ADR 0017](adr/0017-argocd-bootstrap.md) |
-| First image | Published by a GitHub Actions workflow | ADR 0018 (planned) |
-| Image tag update | A workflow opens a pull request that changes the tag | ADR 0018 (planned) |
+| First image | Published by a GitHub Actions workflow | [ADR 0018](adr/0018-image-tag-update.md) |
+| Image tag update | A workflow opens a pull request that changes the tag | [ADR 0018](adr/0018-image-tag-update.md) |
 | Traces and dashboards | No paid managed Grafana. Dashboards are queries in the Azure Monitor workspace. The trace backend is chosen in the ADR | ADR 0019 (planned) |
 | Logs | No cluster-wide log collection. Logs are read with `kubectl logs` | ADR 0019 (planned) |
 | Policy and scanning | Tools chosen in the ADR | ADR 0020 (planned) |
@@ -105,7 +105,7 @@ Numbering continues from ADR 0012.
 | [0015](adr/0015-network-policy-engine.md) | Use Azure network policy |
 | [0016](adr/0016-ingress.md) | Choose the ingress |
 | [0017](adr/0017-argocd-bootstrap.md) | Bootstrap Argo CD from the session script |
-| 0018 | Update the image tag with a pull request |
+| [0018](adr/0018-image-tag-update.md) | Update the image tag with a pull request |
 | 0019 | Choose the trace backend and Grafana hosting |
 | 0020 | Choose policy and scanning tools |
 | 0021 | Sign in to the cluster with Entra ID |
