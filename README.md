@@ -61,6 +61,10 @@ Work is tracked in GitHub issues.
 
 A Jira project (key PP) is planned for the roadmap. Issues may reference PP-numbers once it exists.
 
+## Project history
+
+How the repository was built and why its issue and pull request history is short: [docs/history.md](docs/history.md).
+
 ## Contributing
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) for branch names, commit style, the pull request flow and what "done" means here.
