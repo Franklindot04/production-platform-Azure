@@ -27,7 +27,7 @@ git config user.name "github-actions[bot]"
 git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 git switch -c "$branch"
 git add "$file"
-git commit -q -m "bump the sample service image to ${short} (#46)"
+git commit -q -m "bump the sample service image to ${short} (#34)"
 
 remote_sha="$(git ls-remote --heads origin "refs/heads/${branch}" | cut -f1)"
 if [ -z "$remote_sha" ]; then
@@ -51,7 +51,7 @@ else
   cat >"${RUNNER_TEMP}/body.md" <<EOF
 ## Linked issue
 
-Refs #46
+Refs #34
 
 ## What changed
 
