@@ -17,7 +17,7 @@ The platform needs one workload for the SLOs to measure. It has to start fast, u
   - `GET /healthz` for liveness.
   - `GET /readyz` for readiness.
   - `GET /work` waits for the configured latency and fails with the configured probability.
-  - `GET /metrics` in Prometheus format (issue #49).
+  - `GET /metrics` in Prometheus format (issue #38).
 - Latency and error rate are set at run time through `PUT /admin/config` on a separate admin port. The Service and the ingress do not expose the admin port. It is reached by port-forward or from inside the cluster.
 - Starting values come from environment variables, and the values are validated: a latency cap of 5 seconds and an error rate from 0 to 1.
 - Logs are written to standard output.
