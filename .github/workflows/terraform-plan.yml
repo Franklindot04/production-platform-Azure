@@ -1,0 +1,78 @@
+name: Terraform plan
+
+on:
+  pull_request:
+    paths:
+      - "infrastructure/**"
+
+permissions: {}
+
+jobs:
+  plan:
+    name: Plan the dev roots
+    # Pull requests from forks get no token and no secrets.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      HAS_AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID != '' }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    steps:
+      - name: Check for the Azure client ID
+        if: env.HAS_AZURE_CLIENT_ID != 'true'
+        run: echo "::notice::The secret AZURE_CLIENT_ID is not set. The plan is skipped."
+
+      - name: Check out the repository
+        if: env.HAS_AZURE_CLIENT_ID == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Terraform
+        if: env.HAS_AZURE_CLIENT_ID == 'true'
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: 1.14.5
+          terraform_wrapper: false
+
+      - name: Log in to Azure
+        if: env.HAS_AZURE_CLIENT_ID == 'true'
+        
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Plan the persistent root
+        if: env.HAS_AZURE_CLIENT_ID == 'true'
+        env:
+          TFSTATE_ACCOUNT_NAME: ${{ secrets.TFSTATE_ACCOUNT_NAME }}
+          # Placeholder value. The plan sends no mail, and the real address is not stored in GitHub.
+          TF_VAR_alert_email: plan-only@example.com
+        run: |
+          set -euo pipefail
+          export TF_VAR_state_account_name="$TFSTATE_ACCOUNT_NAME"
+          dir=infrastructure/environments/dev/persistent
+          terraform -chdir="$dir" init -input=false -lockfile=readonly \
+            -backend-config="resource_group_name=pp-shared-state-rg" \
+            -backend-config="storage_account_name=$TFSTATE_ACCOUNT_NAME"
+          terraform -chdir="$dir" plan -input=false -lock=false -refresh=false
+
+      - name: Plan the session root
+        if: env.HAS_AZURE_CLIENT_ID == 'true'
+        env:
+          TFSTATE_ACCOUNT_NAME: ${{ secrets.TFSTATE_ACCOUNT_NAME }}
+          # Documentation range (RFC 5737). The plan is not applied.
+          TF_VAR_api_authorized_ip_ranges: '["192.0.2.0/24"]'
+        run: |
+          set -euo pipefail
+          dir=infrastructure/environments/dev/session
+          terraform -chdir="$dir" init -input=false -lockfile=readonly \
+            -backend-config="resource_group_name=pp-shared-state-rg" \
+            -backend-config="storage_account_name=$TFSTATE_ACCOUNT_NAME"
+          terraform -chdir="$dir" plan -input=false -lock=false

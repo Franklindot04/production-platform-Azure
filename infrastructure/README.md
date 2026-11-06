@@ -6,6 +6,8 @@ Terraform for the platform. The `dev` roots were applied once. The persistent re
 - `modules/`: shared modules. Planned.
 - `environments/<env>/`: one folder per environment, each with a persistent and a session root. Only `dev` exists. `staging` and `prod` are added when they are needed.
 
+The persistent root also contains written, not applied, code for the monitoring workspaces, Key Vault and the identity for pull request plans (ADR 0022). Those resources are planned until they are applied.
+
 There are two Terraform roots today, `environments/dev/persistent` and `environments/dev/session`. Each environment root is its own Terraform configuration. Terraform workspaces are not used. Environment inputs are written in `.tf` files, because `.gitignore` excludes `*.tfvars`.
 
 ## Session script

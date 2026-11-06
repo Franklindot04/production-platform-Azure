@@ -120,16 +120,17 @@ The status column is `built` for a component that exists, `written` for a compon
 | State storage | Holds Terraform state | shared | 2 (#2) | built |
 | Virtual network | Network for nodes | session | 2 (#2) | built |
 | Container registry | Stores images | outside Azure (`ghcr.io`) | 4 (#4) | planned |
-| Key Vault | Holds secrets | persistent | 6 (#6) | planned |
+| Key Vault | Holds secrets | persistent | 6 (#6) | planned (code written, not applied) |
 | AKS cluster | Runs workloads | session | 3 (#3) | built |
 | Ingress | Routes outside traffic to the service | session | 3 (#3) | written |
 | Namespaces, quotas, network policy | Cluster rules | session | 3 (#3) | written |
 | Sample service | The workload measured by SLOs | session | 3 (#3) | written |
 | GitHub Actions | Build, test, scan, publish | n/a | 4 (#4) | written |
 | Argo CD | Syncs cluster state from Git | session | 3 (#3) | written |
-| Azure Monitor and Log Analytics | Metric and log storage, alert rules | persistent | 5 (#5) | planned |
+| Azure Monitor and Log Analytics | Metric and log storage, alert rules | persistent | 5 (#5) | planned (workspaces, Application Insights and action group written, not applied) |
 | OpenTelemetry Collector | Collects traces and metrics | session | 5 (#5) | planned |
 | Dashboards | Saved queries on the workspaces, no Grafana | persistent | 5 (#5) | planned |
+| Pull request plan identity | Reads Azure and state so a pull request can run `terraform plan` | persistent | 6 (#6) | planned (code written, not applied) |
 | Policy checks | Block unsafe changes | n/a | 6 (#6) | planned |
 | Runbooks and postmortems | Incident handling | n/a | 7 (#7) | planned |
 
@@ -209,7 +210,7 @@ Names follow ADR 0003. `shared` takes the place of `<env>` for the state storage
 ### Access
 
 - Role assignments for an environment are scoped to its resource groups, plus a data role on its state container.
-- Each environment has its own pipeline identity, tied to the GitHub environment with the same name. Pull request runs use a read-only identity. (ADR 0007)
+- Each environment has its own pipeline identity, tied to the GitHub environment with the same name. Pull request runs use a read-only identity. (ADR 0007, ADR 0022)
 - The maintainer is Owner of the subscription. This is not a boundary between environments.
 
 ### Cost, quota and policy
@@ -243,9 +244,9 @@ The end-of-session teardown in ADR 0009 applies to every environment, including 
 Mostly planned. The access to the Terraform state is built.
 
 - **People.** The maintainer signs in with Microsoft Entra ID. Cluster access is planned to use Entra ID and Azure RBAC (ADR 0021). Until then the cluster uses local accounts.
-- **Pipelines.** GitHub Actions logs in to Azure using OIDC federation. No client secret is stored in GitHub. (ADR 0007)
+- **Pipelines.** GitHub Actions logs in to Azure using OIDC federation. No client secret is stored in GitHub. (ADR 0007) The identity for pull request plans is written in `infrastructure/environments/dev/persistent/identity.tf` and is not applied. Its federated credential subject is `repo:<owner>/<name>:pull_request`, and it has Reader on the persistent resource group and Storage Blob Data Reader on the `tfstate-dev` container. (ADR 0022)
 - **Workloads.** Pods use workload identity to read Key Vault. No Azure credentials are stored in the cluster.
-- **Secrets.** Secrets live in Key Vault. They are not committed. `.gitignore` covers common secret files, and GitHub secret scanning and push protection are on for this repository.
+- **Secrets.** Secrets live in Key Vault, which uses Azure RBAC and has no role assignment yet. (ADR 0022) They are not committed. `.gitignore` covers common secret files, and GitHub secret scanning and push protection are on for this repository.
 - **Terraform state.** Access with Entra ID only. Shared key access is turned off. (ADR 0004)
 - **Least privilege.** Each identity gets the lowest role that works, scoped as narrowly as possible. Roles for an environment are scoped to its resource groups. (ADR 0010)
 
@@ -261,6 +262,7 @@ All planned. See ADR 0008.
 - Dashboards are saved queries on the workspaces, stored as code in `monitoring/`. There is no Grafana. (ADR 0019)
 - The sample service gets two SLIs to start: availability and latency. Targets are not set yet. Error budget alerts are planned.
 - **SLO caveat.** The cluster is down between sessions. SLOs are measured over session time, with generated traffic. The window length is decided when the SLO is defined.
+- The persistent root defines the workspaces, Application Insights and an action group with one email receiver. The address is set at run time and is not committed. Nothing is applied. (ADR 0022)
 - Alerts notify an action group. Email is the first target (assumption). With one maintainer, there is no paging rotation.
 
 ## 12. Cost notes
@@ -325,6 +327,7 @@ The target subscription has a regional vCPU quota of 4, which limits node sizes 
 | [0019](adr/0019-trace-backend-and-grafana.md) | Choose the trace backend and Grafana hosting | proposed |
 | [0020](adr/0020-policy-and-scanning-tools.md) | Choose policy and scanning tools | proposed |
 | [0021](adr/0021-entra-id-cluster-access.md) | Sign in to the cluster with Entra ID | proposed |
+| [0022](adr/0022-persistent-layer-and-plan-identity.md) | Define the persistent layer and the pull request plan identity | proposed |
 
 Other open decisions are listed in section 15.
 
