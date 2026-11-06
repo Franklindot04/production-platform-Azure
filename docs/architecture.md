@@ -329,6 +329,7 @@ The target subscription has a regional vCPU quota of 4, which limits node sizes 
 | [0021](adr/0021-entra-id-cluster-access.md) | Sign in to the cluster with Entra ID | proposed |
 | [0022](adr/0022-persistent-layer-and-plan-identity.md) | Define the persistent layer and the pull request plan identity | proposed |
 | [0023](adr/0023-metrics-on-the-admin-port.md) | Serve metrics on the admin port | proposed |
+| [0024](adr/0024-managed-prometheus.md) | Enable managed Prometheus on the cluster | proposed |
 
 Other open decisions are listed in section 15.
 

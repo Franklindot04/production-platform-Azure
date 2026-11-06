@@ -86,5 +86,8 @@ resource "azurerm_kubernetes_cluster" "main" {
     default_nginx_controller = "External"
   }
 
+  # Managed Prometheus (ADR 0024). The rule and the association are in monitoring.tf.
+  monitor_metrics {}
+
   tags = local.tags
 }
