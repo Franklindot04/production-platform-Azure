@@ -1,12 +1,22 @@
 #!/usr/bin/env bash
 # Creates, destroys and checks the session layer of an environment.
-# Usage: session.sh <up|down|check> [env] [--apply|--yes]
+# Usage: session.sh <up|down|check|bootstrap|argocd-password> [env] [part] [--apply|--yes]
 #   up              Plan the session root. The plan is saved outside the repository.
 #   up --apply      Apply the saved plan. It bills until the session layer is destroyed.
 #   down            Show the destroy plan.
 #   down --yes      Destroy the session root.
 #   check           List every resource by resource group and report what remains.
+#   bootstrap       Install Argo CD with Helm, set the ingress source range, and apply
+#                   the root Application. It can be repeated. A part (argocd, ingress or
+#                   root) runs only that part, for example `bootstrap ingress` to set the
+#                   ingress range again after the maintainer's address changed.
+#   argocd-password Print the Argo CD admin credential to the terminal. It is generated
+#                   by Argo CD, read from the cluster when asked, and never stored.
 # env is dev, staging or prod. Default: dev.
+# bootstrap and argocd-password use the administrator credential of the session cluster.
+# PP_KUBE_CONTEXT=<context> uses an existing kubectl context instead, for a kind cluster.
+# The ingress source range comes from PP_INGRESS_ALLOWED_RANGES (comma separated) or from
+# TF_VAR_api_authorized_ip_ranges. It is not stored.
 # Exit codes: 0 nothing remains, 1 something remains, 2 error or wrong use.
 # Output is masked: GUIDs and every /32 host range are replaced. See infrastructure/README.md.
 set -euo pipefail
@@ -16,9 +26,11 @@ shift || true
 
 ENV_NAME="dev"
 FLAG=""
+PART="all"
 for arg in "$@"; do
   case "$arg" in
     dev | staging | prod) ENV_NAME="$arg" ;;
+    argocd | ingress | root) PART="$arg" ;;
     --apply | --yes) FLAG="$arg" ;;
     *)
       echo "unknown argument: $arg" >&2
@@ -66,7 +78,7 @@ need_terraform_inputs() {
 }
 
 # The plan file holds the authorized range, so it must stay outside the repository.
-plan_file() {
+plan_dir() {
   local dir="${PP_PLAN_DIR:-${TMPDIR:-/tmp}}"
   mkdir -p "$dir"
   dir="$(cd "$dir" && pwd)"
@@ -76,7 +88,11 @@ plan_file() {
       exit 2
       ;;
   esac
-  echo "${dir}/pp-${ENV_NAME}-session.tfplan"
+  echo "$dir"
+}
+
+plan_file() {
+  echo "$(plan_dir)/pp-${ENV_NAME}-session.tfplan"
 }
 
 tf_init() {
@@ -203,6 +219,129 @@ sys.exit(1 if remains else 0)
 PY
 }
 
+ARGOCD_NAMESPACE="argocd"
+ARGOCD_CHART_VERSION="10.14.0"
+ARGOCD_REPO="https://argoproj.github.io/argo-helm"
+NGINX_CRD="nginxingresscontrollers.approuting.kubernetes.azure.com"
+
+# kube_setup   Sets K and H to the kubectl and helm commands for the cluster.
+# The kubeconfig of the session cluster is written outside the repository.
+kube_setup() {
+  command -v kubectl >/dev/null || {
+    echo "kubectl is not installed" >&2
+    exit 2
+  }
+  command -v helm >/dev/null || {
+    echo "helm is not installed" >&2
+    exit 2
+  }
+  if [ -n "${PP_KUBE_CONTEXT:-}" ]; then
+    K=(kubectl --context "$PP_KUBE_CONTEXT")
+    H=(helm --kube-context "$PP_KUBE_CONTEXT")
+    return
+  fi
+  local kubeconfig
+  kubeconfig="$(plan_dir)/kubeconfig-${ENV_NAME}"
+  az aks get-credentials --admin --overwrite-existing --file "$kubeconfig" \
+    -g "pp-${ENV_NAME}-session-rg" -n "pp-${ENV_NAME}-aks" >/dev/null
+  chmod 600 "$kubeconfig"
+  export KUBECONFIG="$kubeconfig"
+  K=(kubectl)
+  H=(helm)
+}
+
+# ingress_ranges   Prints the source ranges for the ingress as a comma separated
+# list, or stops. The ingress is never left open by default.
+ingress_ranges() {
+  local ranges="${PP_INGRESS_ALLOWED_RANGES:-}"
+  if [ -z "$ranges" ] && [ -n "${TF_VAR_api_authorized_ip_ranges:-}" ]; then
+    ranges="$(python3 -I -c 'import json,sys; print(",".join(json.loads(sys.argv[1])))' "$TF_VAR_api_authorized_ip_ranges")"
+  fi
+  if [ -z "$ranges" ]; then
+    echo "Set PP_INGRESS_ALLOWED_RANGES or TF_VAR_api_authorized_ip_ranges." >&2
+    exit 2
+  fi
+  python3 -I -c 'import ipaddress,sys
+for r in sys.argv[1].split(","):
+    ipaddress.ip_network(r, strict=False)
+    if r.endswith("/0"):
+        raise SystemExit("a range of /0 is not allowed")' "$ranges" || {
+    echo "The ingress ranges are not a list of CIDR ranges." >&2
+    exit 2
+  }
+  echo "$ranges"
+}
+
+# set_ingress_range   Limits the managed NGINX controller to the maintainer's
+# range through the annotations of its load balancer Service. On a cluster
+# without the add-on, such as kind, there is nothing to set.
+set_ingress_range() {
+  if ! "${K[@]}" get crd "$NGINX_CRD" >/dev/null 2>&1; then
+    echo "This cluster has no application routing add-on. The ingress range is not set."
+    return 0
+  fi
+  local ranges patch i
+  ranges="$(ingress_ranges)"
+  for i in $(seq 1 60); do
+    "${K[@]}" get nginxingresscontroller default >/dev/null 2>&1 && break
+    [ "$i" = "60" ] && {
+      echo "The default NginxIngressController does not exist." >&2
+      exit 1
+    }
+    sleep 5
+  done
+  patch="$(python3 -I -c 'import json,sys; print(json.dumps({"spec": {"loadBalancerAnnotations": {"service.beta.kubernetes.io/azure-allowed-ip-ranges": sys.argv[1]}}}))' "$ranges")"
+  "${K[@]}" patch nginxingresscontroller default --type merge -p "$patch" 2>&1 | mask
+  echo "The ingress source range is set."
+  # One replica uses less of the small capacity. If AKS refuses it, go on.
+  "${K[@]}" patch nginxingresscontroller default --type merge \
+    -p '{"spec":{"scaling":{"minReplicas":1,"maxReplicas":2}}}' 2>&1 | mask ||
+    echo "warning: the scaling of the ingress controller was not changed"
+}
+
+step_bootstrap() {
+  local root_app="${REPO_DIR}/gitops/${ENV_NAME}/root-application.yaml"
+  [ -f "$root_app" ] || {
+    echo "no root Application for ${ENV_NAME}" >&2
+    exit 2
+  }
+  build_mask
+  kube_setup
+
+  if [ "$PART" = "all" ] || [ "$PART" = "argocd" ]; then
+    echo "== argo cd"
+    "${H[@]}" upgrade --install argocd argo-cd --repo "$ARGOCD_REPO" --version "$ARGOCD_CHART_VERSION" \
+      --namespace "$ARGOCD_NAMESPACE" --create-namespace \
+      -f "${REPO_DIR}/gitops/bootstrap/argocd-values.yaml" --wait --timeout 10m 2>&1 | mask
+  fi
+
+  if [ "$PART" = "all" ] || [ "$PART" = "ingress" ]; then
+    echo "== ingress range"
+    set_ingress_range
+  fi
+
+  if [ "$PART" = "all" ] || [ "$PART" = "root" ]; then
+    echo "== root application"
+    "${K[@]}" apply -f "$root_app" 2>&1 | mask
+  fi
+
+  if [ "$PART" = "all" ]; then
+    echo "Argo CD is installed and the root Application is applied."
+    echo "Read the admin credential with: session.sh argocd-password"
+    echo "Open the UI with: kubectl -n ${ARGOCD_NAMESPACE} port-forward svc/argocd-server 8080:443"
+  fi
+}
+
+step_argocd_password() {
+  if [ ! -t 1 ]; then
+    echo "Not printing the credential: the output is not a terminal." >&2
+    exit 2
+  fi
+  kube_setup
+  "${K[@]}" -n "$ARGOCD_NAMESPACE" get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 --decode
+  echo
+}
+
 case "$STEP" in
   up) step_up ;;
   down) step_down ;;
@@ -210,8 +349,10 @@ case "$STEP" in
     build_mask
     step_check
     ;;
+  bootstrap) step_bootstrap ;;
+  argocd-password) step_argocd_password ;;
   *)
-    echo "usage: session.sh <up|down|check> [env] [--apply|--yes]" >&2
+    echo "usage: session.sh <up|down|check|bootstrap|argocd-password> [env] [part] [--apply|--yes]" >&2
     exit 2
     ;;
 esac
