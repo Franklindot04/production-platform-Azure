@@ -61,7 +61,6 @@ Unknowns:
 
 - Whether the tools fit next to the system pods, and whether the pool can take an upgrade or a node replacement with all 4 vCPU in use. AKS accepted the pool in the first create. (ADR 0012)
 - Whether the quota can be raised.
-- The language and shape of the sample service.
 - The trace backend and the Grafana hosting choice. (ADR 0008)
 - The network policy engine and the policy tool for Epic 6.
 
@@ -321,6 +320,7 @@ The target subscription has a regional vCPU quota of 4, which limits node sizes 
 | [0011](adr/0011-session-network-design.md) | Design the session network | proposed |
 | [0012](adr/0012-first-aks-plan.md) | Plan the first AKS cluster | proposed |
 | [0013](adr/0013-container-registry.md) | Use GitHub Container Registry for images | proposed |
+| [0014](adr/0014-sample-service.md) | Write the sample service in Go | proposed |
 
 Other open decisions are listed in section 15.
 
@@ -328,11 +328,10 @@ Other open decisions are listed in section 15.
 
 1. When is `staging` created, and what check must `dev` pass before a change moves on? (ADR 0010)
 2. Which alert thresholds does the planned budget use? (ADR 0009)
-3. What is the sample service, and in which language?
-4. Which trace backend, and which Grafana hosting?
-5. Which network policy engine and which policy tool?
-6. How is the Argo CD admin credential handled?
-7. How is the image tag updated after a build?
-8. What SLO targets and window fit a service that is only up during sessions?
-9. How long does a full create take? The session layer took about 7 minutes to create and about 7 minutes to destroy in single runs (ADR 0012). The full platform is measured once it exists, and it sets the recovery time that Epic 7 (#7) can claim.
-10. Do the tools fit in the capacity that is left after the system pods? (ADR 0012)
+3. Which trace backend, and which Grafana hosting?
+4. Which network policy engine and which policy tool?
+5. How is the Argo CD admin credential handled?
+6. How is the image tag updated after a build?
+7. What SLO targets and window fit a service that is only up during sessions?
+8. How long does a full create take? The session layer took about 7 minutes to create and about 7 minutes to destroy in single runs (ADR 0012). The full platform is measured once it exists, and it sets the recovery time that Epic 7 (#7) can claim.
+9. Do the tools fit in the capacity that is left after the system pods? (ADR 0012)

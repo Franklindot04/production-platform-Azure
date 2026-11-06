@@ -23,7 +23,7 @@ The plan covers the Kubernetes platform, delivery, observability, security, inci
 | Area | Decision | Record |
 |---|---|---|
 | Registry | `ghcr.io`, public package | [ADR 0013](adr/0013-container-registry.md) |
-| Sample service | Go, health endpoints, settable latency and error rate | ADR 0014 (planned) |
+| Sample service | Go, health endpoints, settable latency and error rate | [ADR 0014](adr/0014-sample-service.md) |
 | Network policy | Azure's own engine, set in the session Terraform | ADR 0015 (planned) |
 | Ingress | The lighter of the AKS add-on or one controller, chosen from the documentation. HTTP on the plain IP, no domain, no certificate | ADR 0016 (planned) |
 | Bootstrap | A `bootstrap` step in `session.sh` installs Argo CD with Helm and a root Application. No third Terraform root | ADR 0017 (planned) |
@@ -101,7 +101,7 @@ Numbering continues from ADR 0012.
 | ADR | Title |
 |---|---|
 | [0013](adr/0013-container-registry.md) | Use GitHub Container Registry for images |
-| 0014 | Write the sample service in Go |
+| [0014](adr/0014-sample-service.md) | Write the sample service in Go |
 | 0015 | Use Azure network policy |
 | 0016 | Choose the ingress |
 | 0017 | Bootstrap Argo CD from the session script |
