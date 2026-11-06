@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "sample-service.name" . }}
+  labels:
+    {{- include "sample-service.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "sample-service.selectorLabels" . | nindent 4 }}
+  # Only the API port is exposed. The admin port is not part of the Service.
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: http

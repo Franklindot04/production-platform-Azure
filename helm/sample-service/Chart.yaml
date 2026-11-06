@@ -1,0 +1,6 @@
+apiVersion: v2
+name: sample-service
+description: The sample service that the platform's SLOs measure
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
