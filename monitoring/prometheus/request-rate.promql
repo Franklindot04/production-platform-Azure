@@ -1,0 +1,4 @@
+# Requests per second by route, averaged over 5 minutes.
+# Run in: Prometheus explorer of the Azure Monitor workspace pp-dev-amw.
+# Reads: http_requests_total (labels route, code).
+sum by (route) (rate(http_requests_total[5m]))
