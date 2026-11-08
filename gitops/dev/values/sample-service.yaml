@@ -8,3 +8,9 @@ image:
 ingress:
   enabled: true
   className: nginx.approuting.kubernetes.azure.com
+
+# Traces go to the Collector in the observability namespace (ADR 0026). The Go
+# exporter appends /v1/traces.
+tracing:
+  enabled: true
+  endpoint: http://opentelemetry-collector.observability.svc.cluster.local:4318
