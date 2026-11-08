@@ -332,6 +332,7 @@ The target subscription has a regional vCPU quota of 4, which limits node sizes 
 | [0024](adr/0024-managed-prometheus.md) | Enable managed Prometheus on the cluster | proposed |
 | [0025](adr/0025-collector-connection-string.md) | Send traces with the Azure Monitor exporter and a connection string | proposed |
 | [0026](adr/0026-service-tracing.md) | Trace the sample service with the OpenTelemetry SDK | proposed |
+| [0027](adr/0027-dashboard-queries-as-files.md) | Keep dashboard queries as files under monitoring/ | proposed |
 
 Other open decisions are listed in section 15.
 

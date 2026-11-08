@@ -133,7 +133,7 @@ If Session 1 fails a gate or time runs out, the work is cut in this order:
 
 1. Entra ID access to the cluster (#56).
 2. OIDC identity for pull request plans (#47).
-3. Dashboards as code (#51), reduced to the queries that Session 2 needs.
+3. Dashboards as code (#40), reduced to the queries that Session 2 needs.
 4. The experiments in Session 2 that are marked optional.
 
 Cluster-wide log collection and a managed Grafana are already out of scope.
