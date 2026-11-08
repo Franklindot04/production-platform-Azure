@@ -33,7 +33,7 @@ Rules:
 | 0:35 | **Gate B**, capacity | `kubectl describe nodes`, `kubectl top pods -A`, requests and limits per tool | The capacity budget table |
 | 0:50 | Network policy | A test pod in another namespace cannot reach the service. The allowed path works. DNS works | Result of each check |
 | 1:00 | GitOps flow | Merge a prepared tag-bump pull request, watch the sync, then revert it and watch the rollback | Time to sync and to roll back |
-| 1:15 | Observability | A metric in the Azure Monitor workspace, a trace in the backend, a test query from `monitoring/`. `metrics.scrape.enabled` is set to `true` in `gitops/dev/values/sample-service.yaml` through a pull request after Gate A, and the target is then checked in the Azure Monitor workspace | Masked screenshots |
+| 1:15 | Observability | A metric in the Azure Monitor workspace, a trace in the backend, a test query from `monitoring/`. `metrics.scrape.enabled` is set to `true` in `gitops/dev/values/sample-service.yaml` through a pull request after Gate A, and the target is then checked in the Azure Monitor workspace. The bootstrap creates the secret `appinsights-connection`, and the Collector pod is checked Running | Masked screenshots |
 | 1:35 | Identity | The sample service reads one Key Vault secret with workload identity. The maintainer reads the Argo CD credential once (planned command) | Pass or fail |
 | 1:45 | Wrap up | Save output and screenshots in `docs/images`, masked | Files saved |
 | 1:50 | Teardown | `./infrastructure/session.sh down` then `down --yes`, then `./infrastructure/session.sh check` | Output of `check`. Exit 0 is the end |

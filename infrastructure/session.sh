@@ -7,9 +7,15 @@
 #   down --yes      Destroy the session root.
 #   check           List every resource by resource group and report what remains.
 #   bootstrap       Install Argo CD with Helm, set the ingress source range, and apply
-#                   the root Application. It can be repeated. A part (argocd, ingress or
-#                   root) runs only that part, for example `bootstrap ingress` to set the
-#                   ingress range again after the maintainer's address changed.
+#                   the root Application, then create the cluster secret for the Collector.
+#                   It can be repeated. A part (argocd, ingress, root or secrets) runs only
+#                   that part, for example `bootstrap ingress` to set the ingress range
+#                   again after the maintainer's address changed. The secrets part reads the
+#                   Application Insights connection string from the persistent root at run
+#                   time and creates the secret appinsights-connection in the namespace
+#                   observability. The value only travels through pipes. It is not printed,
+#                   masked, stored or written to a file. It is skipped on a kind cluster in a
+#                   full bootstrap, and `bootstrap secrets` stops there (PP_KUBE_CONTEXT).
 #   argocd-password Print the Argo CD admin credential to the terminal. It is generated
 #                   by Argo CD, read from the cluster when asked, and never stored.
 # env is dev, staging or prod. Default: dev.
@@ -30,7 +36,7 @@ PART="all"
 for arg in "$@"; do
   case "$arg" in
     dev | staging | prod) ENV_NAME="$arg" ;;
-    argocd | ingress | root) PART="$arg" ;;
+    argocd | ingress | root | secrets) PART="$arg" ;;
     --apply | --yes) FLAG="$arg" ;;
     *)
       echo "unknown argument: $arg" >&2
@@ -42,6 +48,7 @@ done
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 ROOT="${SCRIPT_DIR}/environments/${ENV_NAME}/session"
+PERSISTENT_ROOT="${SCRIPT_DIR}/environments/${ENV_NAME}/persistent"
 NAME_FILE="${SCRIPT_DIR}/bootstrap/.state-account-name"
 STATE_RG="pp-shared-state-rg"
 
@@ -299,6 +306,54 @@ set_ingress_range() {
     echo "warning: the scaling of the ingress controller was not changed"
 }
 
+# create_collector_secret   Creates the secret appinsights-connection in the namespace
+# observability from the connection string in the state of the persistent root.
+# The value is never put in a variable or a file, and it is never printed or masked.
+# It only travels through pipes.
+create_collector_secret() {
+  local i output_name="application_insights_connection_string"
+  if [ -n "${PP_KUBE_CONTEXT:-}" ]; then
+    echo "The secrets part reads Azure state, and a kind cluster has none." >&2
+    echo "Create the secret appinsights-connection (key connection-string) by hand if it is needed there." >&2
+    exit 2
+  fi
+  need_terraform_inputs
+  [ -d "$PERSISTENT_ROOT" ] || {
+    echo "no persistent root for ${ENV_NAME}" >&2
+    exit 2
+  }
+  # Initialise the backend of the persistent root. The output is discarded.
+  terraform -chdir="$PERSISTENT_ROOT" init -input=false -no-color -reconfigure \
+    -backend-config="resource_group_name=${STATE_RG}" \
+    -backend-config="storage_account_name=$(cat "$NAME_FILE")" >/dev/null 2>&1 || {
+    echo "Could not initialise the backend of the persistent root." >&2
+    exit 1
+  }
+  for i in $(seq 1 60); do
+    "${K[@]}" get namespace observability >/dev/null 2>&1 && break
+    [ "$i" = "60" ] && {
+      echo "The namespace observability does not exist. Check the cluster-rules Application." >&2
+      exit 1
+    }
+    sleep 5
+  done
+  # First read: stop without printing anything if the output is empty or missing.
+  terraform -chdir="$PERSISTENT_ROOT" output -raw "$output_name" 2>/dev/null |
+    python3 -I -c 'import sys; sys.exit(0 if sys.stdin.buffer.read().strip() else 3)' || {
+    echo "The persistent root has no connection string. Apply the persistent root first." >&2
+    exit 1
+  }
+  # Second read: straight into the cluster.
+  terraform -chdir="$PERSISTENT_ROOT" output -raw "$output_name" 2>/dev/null |
+    "${K[@]}" -n observability create secret generic appinsights-connection \
+      --from-file=connection-string=/dev/stdin --dry-run=client -o yaml 2>/dev/null |
+    "${K[@]}" apply -f - >/dev/null 2>&1 || {
+    echo "The secret appinsights-connection was not set." >&2
+    exit 1
+  }
+  echo "The secret appinsights-connection is set in the namespace observability."
+}
+
 step_bootstrap() {
   local root_app="${REPO_DIR}/gitops/${ENV_NAME}/root-application.yaml"
   [ -f "$root_app" ] || {
@@ -323,6 +378,18 @@ step_bootstrap() {
   if [ "$PART" = "all" ] || [ "$PART" = "root" ]; then
     echo "== root application"
     "${K[@]}" apply -f "$root_app" 2>&1 | mask
+  fi
+
+  if [ "$PART" = "secrets" ]; then
+    echo "== secrets"
+    create_collector_secret
+  elif [ "$PART" = "all" ]; then
+    echo "== secrets"
+    if [ -n "${PP_KUBE_CONTEXT:-}" ]; then
+      echo "Skipped: a kind cluster has no Azure state. Create the secret appinsights-connection by hand if it is needed."
+    else
+      create_collector_secret
+    fi
   fi
 
   if [ "$PART" = "all" ]; then
