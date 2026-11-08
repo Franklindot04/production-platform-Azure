@@ -18,6 +18,13 @@ import (
 func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
+	// Tracing is off unless OTEL_EXPORTER_OTLP_ENDPOINT is set. A failure to
+	// set it up does not stop the service.
+	shutdownTracing, err := initTracing(context.Background())
+	if err != nil {
+		logger.Error("tracing is off", "error", err)
+	}
+
 	latency, err := parseDuration(os.Getenv("LATENCY"), 0)
 	if err != nil {
 		logger.Error("invalid LATENCY", "error", err)
@@ -77,6 +84,13 @@ func main() {
 		if err := srv.Shutdown(ctx); err != nil {
 			logger.Error("shutdown", "error", err)
 		}
+	}
+
+	// Flush the spans that are still queued.
+	traceCtx, traceCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer traceCancel()
+	if err := shutdownTracing(traceCtx); err != nil {
+		logger.Error("tracing shutdown", "error", err)
 	}
 }
 

@@ -10,6 +10,9 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // MaxLatency is the largest latency that can be set.
@@ -37,6 +40,7 @@ type server struct {
 	chance func() float64
 	logger *slog.Logger
 	met    *metrics
+	tracer trace.Tracer
 }
 
 func newServer(latency time.Duration, errorRate float64, logger *slog.Logger) (*server, error) {
@@ -44,7 +48,7 @@ func newServer(latency time.Duration, errorRate float64, logger *slog.Logger) (*
 	if err := cur.validate(); err != nil {
 		return nil, err
 	}
-	s := &server{cur: cur, chance: rand.Float64, logger: logger, met: newMetrics()}
+	s := &server{cur: cur, chance: rand.Float64, logger: logger, met: newMetrics(), tracer: otel.Tracer(tracerName)}
 	s.ready.Store(true)
 	return s, nil
 }
@@ -72,7 +76,7 @@ func (s *server) apiHandler() http.Handler {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("ready\n"))
 	}))
-	mux.HandleFunc("GET /work", s.met.instrument("/work", s.work))
+	mux.HandleFunc("GET /work", s.traced("/work", s.met.instrument("/work", s.work)))
 	return mux
 }
 
