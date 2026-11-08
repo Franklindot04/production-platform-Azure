@@ -1,0 +1,30 @@
+# The OpenTelemetry Collector, from the upstream Helm chart with the `dev` values
+# in this repository (ADR 0025). Synced after the cluster rules. The secret
+# appinsights-connection is created by `session.sh bootstrap secrets`, not by Git.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: opentelemetry-collector
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  sources:
+    - repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
+      chart: opentelemetry-collector
+      targetRevision: 0.178.2
+      helm:
+        releaseName: opentelemetry-collector
+        valueFiles:
+          - $values/gitops/dev/values/opentelemetry-collector.yaml
+    - repoURL: https://github.com/Franklindot04/production-platform-Azure.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: observability
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
