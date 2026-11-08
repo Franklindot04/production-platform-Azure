@@ -33,7 +33,20 @@ The service writes the Prometheus text format itself, with the standard library 
 
 `route` is `/healthz`, `/readyz` or `/work`. It is set where the handler is registered and is not taken from the request URL. `code` is the status code. A `/work` request that the client abandons before the response is counted with `499`. The histogram buckets are 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5 and 10 seconds, plus `+Inf`. Go runtime and process metrics are not exported.
 
-Traces are planned and are not part of the service yet.
+## Traces
+
+The service can send traces with the OpenTelemetry Go SDK over OTLP/HTTP ([ADR 0026](../../docs/adr/0026-service-tracing.md)).
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | unset | Base URL of the OTLP/HTTP receiver. The exporter appends `/v1/traces`. |
+| `OTEL_SERVICE_NAME` | `sample-service` | Value of the resource attribute `service.name` |
+
+If `OTEL_EXPORTER_OTLP_ENDPOINT` is unset, tracing is off. Nothing is installed and no spans are exported. Spans are batched and flushed when the process shuts down.
+
+Only `GET /work` creates a span. `/healthz` and `/readyz` do not, so probes do not fill the trace backend. The metrics count all three routes. The span is named `/work` and carries `http.request.method`, `http.route` and `http.response.status_code`. A status of 500 or more marks the span as an error. A request that the client abandons before the response is recorded with status 499 and is not marked as an error. An incoming W3C `traceparent` header becomes the parent of the span. The sampler is the SDK default.
+
+The tests use an in-memory span recorder and send nothing over the network. Run them with `go test -race ./...`. That traces reach Application Insights through the Collector is not checked in a cluster.
 
 ## Settings
 
