@@ -141,6 +141,18 @@ func (w *statusWriter) Write(b []byte) (int, error) {
 	return w.ResponseWriter.Write(b)
 }
 
+// status returns the status code of the response. A handler that wrote nothing
+// because the client left is reported as 499. Otherwise it is 200.
+func (w *statusWriter) status(r *http.Request) int {
+	if w.wrote {
+		return w.code
+	}
+	if r.Context().Err() != nil {
+		return statusClientClosed
+	}
+	return http.StatusOK
+}
+
 // instrument counts and times a handler. The route is a fixed string given
 // where the handler is registered. It is never taken from the request URL.
 func (m *metrics) instrument(route string, next http.HandlerFunc) http.HandlerFunc {
@@ -148,14 +160,7 @@ func (m *metrics) instrument(route string, next http.HandlerFunc) http.HandlerFu
 		start := time.Now()
 		sw := &statusWriter{ResponseWriter: w}
 		next(sw, r)
-		code := sw.code
-		if !sw.wrote {
-			if r.Context().Err() != nil {
-				code = statusClientClosed
-			} else {
-				code = http.StatusOK
-			}
-		}
+		code := sw.status(r)
 		m.observe(route, code, time.Since(start))
 	}
 }

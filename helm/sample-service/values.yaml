@@ -23,6 +23,12 @@ metrics:
     enabled: false
     interval: "30s"
 
+# Traces go to the OpenTelemetry Collector over OTLP/HTTP. When enabled, the
+# endpoint is required. The service sends to <endpoint>/v1/traces.
+tracing:
+  enabled: false
+  endpoint: ""
+
 ingress:
   enabled: false
   className: ""
