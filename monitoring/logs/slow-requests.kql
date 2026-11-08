@@ -1,0 +1,10 @@
+// /work requests slower than the threshold, newest first.
+// Change thresholdMs to set the limit, in milliseconds.
+// Run in: Logs view of the Log Analytics workspace pp-dev-law or of Application Insights.
+// Reads: AppRequests. The mapping from server spans to this table is not verified.
+let thresholdMs = 500;
+AppRequests
+| where Name == "/work"
+| where DurationMs > thresholdMs
+| project TimeGenerated, Name, ResultCode, DurationMs, OperationId
+| order by TimeGenerated desc

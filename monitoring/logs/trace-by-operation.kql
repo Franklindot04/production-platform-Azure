@@ -1,0 +1,9 @@
+// All requests and dependency calls of one operation, oldest first.
+// Replace the value of operationId with an OperationId from another query.
+// Run in: Logs view of the Log Analytics workspace pp-dev-law or of Application Insights.
+// Reads: AppRequests and AppDependencies. The mapping from spans to these tables is not verified.
+let operationId = "<operation id>";
+union AppRequests, AppDependencies
+| where OperationId == operationId
+| project TimeGenerated, Type, Name, ResultCode, DurationMs, Id, ParentId
+| order by TimeGenerated asc
