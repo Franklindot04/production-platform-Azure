@@ -6,6 +6,7 @@ The resources of `dev` that outlive a session. The resource group `pp-dev-persis
 |---|---|
 | `main.tf` | The resource group and the tags. |
 | `monitoring.tf` | An Azure Monitor workspace, a Log Analytics workspace (30 days, 0.5 GB a day), a workspace-based Application Insights resource and an action group with one email receiver (ADR 0008, ADR 0019, ADR 0022). |
+| `alerts.tf` | A Prometheus rule group `pp-dev-slo-alerts` in the Azure Monitor workspace with four burn-rate alerts that send to the action group (ADR 0028). |
 | `keyvault.tf` | A Key Vault with Azure RBAC authorization, 7 days of soft delete and purge protection off. The name has a random suffix. No role is assigned on it. |
 | `identity.tf` | An Entra application, service principal and one federated credential for pull request plans, Reader on the resource group and Storage Blob Data Reader on the `tfstate-dev` container. It has no client secret (ADR 0007, ADR 0022). |
 | `outputs.tf` | Resource IDs, the vault name and the client ID of the plan identity. The Application Insights connection string is a sensitive output. |

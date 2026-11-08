@@ -10,6 +10,8 @@ Saved queries for the metrics and traces of the sample service. There is no Graf
 | `prometheus/error-ratio.promql` | PromQL | Share of `/work` requests with a 5xx code. Code 499 is not an error |
 | `prometheus/latency-p95.promql` | PromQL | 95th percentile latency of `/work` |
 | `prometheus/abandoned-requests.promql` | PromQL | Rate of `/work` requests with code 499 |
+| `prometheus/availability-sli.promql` | PromQL | Availability SLI: share of `/work` requests without a 5xx code |
+| `prometheus/latency-sli.promql` | PromQL | Latency SLI: share of `/work` requests within 0.5 seconds |
 | `logs/failed-requests.kql` | KQL | Failed `/work` requests, newest first |
 | `logs/slow-requests.kql` | KQL | `/work` requests slower than a threshold set at the top of the file |
 | `logs/trace-by-operation.kql` | KQL | All rows of one operation id from `AppRequests` and `AppDependencies` |
@@ -39,4 +41,6 @@ The queries have not been run against any workspace. The assumption that `/work`
 ## Not built
 
 - Queries deployed as saved searches (planned).
-- Alert rules and SLO queries (issue #41).
+- Alerts for missing data (planned).
+
+The alert rules are defined in `infrastructure/environments/dev/persistent/alerts.tf` (ADR 0028, `docs/slos.md`). They exist in Azure only after the persistent layer is applied.

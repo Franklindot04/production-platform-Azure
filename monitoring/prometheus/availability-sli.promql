@@ -1,0 +1,10 @@
+# Availability SLI: share of /work requests whose code is not 5xx, over 5 minutes.
+# Code 499 (client abandoned the request) is not counted as an error.
+# Returns no data when /work received no requests in the window.
+# Run in: Prometheus explorer of the Azure Monitor workspace pp-dev-amw.
+# Reads: http_requests_total (labels route, code).
+1 - (
+  sum(rate(http_requests_total{route="/work", code=~"5.."}[5m]))
+  /
+  sum(rate(http_requests_total{route="/work"}[5m]))
+)

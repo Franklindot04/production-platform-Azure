@@ -1,0 +1,7 @@
+# Latency SLI: share of /work requests that finished within 0.5 seconds, over 5 minutes.
+# Returns no data when /work received no requests in the window.
+# Run in: Prometheus explorer of the Azure Monitor workspace pp-dev-amw.
+# Reads: http_request_duration_seconds_bucket (le="0.5") and http_request_duration_seconds_count.
+sum(rate(http_request_duration_seconds_bucket{route="/work", le="0.5"}[5m]))
+/
+sum(rate(http_request_duration_seconds_count{route="/work"}[5m]))
