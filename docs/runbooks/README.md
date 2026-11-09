@@ -2,7 +2,7 @@
 
 A runbook is a short procedure for one failure that the repository already names: an alert, a failure experiment or a known setup problem. It says how to recognise the failure, what to check, how to fix it and how to tell that it is fixed.
 
-Issue #46. The incident process and the postmortem template are issue #47 and are not here.
+Issue #46. The incident process and the severity table are in [incident-process.md](../incident-process.md), and the postmortem template is [postmortems/template.md](../postmortems/template.md). They are issue #47 and are proposed (ADR 0030).
 
 ## Status
 

@@ -132,7 +132,7 @@ The status column is `built` for a component that exists, `written` for a compon
 | Dashboards | Saved queries on the workspaces, no Grafana | persistent | 5 (#5) | planned |
 | Pull request plan identity | Reads Azure and state so a pull request can run `terraform plan` | persistent | 6 (#6) | planned (code written, not applied) |
 | Policy checks | Block unsafe changes | n/a | 6 (#6) | written |
-| Runbooks and postmortems | Incident handling | n/a | 7 (#7) | runbooks written, not exercised ([docs/runbooks/](runbooks/README.md)); postmortems planned |
+| Runbooks and postmortems | Incident handling | n/a | 7 (#7) | runbooks written, not exercised ([docs/runbooks/](runbooks/README.md)); incident process and postmortem template written, not used ([docs/incident-process.md](incident-process.md)) |
 
 ### Capacity limit
 
@@ -335,6 +335,7 @@ The target subscription has a regional vCPU quota of 4, which limits node sizes 
 | [0027](adr/0027-dashboard-queries-as-files.md) | Keep dashboard queries as files under monitoring/ | proposed |
 | [0028](adr/0028-slos-and-burn-rate-alerts.md) | Set SLOs for the sample service and alert on burn rate | proposed |
 | [0029](adr/0029-workload-identity-and-vault-access.md) | Give the sample service access to Key Vault with workload identity | proposed |
+| [0030](adr/0030-incident-process-and-postmortems.md) | Set the incident process and write postmortems | proposed |
 
 Other open decisions are listed in section 15.
 

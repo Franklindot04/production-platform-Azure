@@ -61,5 +61,5 @@ The runbooks [key-vault-mount-fails.md](../runbooks/key-vault-mount-fails.md), [
 ## After the session
 
 1. `session.sh check` exits 0.
-2. The results go into a pull request, with the first postmortem (#47).
+2. The results go into a pull request, with the first postmortem (#47), written from [the template](../postmortems/template.md).
 3. The issue #50 criteria are ticked only for what was run.

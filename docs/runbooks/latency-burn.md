@@ -9,7 +9,7 @@ One of two alerts in the rule group `pp-dev-slo-alerts` (`infrastructure/environ
 | LatencyFastBurn | 1 | 15m and 5m | above 0.72 | 2 minutes |
 | LatencySlowBurn | 2 | 1h and 15m | above 0.30 | 5 minutes |
 
-The two differ in how fast the 30 day error budget (0.05) is used. At the fast burn rate (14.4) it is used up in about two days. At the slow burn rate (6) it is used up in about five days. Fast burn is severity 1 and is the one to act on first. Slow burn is severity 2. The repository sets no response time for either severity. That is not known.
+The two differ in how fast the 30 day error budget (0.05) is used. At the fast burn rate (14.4) it is used up in about two days. At the slow burn rate (6) it is used up in about five days. Fast burn is severity 1 and is the one to act on first. Slow burn is severity 2. The response to each level is given as actions, not times: see the [severity table](../incident-process.md).
 
 The alerts have not been applied and have not fired. This runbook is exercised by Session 2 experiment 3 (inject errors and latency), which is its first test.
 

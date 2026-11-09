@@ -49,7 +49,7 @@ The folders below marked as existing are in the repository. The others are plann
 - `tests/`: checks that need no Azure. Exists.
 - `monitoring/`: dashboards, alert rules and SLO definitions.
 - `security/`: policies and scanning configuration.
-- `docs/`: architecture documents, ADRs and runbooks (`docs/runbooks/`, written, not exercised). Postmortems are planned. Exists.
+- `docs/`: architecture documents, ADRs and runbooks (`docs/runbooks/`, written, not exercised). Postmortems have a template (`docs/postmortems/`), and none has been written. Exists.
 
 ## How work is tracked
 
