@@ -52,6 +52,26 @@ variable "github_repository" {
   }
 }
 
+variable "github_owner_id" {
+  type        = string
+  description = "The numeric ID of the repository owner, as presented in the subject of the token. Set at run time with TF_VAR_github_owner_id. No default."
+
+  validation {
+    condition     = can(regex("^[0-9]+$", var.github_owner_id))
+    error_message = "github_owner_id must be the numeric GitHub ID of the repository owner."
+  }
+}
+
+variable "github_repository_id" {
+  type        = string
+  description = "The numeric ID of the repository, as presented in the subject of the token. Set at run time with TF_VAR_github_repository_id. No default."
+
+  validation {
+    condition     = can(regex("^[0-9]+$", var.github_repository_id))
+    error_message = "github_repository_id must be the numeric GitHub ID of the repository."
+  }
+}
+
 variable "state_account_name" {
   type        = string
   description = "Name of the state storage account. Set at run time with TF_VAR_state_account_name. No default."
