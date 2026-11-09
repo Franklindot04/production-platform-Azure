@@ -17,7 +17,12 @@ Epic 6 needs checks that stop unsafe changes. The architecture document left the
 - Actions and tool versions are pinned (full SHAs for actions) when the workflow is written.
 - No admission policy engine is installed in the cluster. Namespaces carry Pod Security Admission labels instead (issue #30), which the cluster enforces without extra pods.
 
-The behaviour of the tools was not verified for this record. It is checked when the workflow is written.
+## Pinned versions
+
+- Action: `aquasecurity/trivy-action` at SHA `57a97c7e7821a5776cebc9bb87c984fa69cba8f1` (v0.35.0).
+- Trivy: v0.69.3, set as the `version` input on every Trivy step.
+- Reason: the version tags of the action and Trivy v0.69.4 were replaced with malicious code in March 2026. This SHA and v0.69.3 are the versions that the vendor's advisory names as safe.
+- The ignore-file format and the action inputs are checked by the first run of the workflow.
 
 ## Consequences
 

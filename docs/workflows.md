@@ -7,6 +7,7 @@ The GitHub Actions workflows of the repository. Every action is pinned to a full
 | Terraform checks | `terraform-checks.yml` | Pull requests that change `infrastructure/` | `contents: read` |
 | Terraform plan | `terraform-plan.yml` | Pull requests that change `infrastructure/` | None at the top, and `contents: read` and `id-token: write` in the one job |
 | Service, chart and manifest checks | `app-checks.yml` | Pull requests that change `applications/`, `helm/`, `kubernetes/`, `gitops/` or `tests/kind/` | `contents: read` |
+| Security scans | `security-scans.yml` | Pull requests that change `infrastructure/`, `kubernetes/`, `helm/`, `gitops/`, `applications/` or `.trivyignore.yaml` | `contents: read` |
 | Publish image | `image-publish.yml` | Pushes to `main` that change `applications/sample-service/`, and manual runs | `contents: read`, and `packages: write` in the one job that pushes |
 | Open pull request for the image tag | `image-tag-bump.yml` | When Publish image succeeds on `main` | None at the top, and `contents: write` and `pull-requests: write` in the one job |
 
@@ -30,6 +31,18 @@ Two jobs, both running `tests/kind/check.sh`:
 - `kind` runs after `static` and runs the whole script, which creates a `kind` cluster, installs the chart and the cluster rules, and checks them. `kind` is installed with `go install` at a pinned version.
 
 The checks are described in `tests/kind/README.md`.
+
+## Security scans
+
+Two jobs run Trivy (ADR 0020).
+
+- `config` scans the repository for misconfiguration in the Terraform, the Kubernetes manifests and the chart, and then scans the files for secrets. The chart is rendered with the dev values, because it needs `image.tag`.
+- `image` builds `applications/sample-service` and scans the image for vulnerabilities and secrets.
+- A finding of severity HIGH or CRITICAL fails the run.
+- An accepted finding goes into `.trivyignore.yaml` with a reason.
+- The action is pinned by full SHA and Trivy is pinned to v0.69.3, because the version tags of the action and Trivy v0.69.4 were replaced with malicious code in March 2026.
+- Nothing is uploaded and the workflow has no permissions beyond `contents: read`.
+- The action inputs, the environment variables and the ignore-file format are checked by the first run.
 
 ## Publish image
 

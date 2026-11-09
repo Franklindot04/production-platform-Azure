@@ -131,7 +131,7 @@ The status column is `built` for a component that exists, `written` for a compon
 | OpenTelemetry Collector | Collects traces and metrics | session | 5 (#5) | planned |
 | Dashboards | Saved queries on the workspaces, no Grafana | persistent | 5 (#5) | planned |
 | Pull request plan identity | Reads Azure and state so a pull request can run `terraform plan` | persistent | 6 (#6) | planned (code written, not applied) |
-| Policy checks | Block unsafe changes | n/a | 6 (#6) | planned |
+| Policy checks | Block unsafe changes | n/a | 6 (#6) | written |
 | Runbooks and postmortems | Incident handling | n/a | 7 (#7) | planned |
 
 ### Capacity limit
