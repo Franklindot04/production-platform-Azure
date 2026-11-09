@@ -19,9 +19,13 @@ These have no default and are not written to any file:
 ```bash
 export TF_VAR_alert_email="<address that receives alerts>"
 export TF_VAR_state_account_name="$(cat infrastructure/bootstrap/.state-account-name)"
+export TF_VAR_github_owner_id="$(gh api repos/<owner>/<name> --jq .owner.id)"
+export TF_VAR_github_repository_id="$(gh api repos/<owner>/<name> --jq .id)"
 ```
 
-`alert_email` must look like an email address. It is stored in the state. `github_repository` defaults to this repository and sets the subject of the federated credential: `repo:<owner>/<name>:pull_request`.
+The two GitHub IDs are not secret. They are not written to a file.
+
+`alert_email` must look like an email address. It is stored in the state. `github_repository` defaults to this repository. With the two IDs it sets the subject of the federated credential: `repo:<owner>@<owner-id>/<name>@<repo-id>:pull_request`. GitHub presents the subject with the numeric owner and repository IDs, and Terraform takes them as run-time inputs.
 
 Applying `identity.tf` needs permission to create applications in the Entra tenant and to create role assignments. After the apply, store the output `plan_identity_client_id`, the tenant ID, the subscription ID and the state account name as the repository secrets `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID` and `TFSTATE_ACCOUNT_NAME`. Until `AZURE_CLIENT_ID` is set, the plan workflow does nothing (`docs/workflows.md`).
 

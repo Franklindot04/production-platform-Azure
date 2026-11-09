@@ -13,7 +13,7 @@ The GitHub Actions workflows of the repository. Every action is pinned to a full
 
 ## Terraform plan
 
-Runs `terraform plan -lock=false` for the two `dev` roots (ADR 0022) on pull requests from this repository. It logs in with the plan identity through OIDC and needs the four repository secrets listed under "Repository settings the workflows need". If `AZURE_CLIENT_ID` is empty or not set, the plan is skipped with a notice.
+Runs `terraform plan -lock=false` for the two `dev` roots (ADR 0022) on pull requests from this repository. It logs in with the plan identity through OIDC, passes the owner ID and the repository ID from the GitHub context to the persistent plan, and needs the four repository secrets listed under "Repository settings the workflows need". If `AZURE_CLIENT_ID` is empty or not set, the plan is skipped with a notice.
 
 - One job. It does nothing for pull requests from forks.
 - If the secret `AZURE_CLIENT_ID` is not set, the first step prints a notice and every other step is skipped.

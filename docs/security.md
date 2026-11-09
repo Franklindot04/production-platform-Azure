@@ -32,7 +32,7 @@ Status values:
 
 Notes on the rows:
 
-- The plan identity federated credential has the subject `repo:<owner>/<name>:pull_request`. Pull requests from forks get no token and no secrets (`.github/workflows/terraform-plan.yml`). The plan identity has no role on the session resource group (`docs/workflows.md`).
+- The plan identity federated credential has the subject `repo:<owner>@<owner-id>/<name>@<repo-id>:pull_request`. Pull requests from forks get no token and no secrets (`.github/workflows/terraform-plan.yml`). The plan identity has no role on the session resource group (`docs/workflows.md`).
 - The workflow Terraform plan reads the repository secrets `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID` and `TFSTATE_ACCOUNT_NAME`. They hold identifiers and no credential (`docs/workflows.md`). Publish image logs in to `ghcr.io` with the built-in token, and the tag workflow uses the built-in token.
 - The kubeconfig that `session.sh` fetches is written outside the repository, with mode 600 (`infrastructure/session.sh`, `kube_setup`). The script stops if `PP_PLAN_DIR` is inside the repository.
 - The bootstrap step keeps using the local administrator credential after Entra ID access is added, and local accounts stay on as a fallback (`docs/adr/0021-entra-id-cluster-access.md`).
