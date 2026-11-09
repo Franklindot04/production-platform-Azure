@@ -1,7 +1,17 @@
 # Identity for pull request plans (ADR 0007, ADR 0022). It has no client secret.
 # A pull request run gets a token only when the workflow runs for a pull request.
+# GitHub presents the subject with the numeric owner ID and repository ID:
+# repo:<owner>@<owner-id>/<name>@<repo-id>:pull_request. The IDs are run-time inputs.
 
 locals {
+  github_owner = split("/", var.github_repository)[0]
+  github_name  = split("/", var.github_repository)[1]
+  pull_request_subject = join("", [
+    "repo:", local.github_owner, "@", var.github_owner_id,
+    "/", local.github_name, "@", var.github_repository_id,
+    ":pull_request",
+  ])
+
   state_container_id = join("/", [
     "/subscriptions", data.azurerm_client_config.current.subscription_id,
     "resourceGroups", var.state_resource_group_name,
@@ -25,7 +35,7 @@ resource "azuread_application_federated_identity_credential" "pull_request" {
   description    = "Pull request runs of ${var.github_repository}"
   audiences      = ["api://AzureADTokenExchange"]
   issuer         = "https://token.actions.githubusercontent.com"
-  subject        = "repo:${var.github_repository}:pull_request"
+  subject        = local.pull_request_subject
 }
 
 resource "azurerm_role_assignment" "plan_reader" {
