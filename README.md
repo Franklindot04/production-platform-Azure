@@ -12,9 +12,9 @@ What exists today:
 
 - Repository files: `.gitignore`, `.editorconfig`, issue and PR templates, `CONTRIBUTING.md`, `LICENSE`, `CODE_OF_CONDUCT.md`, `SECURITY.md`.
 - A decision record process in `docs/adr/`.
-- `infrastructure/`: two Terraform roots for `dev` and the bootstrap script for the state backend. The roots define resource groups, a virtual network, a subnet and an AKS cluster. They were applied once. The session layer was destroyed afterwards, and only the empty persistent resource group exists. `session.sh` creates, destroys and checks the session layer. Plans and the first create are in `docs/plans/` and ADR 0012.
+- `infrastructure/`: two Terraform roots for `dev` and the bootstrap script for the state backend. The persistent root is applied: the monitoring workspaces, the alerts, the Key Vault and the identities. The session root defines a virtual network, a subnet and an AKS cluster. It was applied once and the session layer was destroyed afterwards. `session.sh` creates, destroys and checks the session layer. Plans and the first create are in `docs/plans/` and ADR 0012.
 - The state backend in Azure: one resource group, one storage account and the `tfstate-dev` container, created with `infrastructure/bootstrap/bootstrap.sh`.
-- GitHub Actions workflows: Terraform checks, Terraform plan, Service, chart and manifest checks, Security scans, Publish image, and Open pull request for the image tag. See `docs/workflows.md`. All six have run on GitHub. The Terraform plan workflow does nothing until the plan identity is applied.
+- GitHub Actions workflows: Terraform checks, Terraform plan, Service, chart and manifest checks, Security scans, Publish image, and Open pull request for the image tag. See `docs/workflows.md`. All six have run on GitHub. The Terraform plan workflow plans the two `dev` roots on pull requests from this repository.
 - `applications/sample-service/`: a Go service with health endpoints and a settable latency and error rate, and its Dockerfile. `helm/sample-service/`: its chart. `kubernetes/`: namespaces, quotas and network policies. `gitops/`: the Argo CD Applications and `dev` values. `tests/kind/`: a script that checks all of it in a local `kind` cluster. None of it has run on AKS.
 - Planned work, written up as GitHub issues.
 
