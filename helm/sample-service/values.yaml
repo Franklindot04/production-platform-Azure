@@ -29,6 +29,17 @@ tracing:
   enabled: false
   endpoint: ""
 
+# Mounts one Key Vault secret as a file with workload identity (ADR 0029).
+# The client ID, the tenant ID and the vault name are set at run time and are not
+# written in Git. When enabled is true, every value in this block is required.
+vaultSecret:
+  enabled: false
+  clientId: ""
+  tenantId: ""
+  vaultName: ""
+  objectName: ""
+  mountPath: /mnt/secrets
+
 ingress:
   enabled: false
   className: ""
