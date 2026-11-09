@@ -1,0 +1,10 @@
+# Findings that the security scans accept (.github/workflows/security-scans.yml).
+#
+# Each entry needs:
+#   id:         the finding ID, for example a vulnerability or misconfiguration ID
+#   paths:      the files the entry applies to
+#   statement:  the reason the finding is accepted
+# expired_at is optional. Entries are reviewed in pull requests.
+misconfigurations: []
+vulnerabilities: []
+secrets: []
