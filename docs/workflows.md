@@ -34,7 +34,7 @@ The checks are described in `tests/kind/README.md`.
 
 ## Security scans
 
-Two jobs run Trivy (ADR 0020). The workflow is written and has not run.
+Two jobs run Trivy (ADR 0020).
 
 - `config` scans the repository for misconfiguration in the Terraform, the Kubernetes manifests and the chart, and then scans the files for secrets. The chart is rendered with the dev values, because it needs `image.tag`.
 - `image` builds `applications/sample-service` and scans the image for vulnerabilities and secrets.
