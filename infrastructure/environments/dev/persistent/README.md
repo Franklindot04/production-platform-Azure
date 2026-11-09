@@ -1,6 +1,6 @@
 # dev persistent layer
 
-The resources of `dev` that outlive a session. The resource group `pp-dev-persistent-rg` in `swedencentral` was applied once. The files below are written and not applied, so every resource in them is planned. The container registry is an open question.
+The resources of `dev` that outlive a session. The resource group `pp-dev-persistent-rg` in `swedencentral` was applied once. The files below are written and not applied, so every resource in them is planned. Images are stored in `ghcr.io`, outside Azure, so this layer has no registry (ADR 0013).
 
 | File | Defines |
 |---|---|
@@ -8,7 +8,7 @@ The resources of `dev` that outlive a session. The resource group `pp-dev-persis
 | `monitoring.tf` | An Azure Monitor workspace, a Log Analytics workspace (30 days, 0.5 GB a day), a workspace-based Application Insights resource and an action group with one email receiver (ADR 0008, ADR 0019, ADR 0022). |
 | `alerts.tf` | A Prometheus rule group `pp-dev-slo-alerts` in the Azure Monitor workspace with four burn-rate alerts that send to the action group (ADR 0028). |
 | `keyvault.tf` | A Key Vault with Azure RBAC authorization, 7 days of soft delete and purge protection off. The name has a random suffix. The roles on it are in `workload-identity.tf`. |
-| `workload-identity.tf` | A user-assigned managed identity `pp-dev-sample-service` for the sample service, with Key Vault Secrets User on the vault. The principal that runs apply gets Key Vault Secrets Officer, to set secret values by hand (issue #43 reviews roles). The secret value is not in Terraform or in state. The federated credential is in the session root (ADR 0029). |
+| `workload-identity.tf` | A user-assigned managed identity `pp-dev-sample-service` for the sample service, with Key Vault Secrets User on the vault. The principal that runs apply gets Key Vault Secrets Officer, to set secret values by hand (the roles are listed in [docs/security.md](../../../../docs/security.md)). The secret value is not in Terraform or in state. The federated credential is in the session root (ADR 0029). |
 | `identity.tf` | An Entra application, service principal and one federated credential for pull request plans, Reader on the resource group and Storage Blob Data Reader on the `tfstate-dev` container. It has no client secret (ADR 0007, ADR 0022). |
 | `outputs.tf` | Resource IDs, the vault name, the client ID of the plan identity, and the name and client ID of the sample service identity. The Application Insights connection string is a sensitive output. |
 
