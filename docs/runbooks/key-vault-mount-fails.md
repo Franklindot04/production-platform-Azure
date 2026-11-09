@@ -20,14 +20,14 @@ If the mount is not turned on (`vaultSecret.enabled` is false), the pods start w
 6. `kubectl get csidriver secrets-store.csi.k8s.io` (planned, not run). It shows whether the driver is installed by the cluster add-on.
 7. `az keyvault secret show --vault-name "$(terraform -chdir=infrastructure/environments/dev/persistent output -raw key_vault_name)" --name sample-service-secret --query id -o tsv` (planned, not run). It shows whether the secret exists. It prints the secret ID and not the value.
 
-Unsure: step 7 needs a role that can read secrets on the vault. The maintainer has Key Vault Secrets Officer from the persistent root (ADR 0029). That role is written and not applied.
+Unsure: step 7 needs a role that can read secrets on the vault. The maintainer has Key Vault Secrets Officer from the persistent root (ADR 0029), which allows reading secrets.
 
 ## Likely causes
 
 All four are named in ADR 0029.
 
 1. The secret `sample-service-secret` is not set in the vault. The pod does not start until it exists. The maintainer sets it by hand. Terraform never creates it.
-2. A role is missing. The identity `pp-dev-sample-service` needs Key Vault Secrets User on the vault (`infrastructure/environments/dev/persistent/workload-identity.tf`). The roles exist only after the persistent root is applied.
+2. A role is missing. The identity `pp-dev-sample-service` needs Key Vault Secrets User on the vault (`infrastructure/environments/dev/persistent/workload-identity.tf`). The roles are defined in the persistent root, which is applied.
 3. The federated credential is missing. It is in the session root (`infrastructure/environments/dev/session/workload-identity.tf`). Its subject is `system:serviceaccount:apps:sample-service` and its audience is `api://AzureADTokenExchange`. It is created with the cluster. A credential bound to an earlier cluster does not match a new one.
 4. The Application parameters are missing. `session.sh bootstrap identity` has not run, or the parameters were removed. Whether the root Application leaves them alone is not verified (ADR 0029).
 

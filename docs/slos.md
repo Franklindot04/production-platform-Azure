@@ -35,11 +35,11 @@ For the latency alerts the compared value is the share of requests slower than 0
 
 The four alerts are in one rule group, `pp-dev-slo-alerts`, in `infrastructure/environments/dev/persistent/alerts.tf`. Each alert sends to the action group `pp-dev-alerts`. The address of the action group is set at run time and is not in the repository.
 
-The rule group exists in Azure only after the persistent layer is applied. This change applies nothing.
+The rule group is part of the persistent layer and is applied.
 
 ## Limits
 
 - The windows are shorter than the usual 1h/5m and 6h/30m, because a live session lasts about two hours.
 - A service that is down and receives no requests produces no data, and no alert fires. An alert for missing data is planned.
-- The alerts have not been applied and have not fired. Session 2 experiment 3 is the first test.
+- The alerts are applied and have not been tested. Session 2 experiment 3 is the first test.
 - Runbooks for the four alerts are written and not exercised: [availability-burn](runbooks/availability-burn.md) and [latency-burn](runbooks/latency-burn.md).
