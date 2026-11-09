@@ -34,7 +34,7 @@ The plan covers the Kubernetes platform, delivery, observability, security, inci
 | Logs | No cluster-wide log collection. Logs are read with `kubectl logs` | [ADR 0019](adr/0019-trace-backend-and-grafana.md) |
 | Policy and scanning | Tools chosen in the ADR | [ADR 0020](adr/0020-policy-and-scanning-tools.md) |
 | Cluster sign-in | Entra ID and Azure RBAC, local accounts kept as a fallback | [ADR 0021](adr/0021-entra-id-cluster-access.md) |
-| Load generator | k6 from the maintainer's machine | Issue #60 |
+| Load generator | k6 from the maintainer's machine | Issue #49 |
 | Alert email | A run-time input, never committed | Issue #48 |
 
 ## 3. Sub-issues
@@ -89,7 +89,7 @@ Epic 8, Reliability and Optimization (#8):
 
 | Issue | Title |
 |---|---|
-| #60 | Load tests |
+| #49 | Load tests |
 | #61 | Failure experiments and live session 2 |
 | #62 | Cost review |
 | #63 | Documentation site and releases |
