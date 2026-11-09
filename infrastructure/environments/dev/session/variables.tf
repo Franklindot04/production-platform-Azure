@@ -61,3 +61,13 @@ variable "api_authorized_ip_ranges" {
     error_message = "Give at least one valid CIDR range. 0.0.0.0/0 is not allowed."
   }
 }
+
+variable "cluster_admin_group_object_id" {
+  type        = string
+  description = "Object ID of the Entra ID group that administers the cluster. Set at run time with TF_VAR_cluster_admin_group_object_id. No default."
+
+  validation {
+    condition     = can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", var.cluster_admin_group_object_id))
+    error_message = "cluster_admin_group_object_id must be the object ID of a group, in GUID form."
+  }
+}
