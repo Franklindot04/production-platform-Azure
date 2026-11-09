@@ -60,6 +60,8 @@ ROOT="${SCRIPT_DIR}/environments/${ENV_NAME}/session"
 PERSISTENT_ROOT="${SCRIPT_DIR}/environments/${ENV_NAME}/persistent"
 NAME_FILE="${SCRIPT_DIR}/bootstrap/.state-account-name"
 STATE_RG="pp-shared-state-rg"
+# The workload region (ADR 0003). Azure names the managed group of the Monitor workspace after it.
+REGION="swedencentral"
 
 # Build the sed expressions that hide GUIDs and the authorized range.
 MASK_SED=(-E
@@ -162,17 +164,20 @@ step_check() {
   local groups_json res_json
   groups_json="$(az group list --query '[].name' -o json)"
   res_json="$(az resource list --query '[].{g:resourceGroup,t:type,n:name}' -o json)"
-  PP_ENV="$ENV_NAME" PP_GROUPS="$groups_json" PP_RES="$res_json" python3 -I - <<'PY' | mask
+  PP_ENV="$ENV_NAME" PP_REGION="$REGION" PP_GROUPS="$groups_json" PP_RES="$res_json" python3 -I - <<'PY' | mask
 import json
 import os
 import sys
 
 env = os.environ["PP_ENV"]
+region = os.environ["PP_REGION"]
 groups = json.loads(os.environ["PP_GROUPS"])
 resources = json.loads(os.environ["PP_RES"])
 
 expected = {"pp-shared-state-rg", f"pp-{env}-persistent-rg"}
-azure_made = {"networkwatcherrg"}
+# Azure creates the second group for the Monitor workspace of the persistent layer.
+monitor_managed = f"ma_pp-{env}-amw_{region}_managed"
+azure_made = {"networkwatcherrg", monitor_managed}
 session = {f"pp-{env}-session-rg", f"pp-{env}-aks-nodes-rg"}
 compute = {
     "microsoft.compute/virtualmachines",
@@ -233,6 +238,8 @@ allowed = {g.lower() for g in expected | azure_made | session}
 report("unexpected resource groups", sorted(g for g in by_group if g.lower() not in allowed))
 if "networkwatcherrg" in lower_groups:
     print("note: NetworkWatcherRG is created by Azure and is not counted")
+if monitor_managed in lower_groups:
+    print("note: the group for the Monitor workspace is made by Azure and is not counted")
 for name in sorted(by_group):
     if name.lower() == f"pp-{env}-persistent-rg":
         print(f"note: {name} exists (persistent layer, not counted)")
