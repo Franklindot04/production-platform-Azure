@@ -35,28 +35,28 @@ The plan covers the Kubernetes platform, delivery, observability, security, inci
 | Policy and scanning | Tools chosen in the ADR | [ADR 0020](adr/0020-policy-and-scanning-tools.md) |
 | Cluster sign-in | Entra ID and Azure RBAC, local accounts kept as a fallback | [ADR 0021](adr/0021-entra-id-cluster-access.md) |
 | Load generator | k6 from the maintainer's machine | Issue #49 |
-| Alert email | A run-time input, never committed | Issue #48 |
+| Alert email | A run-time input, never committed | Issue #37 |
 
 ## 3. Sub-issues
 
-Epic 3, Kubernetes Platform (#3). Issues #33 to #35 are closed.
+Epic 3, Kubernetes Platform (#3). Issues #28 to #31 and #36 are closed.
 
 | Issue | Title |
 |---|---|
-| #39 | Decision records for the Kubernetes platform |
-| #40 | Sample service in Go |
-| #41 | Chart, cluster rules and GitOps layout |
-| #42 | Network policy engine and ingress in the session Terraform |
-| #43 | Argo CD bootstrap in session.sh |
-| #44 | Live session 1: converge and measure |
+| #28 | Decision records for the Kubernetes platform |
+| #29 | Sample service in Go |
+| #30 | Chart, cluster rules and GitOps layout |
+| #36 | Network policy engine and ingress in the session Terraform |
+| #31 | Argo CD bootstrap in session.sh |
+| #32 | Live session 1: converge and measure |
 
 Epic 4, CI/CD and GitOps (#4):
 
 | Issue | Title |
 |---|---|
-| #45 | CI for the service, chart and manifests |
-| #46 | Image publish and tag update |
-| #47 | OIDC identity for pull request plans |
+| #33 | CI for the service, chart and manifests |
+| #34 | Image publish and tag update |
+| #35 | OIDC identity for pull request plans |
 
 Epic 5, Observability and SRE (#5):
 
@@ -72,27 +72,27 @@ Epic 6, Security and Governance (#6):
 
 | Issue | Title |
 |---|---|
-| #53 | Key Vault and workload identity |
-| #54 | Least-privilege roles and secret rules |
-| #55 | Policy and scanning checks |
-| #56 | Entra ID access to the cluster |
+| #42 | Key Vault and workload identity |
+| #43 | Least-privilege roles and secret rules |
+| #44 | Policy and scanning checks |
+| #45 | Entra ID access to the cluster |
 
 Epic 7, Incident Management and Recovery (#7):
 
 | Issue | Title |
 |---|---|
-| #57 | Runbooks |
-| #58 | Incident process and postmortem template |
-| #59 | Measured recovery |
+| #46 | Runbooks |
+| #47 | Incident process and postmortem template |
+| #48 | Measured recovery |
 
 Epic 8, Reliability and Optimization (#8):
 
 | Issue | Title |
 |---|---|
 | #49 | Load tests |
-| #61 | Failure experiments and live session 2 |
-| #62 | Cost review |
-| #63 | Documentation site and releases |
+| #50 | Failure experiments and live session 2 |
+| #52 | Cost review |
+| #51 | Documentation site and releases |
 
 ## 4. Architecture decision records
 
@@ -115,24 +115,24 @@ Numbering continues from ADR 0012.
 | PR | Content | Issues | Needs |
 |---|---|---|---|
 | 1 | This plan and the run sheets | none | none |
-| 2 | ADR 0013 to 0021 and the architecture document corrections | #39 | 1 |
-| 3 | Sample service, chart, cluster rules, GitOps layout, `kind` checks | #40, #41 | 2 |
-| 4 | CI, image publish, tag update workflow | #45, #46 | 3 |
-| 5 | Session Terraform (policy engine, ingress) and the `bootstrap` step | #42, #43 | 3 |
+| 2 | ADR 0013 to 0021 and the architecture document corrections | #28 | 1 |
+| 3 | Sample service, chart, cluster rules, GitOps layout, `kind` checks | #29, #30 | 2 |
+| 4 | CI, image publish, tag update workflow | #33, #34 | 3 |
+| 5 | Session Terraform (policy engine, ingress) and the `bootstrap` step | #36, #31 | 3 |
 | 6 | Persistent layer and identities: workspaces, Key Vault, OIDC | #37, #42, #35 | 2 |
 | 7 | Observability code: scrape configuration, OpenTelemetry, dashboards, SLOs, alerts | #38, #39, #40, #41 | 3, 6 |
-| 8 | Security: scans, role table, secret rules, Entra ID access | #54, #55, #56 | 4, 6 |
-| 9 | Session 1 record, screenshots, fixes | #44 | 3 to 8 |
-| 10 | Runbooks and incident process | #57, #58 | 9 |
-| 11 | Load tests, experiments, Session 2 record, recovery time, cost review | #59, #60, #61, #62 | 9, 10 |
-| 12 | Documentation site, changelog, release notes | #63 | 11 |
+| 8 | Security: scans, role table, secret rules, Entra ID access | #43, #44, #45 | 4, 6 |
+| 9 | Session 1 record, screenshots, fixes | #32 | 3 to 8 |
+| 10 | Runbooks and incident process | #46, #47 | 9 |
+| 11 | Load tests, experiments, Session 2 record, recovery time, cost review | #48, #49, #50, #52 | 9, 10 |
+| 12 | Documentation site, changelog, release notes | #51 | 11 |
 
 ## 6. What is cut first
 
 If Session 1 fails a gate or time runs out, the work is cut in this order:
 
-1. Entra ID access to the cluster (#56).
-2. OIDC identity for pull request plans (#47).
+1. Entra ID access to the cluster (#45).
+2. OIDC identity for pull request plans (#35).
 3. Dashboards as code (#40), reduced to the queries that Session 2 needs.
 4. The experiments in Session 2 that are marked optional.
 
