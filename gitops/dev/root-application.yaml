@@ -17,7 +17,16 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
+  # `session.sh bootstrap identity` sets Helm parameters on the Application
+  # sample-service at run time (ADR 0029). The root Application leaves them alone.
+  ignoreDifferences:
+    - group: argoproj.io
+      kind: Application
+      jsonPointers:
+        - /spec/source/helm/parameters
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - RespectIgnoreDifferences=true
