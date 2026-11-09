@@ -245,8 +245,8 @@ Mostly planned. The access to the Terraform state is built.
 
 - **People.** The maintainer signs in with Microsoft Entra ID. Cluster access is planned to use Entra ID and Azure RBAC (ADR 0021). Until then the cluster uses local accounts.
 - **Pipelines.** GitHub Actions logs in to Azure using OIDC federation. No client secret is stored in GitHub. (ADR 0007) The identity for pull request plans is written in `infrastructure/environments/dev/persistent/identity.tf` and is not applied. Its federated credential subject is `repo:<owner>/<name>:pull_request`, and it has Reader on the persistent resource group and Storage Blob Data Reader on the `tfstate-dev` container. (ADR 0022)
-- **Workloads.** Pods use workload identity to read Key Vault. No Azure credentials are stored in the cluster.
-- **Secrets.** Secrets live in Key Vault, which uses Azure RBAC and has no role assignment yet. (ADR 0022) They are not committed. `.gitignore` covers common secret files, and GitHub secret scanning and push protection are on for this repository.
+- **Workloads.** Pods use workload identity to read Key Vault. No Azure credentials are stored in the cluster. The sample service identity `pp-<env>-sample-service` is written in `infrastructure/environments/dev/persistent/workload-identity.tf` with Key Vault Secrets User on the vault. The cluster settings (OIDC issuer, workload identity, the Key Vault secrets provider add-on) and the federated credential for the service account `apps/sample-service` are written in the session root. Nothing is applied. (ADR 0029)
+- **Secrets.** Secrets live in Key Vault, which uses Azure RBAC. The sample service identity has Key Vault Secrets User and the maintainer has Key Vault Secrets Officer, in code that is written and not applied. The secret value is set by hand and is not in Terraform or in state. (ADR 0022, ADR 0029) They are not committed. `.gitignore` covers common secret files, and GitHub secret scanning and push protection are on for this repository.
 - **Terraform state.** Access with Entra ID only. Shared key access is turned off. (ADR 0004)
 - **Least privilege.** Each identity gets the lowest role that works, scoped as narrowly as possible. Roles for an environment are scoped to its resource groups. (ADR 0010)
 
@@ -334,6 +334,7 @@ The target subscription has a regional vCPU quota of 4, which limits node sizes 
 | [0026](adr/0026-service-tracing.md) | Trace the sample service with the OpenTelemetry SDK | proposed |
 | [0027](adr/0027-dashboard-queries-as-files.md) | Keep dashboard queries as files under monitoring/ | proposed |
 | [0028](adr/0028-slos-and-burn-rate-alerts.md) | Set SLOs for the sample service and alert on burn rate | proposed |
+| [0029](adr/0029-workload-identity-and-vault-access.md) | Give the sample service access to Key Vault with workload identity | proposed |
 
 Other open decisions are listed in section 15.
 

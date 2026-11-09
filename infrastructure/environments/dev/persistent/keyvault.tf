@@ -6,7 +6,8 @@ resource "random_string" "key_vault_suffix" {
   special = false
 }
 
-# No role assignment is made on the vault here.
+# Roles on the vault are assigned in workload-identity.tf: Key Vault Secrets User for the
+# sample service identity, and Key Vault Secrets Officer for the principal that runs apply.
 resource "azurerm_key_vault" "main" {
   name                       = "pp${var.env}kv${random_string.key_vault_suffix.result}"
   resource_group_name        = azurerm_resource_group.persistent.name
