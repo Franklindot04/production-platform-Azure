@@ -19,7 +19,7 @@ The design covers:
 - Build, test and deploy pipelines, and GitOps delivery (Epic 4, #4).
 - Metrics, logs, traces, SLOs and alerts (Epic 5, #5).
 - Identity, secrets and policy checks (Epic 6, #6).
-- Runbooks, incident handling and recovery (Epic 7, #7).
+- Runbooks, incident handling and recovery (Epic 7, #7). The runbooks are written and not exercised: [docs/runbooks/](runbooks/README.md).
 - Load tests, failure experiments and cost review (Epic 8, #8).
 
 ## 3. Goals
@@ -132,7 +132,7 @@ The status column is `built` for a component that exists, `written` for a compon
 | Dashboards | Saved queries on the workspaces, no Grafana | persistent | 5 (#5) | planned |
 | Pull request plan identity | Reads Azure and state so a pull request can run `terraform plan` | persistent | 6 (#6) | planned (code written, not applied) |
 | Policy checks | Block unsafe changes | n/a | 6 (#6) | written |
-| Runbooks and postmortems | Incident handling | n/a | 7 (#7) | planned |
+| Runbooks and postmortems | Incident handling | n/a | 7 (#7) | runbooks written, not exercised ([docs/runbooks/](runbooks/README.md)); postmortems planned |
 
 ### Capacity limit
 

@@ -37,7 +37,18 @@ Rules are the same as in [Session 1](session-1.md): approved plans, masked outpu
 5. Edit a resource by hand with `kubectl`. Hypothesis: Argo CD reverts it.
 6. Optional: apply a network policy that blocks the service. Hypothesis: the probes fail and the alert fires.
 
-Each experiment feeds a runbook (#46). A runbook that no experiment exercised says `not exercised`.
+Each experiment feeds a runbook (#46). A runbook that no experiment exercised says `not exercised`. The runbooks are written and not exercised. See [docs/runbooks/](../runbooks/README.md).
+
+| Experiment | Runbook |
+|---|---|
+| 1. Delete a pod | [pod-not-ready.md](../runbooks/pod-not-ready.md) |
+| 2. Drain a node | [node-drain.md](../runbooks/node-drain.md) |
+| 3. Inject errors and latency | [availability-burn.md](../runbooks/availability-burn.md) and [latency-burn.md](../runbooks/latency-burn.md) |
+| 4. Bad image tag | [bad-image-tag.md](../runbooks/bad-image-tag.md) |
+| 5. Edit by hand | [argocd-drift.md](../runbooks/argocd-drift.md) |
+| 6. Network policy (optional) | [network-policy-blocks-service.md](../runbooks/network-policy-blocks-service.md) |
+
+The runbooks [key-vault-mount-fails.md](../runbooks/key-vault-mount-fails.md), [image-pull-refused.md](../runbooks/image-pull-refused.md) and [session-leftovers.md](../runbooks/session-leftovers.md) have no experiment.
 
 ## What is recorded
 
