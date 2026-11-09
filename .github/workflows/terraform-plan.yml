@@ -54,6 +54,8 @@ jobs:
           TFSTATE_ACCOUNT_NAME: ${{ secrets.TFSTATE_ACCOUNT_NAME }}
           # Placeholder value. The plan sends no mail, and the real address is not stored in GitHub.
           TF_VAR_alert_email: plan-only@example.com
+          TF_VAR_github_owner_id: ${{ github.repository_owner_id }}
+          TF_VAR_github_repository_id: ${{ github.repository_id }}
         run: |
           set -euo pipefail
           export TF_VAR_state_account_name="$TFSTATE_ACCOUNT_NAME"

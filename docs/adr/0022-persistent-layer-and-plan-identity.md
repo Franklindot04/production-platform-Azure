@@ -23,7 +23,7 @@ Persistent root of `dev`:
 Pull request plan identity (ADR 0007):
 
 - An Entra application and service principal with no client secret.
-- One federated credential. The issuer is GitHub Actions. The subject is `repo:<owner>/<name>:pull_request`, where the repository is a variable that defaults to this repository. Only runs triggered by a pull request in that repository can get a token.
+- One federated credential. The issuer is GitHub Actions. The subject is `repo:<owner>@<owner-id>/<name>@<repo-id>:pull_request`, where the repository is a variable that defaults to this repository. GitHub presents the subject with the numeric owner and repository IDs, and Terraform takes them as run-time inputs. Only runs triggered by a pull request in that repository can get a token.
 - Reader on the persistent resource group, and Storage Blob Data Reader on the `tfstate-dev` container. The container scope is built from the state account name, which is a variable set at run time with `TF_VAR_state_account_name`, so the Terraform code does not read the storage account.
 - The workflow `terraform-plan.yml` logs in with `azure/login` and runs `terraform plan -lock=false` for both `dev` roots. The persistent plan also uses `-refresh=false`. Because the identity can only read, the plan does not take the state lease. The workflow does nothing for pull requests from forks, and it does nothing when the secret `AZURE_CLIENT_ID` is not set.
 - The client ID, tenant ID, subscription ID and state account name are stored as GitHub secrets. They are identifiers, not credentials.
