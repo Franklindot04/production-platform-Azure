@@ -23,6 +23,7 @@ The architecture document says that people sign in to the cluster with Microsoft
 - An interactive sign-in is needed for `kubectl` after the cluster is created.
 - A role assignment on the cluster is needed for the maintainer or the group.
 - The first create without Entra ID is the only cluster tested so far. Whether the integration works with the pool in ADR 0012 is not tested.
+- The integration on the cluster, the variable `cluster_admin_group_object_id` and the two role assignments for the group (`access.tf`) are written in the session root and not applied. The role assignments are destroyed with the cluster.
 
 ## Alternatives considered
 
