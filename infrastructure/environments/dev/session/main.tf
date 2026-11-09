@@ -79,6 +79,15 @@ resource "azurerm_kubernetes_cluster" "main" {
     authorized_ip_ranges = var.api_authorized_ip_ranges
   }
 
+  # Workload identity and the Key Vault secrets provider add-on (ADR 0029).
+  # The federated credential is in workload-identity.tf.
+  oidc_issuer_enabled       = true
+  workload_identity_enabled = true
+
+  key_vault_secrets_provider {
+    secret_rotation_enabled = false
+  }
+
   # The managed NGINX ingress (ADR 0016). No DNS zone: the service is reached
   # by the public address of the load balancer, over HTTP.
   web_app_routing {
