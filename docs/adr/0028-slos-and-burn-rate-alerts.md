@@ -28,8 +28,8 @@ The sample service exports `http_requests_total` and `http_request_duration_seco
 
 - With short windows, a short burst can cross the fast-burn threshold. The alerts suit a session, and the windows may need to change for a longer run.
 - No data means no alert, until the alert for missing data is built.
-- The alerts have not been applied and have not fired. They are unverified until Session 2 experiment 3.
-- The rule group is created only when the persistent layer is applied. That is a separate step, and this change applies nothing.
+- The alerts are applied. They are unverified until Session 2 experiment 3.
+- The rule group is part of the persistent layer and is applied.
 - The cost of the rule group and the alert notifications is not estimated.
 
 ## Alternatives considered

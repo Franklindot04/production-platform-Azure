@@ -28,6 +28,7 @@ Assumptions:
 - Forgetting to destroy is the largest cost risk. The end-of-session check is the control, and it depends on the maintainer.
 - Some resources, such as Key Vault with purge protection, hold their names after deletion. They stay in the persistent layer for that reason.
 - Each session starts with a full create. The time this takes is measured and recorded, and it feeds the recovery work in Epic 7 (#7).
+- The budget with alerts at fixed percentages is set in Azure. It is not defined in Terraform. The Terraform definition remains planned.
 
 ## Alternatives considered
 
