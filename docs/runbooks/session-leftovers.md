@@ -15,7 +15,7 @@ The session layer bills until it is destroyed (ADR 0009). A cluster that remains
    - the session resource group `pp-dev-session-rg` or the node resource group `pp-dev-aks-nodes-rg`,
    - a cluster, virtual machine or scale set,
    - a public IP address, a load balancer or a managed disk,
-   - a resource group that is not `pp-shared-state-rg`, `pp-dev-persistent-rg` or `NetworkWatcherRG`.
+   - a resource group that is not `pp-shared-state-rg`, `pp-dev-persistent-rg`, `NetworkWatcherRG` or `MA_pp-dev-amw_swedencentral_managed` (made by Azure for the Monitor workspace).
 3. `./infrastructure/session.sh down` (planned, not run). It shows the destroy plan and destroys nothing. It shows what Terraform would still remove.
 
 ## Likely causes
@@ -33,7 +33,7 @@ Other causes are not known from the repository.
 2. `./infrastructure/session.sh down --yes` (planned, not run). It destroys the session root. `down` needs no authorized range and no admin group value.
 3. If it stops with a state lock error, run the command again. Whether that clears the error is not known.
 4. `./infrastructure/session.sh check` (planned, not run). Repeat until it exits 0.
-5. If something remains that Terraform does not know, the repository gives no way to remove it. Look at the names in the `check` output, decide by hand, and run `check` again. Do not remove `pp-shared-state-rg`, `pp-dev-persistent-rg` or `NetworkWatcherRG`: `check` does not count them, and the first two hold state and persistent resources.
+5. If something remains that Terraform does not know, the repository gives no way to remove it. Look at the names in the `check` output, decide by hand, and run `check` again. Do not remove `pp-shared-state-rg`, `pp-dev-persistent-rg`, `NetworkWatcherRG` or `MA_pp-dev-amw_swedencentral_managed`: `check` does not count them, and the first two hold state and persistent resources.
 
 ## Verify
 
