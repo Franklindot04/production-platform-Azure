@@ -25,7 +25,7 @@ Why a leaked credential is level 1: it cannot be undone once pushed, and the rep
 ## Steps
 
 1. **Detect.**
-   - The alert email from the action group `pp-dev-alerts`. The alerts exist in Azure only after the persistent layer is applied, and the address is set at run time.
+   - The alert email from the action group `pp-dev-alerts`. The address is set at run time.
    - A step of `infrastructure/session.sh` that fails, and `session.sh check` at the end of a session.
    - The k6 summary (`tests/load/README.md`) and the query files in `monitoring/prometheus/`, for example `request-rate.promql` and `error-ratio.promql`.
    - A service that receives no requests produces no data and no alert (`docs/slos.md`). During a session, look at `request-rate.promql` and do not wait for an email.

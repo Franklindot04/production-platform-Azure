@@ -1,14 +1,32 @@
 # infrastructure
 
-Terraform for the platform. The `dev` roots were applied once. The persistent resource group exists and is empty. The session layer was destroyed after the first create.
+Terraform for the platform. The persistent root of `dev` is applied. The session root of `dev` was applied once, and the session layer was destroyed after the first create.
 
 - `bootstrap/`: the Azure CLI script that creates the state backend. It is not a Terraform root.
 - `modules/`: shared modules. Planned.
 - `environments/<env>/`: one folder per environment, each with a persistent and a session root. Only `dev` exists. `staging` and `prod` are added when they are needed.
 
-The persistent root also contains written, not applied, code for the monitoring workspaces, Key Vault, the identity for pull request plans (ADR 0022), and the identity of the sample service with its Key Vault roles (ADR 0029). The session root also contains written, not applied, workload identity settings on the cluster and the federated credential for the sample service (ADR 0029). Those resources are planned until they are applied.
+The persistent root defines the monitoring workspaces, the alerts, the Key Vault, the identity for pull request plans (ADR 0022), and the identity of the sample service with its Key Vault roles (ADR 0029). All of it is applied. The session root also contains written, not applied, workload identity settings on the cluster and the federated credential for the sample service (ADR 0029). Those resources are planned until they are applied.
 
 There are two Terraform roots today, `environments/dev/persistent` and `environments/dev/session`. Each environment root is its own Terraform configuration. Terraform workspaces are not used. Environment inputs are written in `.tf` files, because `.gitignore` excludes `*.tfvars`.
+
+## Resource providers
+
+The subscription must have these resource providers registered before the persistent apply: Microsoft.AlertsManagement, Microsoft.Insights, Microsoft.Monitor, Microsoft.OperationalInsights, Microsoft.KeyVault, Microsoft.ManagedIdentity and Microsoft.Authorization. The session apply also needs Microsoft.ContainerService, Microsoft.Network and Microsoft.Compute.
+
+The Terraform provider blocks do not register providers. Register one with:
+
+```bash
+az provider register --namespace <name> --wait
+```
+
+Check one with:
+
+```bash
+az provider show --namespace <name> --query registrationState -o tsv
+```
+
+The expected output is `Registered`.
 
 ## Session script
 
@@ -26,16 +44,18 @@ There are two Terraform roots today, `environments/dev/persistent` and `environm
 | `session.sh bootstrap secrets` | Creates only the secret `appinsights-connection` in the namespace `observability`. Planned: it has not run. |
 | `session.sh argocd-password` | Prints the Argo CD admin credential to the terminal. |
 
-### One-time and session steps for Entra ID sign-in (planned, not run)
+### Create the Entra ID admin group
 
-None of these steps has run. `kubelogin` must be installed. The group name is a name and not an ID. The group ID is read at run time and is not written to a file.
-
-One time, create the group and add the maintainer to it:
+The group name is a name and not an ID. The group ID is read at run time and is not written to a file. Create the group once and add the maintainer to it:
 
 ```bash
 az ad group create --display-name pp-dev-cluster-admins --mail-nickname pp-dev-cluster-admins --query displayName -o tsv
 az ad group member add --group pp-dev-cluster-admins --member-id "$(az ad signed-in-user show --query id -o tsv)"
 ```
+
+### Entra ID sign-in (planned, not run)
+
+None of these session steps has run. `kubelogin` must be installed.
 
 Each session, before `session.sh up`, set the group ID:
 
@@ -54,7 +74,7 @@ kubectl get nodes
 
 `session.sh bootstrap` keeps using the local administrator credential (ADR 0021).
 
-### Set the Key Vault secret (planned, not run)
+### Set the Key Vault secret
 
 The sample service pods do not start until the secret `sample-service-secret` exists in the vault. Set it once, after the persistent root is applied. The value is read from a prompt and not from the command line, and the output is limited to the secret ID.
 
@@ -66,7 +86,7 @@ printf '%s' "$PP_SECRET_VALUE" | az keyvault secret set \
 unset PP_SECRET_VALUE
 ```
 
-The signed-in user needs the role Key Vault Secrets Officer on the vault (ADR 0029). Reading the value from `/dev/stdin` is not verified.
+The signed-in user needs the role Key Vault Secrets Officer on the vault (ADR 0029).
 
 `dev` is the default environment. Pass `staging` or `prod` as the second argument for another one.
 

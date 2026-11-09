@@ -13,7 +13,7 @@ The GitHub Actions workflows of the repository. Every action is pinned to a full
 
 ## Terraform plan
 
-Runs `terraform plan -lock=false` for the two `dev` roots (ADR 0022). The workflow is written and has not run. The identity it needs is planned and is not applied.
+Runs `terraform plan -lock=false` for the two `dev` roots (ADR 0022) on pull requests from this repository. It logs in with the plan identity through OIDC and needs the four repository secrets listed under "Repository settings the workflows need". If `AZURE_CLIENT_ID` is empty or not set, the plan is skipped with a notice.
 
 - One job. It does nothing for pull requests from forks.
 - If the secret `AZURE_CLIENT_ID` is not set, the first step prints a notice and every other step is skipped.
@@ -21,7 +21,6 @@ Runs `terraform plan -lock=false` for the two `dev` roots (ADR 0022). The workfl
 - The persistent plan uses `-refresh=false`. It sets `TF_VAR_alert_email` to a placeholder address, so the plan shows a change to the action group receiver. The session plan sets `TF_VAR_api_authorized_ip_ranges` to a documentation range.
 - The plan identity has no access to the session resource group. The session plan works while the session layer is destroyed. If the layer exists, the refresh fails.
 - The plan output is not saved.
-- `azure/login` is not pinned yet. The `uses` line holds a placeholder that actionlint reports until the full commit SHA is added.
 
 ## Service, chart and manifest checks
 

@@ -4,7 +4,7 @@
 
 This document describes the intended design of the platform. It is the first version.
 
-**Built today:** the repository setup (templates, contribution rules, license, security policy, decision records), the `infrastructure/` folders with two Terraform roots for `dev` that define a resource group, a virtual network, a node subnet and an AKS cluster (applied once in the first create; the session layer was destroyed afterwards; the Azure network policy and the ingress add-on were added to the session root afterwards and are planned, not applied), the bootstrap script and the state backend it created in Azure (a resource group, a storage account and the `tfstate-dev` container), workflows that check Terraform, plan Terraform, check the service, chart and manifests, run the security scans, publish the image and open the pull request for its tag (all have run on GitHub; the Terraform plan workflow does nothing until the plan identity is applied), and the code of the sample service, its Helm chart, the cluster rules, the GitOps layout, a script that checks them in a local `kind` cluster, and the bootstrap step of the session script, which installs Argo CD (run against `kind`, not yet on AKS). **Everything else in this document is planned.** Of the `dev` roots, only the empty resource group `pp-dev-persistent-rg` exists in Azure.
+**Built today:** the repository setup (templates, contribution rules, license, security policy, decision records), the `infrastructure/` folders with two Terraform roots for `dev` (the persistent root is applied and defines the resource group, the Azure Monitor and Log Analytics workspaces, Application Insights, the action group, the four burn-rate alerts, the Key Vault and the identities for pull request plans and for the sample service; the session root defines a virtual network, a node subnet and an AKS cluster, and was applied once in the first create; the session layer was destroyed afterwards; the Azure network policy and the ingress add-on were added to the session root afterwards and are planned, not applied), the bootstrap script and the state backend it created in Azure (a resource group, a storage account and the `tfstate-dev` container), workflows that check Terraform, plan Terraform, check the service, chart and manifests, run the security scans, publish the image and open the pull request for its tag (all have run on GitHub; the Terraform plan workflow plans the two `dev` roots on pull requests from this repository), and the code of the sample service, its Helm chart, the cluster rules, the GitOps layout, a script that checks them in a local `kind` cluster, and the bootstrap step of the session script, which installs Argo CD (run against `kind`, not yet on AKS). **Everything else in this document is planned.** Of the `dev` roots, the persistent layer exists in Azure. Azure creates two things around it: the resource group `MA_pp-dev-amw_swedencentral_managed` for the Monitor workspace, and an action group named "Application Insights Smart Detection" in the persistent resource group.
 
 Where a choice is not made, the text says so. Where a choice is made but not yet tested, it is marked as an assumption. Decisions are recorded as ADRs in [docs/adr/](adr/) and listed in section 14.
 
@@ -120,17 +120,17 @@ The status column is `built` for a component that exists, `written` for a compon
 | State storage | Holds Terraform state | shared | 2 (#2) | built |
 | Virtual network | Network for nodes | session | 2 (#2) | built |
 | Container registry | Stores images | outside Azure (`ghcr.io`) | 4 (#4) | planned |
-| Key Vault | Holds secrets | persistent | 6 (#6) | planned (code written, not applied) |
+| Key Vault | Holds secrets | persistent | 6 (#6) | built |
 | AKS cluster | Runs workloads | session | 3 (#3) | built |
 | Ingress | Routes outside traffic to the service | session | 3 (#3) | written |
 | Namespaces, quotas, network policy | Cluster rules | session | 3 (#3) | written |
 | Sample service | The workload measured by SLOs | session | 3 (#3) | written |
 | GitHub Actions | Build, test, scan, publish | n/a | 4 (#4) | built |
 | Argo CD | Syncs cluster state from Git | session | 3 (#3) | written |
-| Azure Monitor and Log Analytics | Metric and log storage, alert rules | persistent | 5 (#5) | planned (workspaces, Application Insights and action group written, not applied) |
+| Azure Monitor and Log Analytics | Metric and log storage, alert rules | persistent | 5 (#5) | built (workspaces, Application Insights, action group and the four burn-rate alerts) |
 | OpenTelemetry Collector | Collects traces and metrics | session | 5 (#5) | planned |
 | Dashboards | Saved queries on the workspaces, no Grafana | persistent | 5 (#5) | planned |
-| Pull request plan identity | Reads Azure and state so a pull request can run `terraform plan` | persistent | 6 (#6) | planned (code written, not applied) |
+| Pull request plan identity | Reads Azure and state so a pull request can run `terraform plan` | persistent | 6 (#6) | built |
 | Policy checks | Block unsafe changes | n/a | 6 (#6) | built (Trivy scans in the Security scans workflow) |
 | Runbooks and postmortems | Incident handling | n/a | 7 (#7) | runbooks written, not exercised ([docs/runbooks/](runbooks/README.md)); incident process and postmortem template written, not used ([docs/incident-process.md](incident-process.md)) |
 
@@ -215,7 +215,7 @@ Names follow ADR 0003. `shared` takes the place of `<env>` for the state storage
 
 ### Cost, quota and policy
 
-- Resources carry the `env` tag, so cost can be filtered by environment. A budget with alerts is planned for each environment. (ADR 0009)
+- Resources carry the `env` tag, so cost can be filtered by environment. The `dev` environment has a budget with alerts. It is set in Azure and is not defined in Terraform. Budgets for `staging` and `prod` are planned. (ADR 0009)
 - Quota and budget are shared by all environments. The target subscription has a regional vCPU quota of 4, so only one environment runs at a time. See the capacity limit in section 7.
 - Policy is assigned per environment resource group where the policy tool allows it. A subscription-wide assignment is used only for a rule that applies to every environment.
 
@@ -241,12 +241,12 @@ The end-of-session teardown in ADR 0009 applies to every environment, including 
 
 ## 10. Identity and secrets
 
-Mostly planned. The access to the Terraform state is built.
+The access to the Terraform state, the Key Vault and the identities of the persistent layer are built. The session settings are written and not applied.
 
 - **People.** The maintainer signs in with Microsoft Entra ID. The settings for cluster sign-in with Entra ID and Azure RBAC, the admin group input and the two role assignments for the group are written in the session root and not applied (ADR 0021). Local accounts stay on as a fallback. Until the settings are applied the cluster uses local accounts.
-- **Pipelines.** GitHub Actions logs in to Azure using OIDC federation. No client secret is stored in GitHub. (ADR 0007) The identity for pull request plans is written in `infrastructure/environments/dev/persistent/identity.tf` and is not applied. Its federated credential subject is `repo:<owner>/<name>:pull_request`, and it has Reader on the persistent resource group and Storage Blob Data Reader on the `tfstate-dev` container. (ADR 0022)
-- **Workloads.** Pods use workload identity to read Key Vault. No Azure credentials are stored in the cluster. The sample service identity `pp-<env>-sample-service` is written in `infrastructure/environments/dev/persistent/workload-identity.tf` with Key Vault Secrets User on the vault. The cluster settings (OIDC issuer, workload identity, the Key Vault secrets provider add-on) and the federated credential for the service account `apps/sample-service` are written in the session root. The chart mounts one secret as a file when `vaultSecret.enabled` is true. The bootstrap part `identity` turns it on at run time and no ID is written in Git. Nothing is applied. (ADR 0029)
-- **Secrets.** The rules are in [docs/security.md](security.md). Secrets live in Key Vault, which uses Azure RBAC. The sample service identity has Key Vault Secrets User and the maintainer has Key Vault Secrets Officer, in code that is written and not applied. The secret value is set by hand and is not in Terraform or in state. (ADR 0022, ADR 0029) They are not committed. `.gitignore` covers common secret files, and GitHub secret scanning and push protection are on for this repository.
+- **Pipelines.** GitHub Actions logs in to Azure using OIDC federation. No client secret is stored in GitHub. (ADR 0007) The identity for pull request plans is defined in `infrastructure/environments/dev/persistent/identity.tf` and is applied. Its federated credential subject is `repo:<owner>/<name>:pull_request`, and it has Reader on the persistent resource group and Storage Blob Data Reader on the `tfstate-dev` container. (ADR 0022)
+- **Workloads.** Pods use workload identity to read Key Vault. No Azure credentials are stored in the cluster. The sample service identity `pp-<env>-sample-service` is defined in `infrastructure/environments/dev/persistent/workload-identity.tf` with Key Vault Secrets User on the vault, and is applied. The cluster settings (OIDC issuer, workload identity, the Key Vault secrets provider add-on) and the federated credential for the service account `apps/sample-service` are written in the session root and are not applied. The chart mounts one secret as a file when `vaultSecret.enabled` is true. The bootstrap part `identity` turns it on at run time and no ID is written in Git. The chart mount and the bootstrap part have not run on a cluster. (ADR 0029)
+- **Secrets.** The rules are in [docs/security.md](security.md). Secrets live in Key Vault, which uses Azure RBAC. The sample service identity has Key Vault Secrets User and the maintainer has Key Vault Secrets Officer. Both roles are applied. The secret value is set by hand and is not in Terraform or in state. The secret `sample-service-secret` is set in the vault. (ADR 0022, ADR 0029) They are not committed. `.gitignore` covers common secret files, and GitHub secret scanning and push protection are on for this repository.
 - **Terraform state.** Access with Entra ID only. Shared key access is turned off. (ADR 0004)
 - **Least privilege.** Each identity gets the lowest role that works, scoped as narrowly as possible. Roles for an environment are scoped to its resource groups. (ADR 0010) The roles are listed in [docs/security.md](security.md).
 
@@ -254,20 +254,20 @@ Argo CD generates its admin credential when it starts. It is read at run time an
 
 ## 11. Observability and SLOs
 
-All planned. See ADR 0008.
+The persistent layer (workspaces, Application Insights, action group, alerts) is applied. The rest is planned. See ADR 0008.
 
 - Metrics in Prometheus format go to an Azure Monitor workspace in the persistent layer. History survives cluster teardown.
 - Logs go to a Log Analytics workspace.
 - Traces come from OpenTelemetry in the sample service and go through a Collector to Application Insights. (ADR 0019)
 - Dashboards are saved queries on the workspaces, stored as code in `monitoring/`. There is no Grafana. (ADR 0019)
-- The sample service gets two SLIs to start: availability and latency. Targets are not set yet. Error budget alerts are planned.
+- The sample service gets two SLIs to start: availability and latency. Targets are not set yet. The error budget alerts are applied. They have not been tested.
 - **SLO caveat.** The cluster is down between sessions. SLOs are measured over session time, with generated traffic. The window length is decided when the SLO is defined.
-- The persistent root defines the workspaces, Application Insights and an action group with one email receiver. The address is set at run time and is not committed. Nothing is applied. (ADR 0022)
+- The persistent root defines the workspaces, Application Insights and an action group with one email receiver. The address is set at run time and is not committed. The persistent root is applied. (ADR 0022)
 - Alerts notify an action group. Email is the first target (assumption). With one maintainer, there is no paging rotation.
 
 ## 12. Cost notes
 
-All planned. No cost has been measured. See ADR 0009.
+The budget of `dev` is set in Azure. The rest is planned. No cost has been measured. See ADR 0009.
 
 Plan:
 
@@ -275,8 +275,8 @@ Plan:
 - Keep the persistent layer small.
 - Use small nodes and few of them.
 - Tag all resources.
-- Define an Azure budget with alerts in Terraform.
-- Budgets and cost views per environment are planned. (ADR 0010)
+- Define the budget with alerts in Terraform (planned). The budget of `dev` is set in Azure and is not defined in Terraform.
+- Budgets for `staging` and `prod` and cost views per environment are planned. (ADR 0010)
 
 Main cost drivers to check in the Azure pricing calculator, at the time of use:
 
@@ -291,8 +291,8 @@ The target subscription has a regional vCPU quota of 4, which limits node sizes 
 
 | Risk | Effect | Mitigation |
 |---|---|---|
-| Cluster left running after a session | Unplanned cost. Quota stays in use, so the next cluster cannot be created | End-of-session resource check. Budget alerts are planned. |
-| Budget exceeded | Unplanned cost | A budget with alerts is planned. Resources are tagged. The session layer is destroyed after each session. (ADR 0009) |
+| Cluster left running after a session | Unplanned cost. Quota stays in use, so the next cluster cannot be created | End-of-session resource check. The budget of `dev` has alerts, set in Azure. |
+| Budget exceeded | Unplanned cost | A budget with alerts is set for `dev` in Azure and is not defined in Terraform. Budgets for `staging` and `prod` are planned. Resources are tagged. The session layer is destroyed after each session. (ADR 0009) |
 | Regional vCPU quota of 4 | A cluster over 4 vCPU cannot be created. Upgrades and node replacement need spare quota | Size the cluster within 4 vCPU. Do not upgrade in place. The system pool in ADR 0012 breaks an AKS guideline. AKS accepted it in the first create. An upgrade or a node replacement is not tested. |
 | State lost or corrupted | Infrastructure cannot be managed from code | Versioning and soft delete on the state container. |
 | Key Vault name held after deletion | Cannot re-create it | Keep Key Vault in the persistent layer. |
@@ -342,7 +342,7 @@ Other open decisions are listed in section 15.
 ## 15. Open questions
 
 1. When is `staging` created, and what check must `dev` pass before a change moves on? (ADR 0010)
-2. Which alert thresholds does the planned budget use? (ADR 0009)
+2. Which alert thresholds do the budgets of `staging` and `prod` use? (ADR 0009)
 3. What SLO targets and window fit a service that is only up during sessions?
 4. How long does a full create take? The session layer took about 7 minutes to create and about 7 minutes to destroy in single runs (ADR 0012). The full platform is measured once it exists, and it sets the recovery time that Epic 7 (#7) can claim.
 5. Do the tools fit in the capacity that is left after the system pods? (ADR 0012)

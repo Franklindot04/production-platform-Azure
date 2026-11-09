@@ -32,7 +32,7 @@ ADR 0022 defined the persistent layer with a Key Vault that uses Azure RBAC and 
 - That the root Application leaves the parameters alone, and that the driver gets a token with the token mount off, are not verified.
 - Rotation is off, so a changed secret value is read after the pod restarts.
 - The vault is reachable from any network that has a role on it, until the network rule is added.
-- Everything here is written and not applied. It is unverified until a live session.
+- The persistent resources (the identity and the Key Vault roles) are applied. The session resources (the cluster settings, the federated credential and the chart mount) are written and not applied, and are unverified until a live session.
 
 ## Alternatives considered
 

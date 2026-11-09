@@ -22,6 +22,7 @@ Rules:
 5. The bootstrap step has been run against `kind` and passed.
 6. The secret `sample-service-secret` is set in the Key Vault (one time, `infrastructure/README.md`). Without it the sample service pods do not start.
 7. The Entra ID group for cluster admins exists, the maintainer is a member, and `kubelogin` is installed (`infrastructure/README.md`, planned).
+8. The resource providers listed in `infrastructure/README.md` are registered.
 
 ## Run sheet
 

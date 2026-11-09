@@ -15,11 +15,11 @@ Status values:
 |---|---|---|---|---|---|
 | The maintainer | Owns the subscription and every environment | Owner | Every environment. ADR 0010 does not name the scope | Stated in `docs/adr/0010-environment-separation.md`. Not defined in code | Applied |
 | The maintainer | Reads and writes Terraform state | Storage Blob Data Contributor | The container `tfstate-<env>` | `infrastructure/bootstrap/bootstrap.sh` (step `role`) | Applied |
-| The maintainer, running `terraform apply` on the persistent root | Sets Key Vault secret values by hand | Key Vault Secrets Officer, for the principal that runs apply | The Key Vault | `infrastructure/environments/dev/persistent/workload-identity.tf` | Written and not applied |
-| The maintainer, running `terraform apply` on the persistent root | Creates the plan identity and its role assignments | Permission to create applications in the Entra tenant and to create role assignments. No role is named | The Entra tenant, and role assignments | `infrastructure/environments/dev/persistent/README.md` | Planned. It is needed when the persistent root is applied |
-| Pull request plan identity `pp-<env>-pr-plan` | `terraform plan` on pull requests | Reader | The persistent resource group | `infrastructure/environments/dev/persistent/identity.tf` | Written and not applied |
-| Pull request plan identity | Reads Terraform state during a plan | Storage Blob Data Reader | The container `tfstate-<env>` | `infrastructure/environments/dev/persistent/identity.tf` | Written and not applied |
-| Sample service identity `pp-<env>-sample-service` | Reads one Key Vault secret from the pods | Key Vault Secrets User | The Key Vault | `infrastructure/environments/dev/persistent/workload-identity.tf` | Written and not applied |
+| The maintainer, running `terraform apply` on the persistent root | Sets Key Vault secret values by hand | Key Vault Secrets Officer, for the principal that runs apply | The Key Vault | `infrastructure/environments/dev/persistent/workload-identity.tf` | Applied |
+| The maintainer, running `terraform apply` on the persistent root | Creates the plan identity and its role assignments | Permission to create applications in the Entra tenant and to create role assignments. No role is named | The Entra tenant, and role assignments | `infrastructure/environments/dev/persistent/README.md` | Applied. No role is named |
+| Pull request plan identity `pp-<env>-pr-plan` | `terraform plan` on pull requests | Reader | The persistent resource group | `infrastructure/environments/dev/persistent/identity.tf` | Applied |
+| Pull request plan identity | Reads Terraform state during a plan | Storage Blob Data Reader | The container `tfstate-<env>` | `infrastructure/environments/dev/persistent/identity.tf` | Applied |
+| Sample service identity `pp-<env>-sample-service` | Reads one Key Vault secret from the pods | Key Vault Secrets User | The Key Vault | `infrastructure/environments/dev/persistent/workload-identity.tf` | Applied |
 | Workflows Terraform checks, Service, chart and manifest checks, Security scans | Checks on pull requests | `contents: read` | The repository | `.github/workflows/terraform-checks.yml`, `app-checks.yml`, `security-scans.yml` | In the repository |
 | Workflow Terraform plan | Logs in to Azure as the plan identity | `contents: read` and `id-token: write`, in the one job. No permissions at the top | The repository, and a token for the federated credential | `.github/workflows/terraform-plan.yml` | In the repository |
 | Workflow Publish image | Pushes the sample service image | `contents: read` at the top, and `packages: write` in the one job | The repository and its package on `ghcr.io` | `.github/workflows/image-publish.yml` | In the repository |
@@ -65,11 +65,11 @@ A new role, scope or permission is added in a pull request that changes this tab
    - The Key Vault secret: rotation is off in the add-on (`infrastructure/environments/dev/session/main.tf`). To change the value, set a new one with the step in `infrastructure/README.md`. The pods read it after they restart (ADR 0029).
    - The cluster secret `appinsights-connection`: `session.sh bootstrap secrets` creates it from the state again. No other rotation process is written.
 8. **If a secret leaks:** rotate it first. Then report it as in `SECURITY.md`, through private vulnerability reporting and not a public issue. The repository is public (ADR 0007), so treat a pushed value as exposed even after the commit is removed.
-9. **Setting the Key Vault secret.** The one-time step is in `infrastructure/README.md`. It is planned and has not run.
+9. **Setting the Key Vault secret.** The one-time step is in `infrastructure/README.md`. The secret `sample-service-secret` is set.
 
 ## 3. Not done yet
 
 - Entra ID access for people to the cluster (issue #45, ADR 0021). The code is written and not applied. No one has signed in through it, and whether it works with the pool in ADR 0012 is not tested.
 - The network rule on the Key Vault. The scan finding AZU-0013 is accepted in `.trivyignore.yaml` (ADR 0029).
-- Every role marked "written and not applied" above: the plan identity, the sample service identity, the Key Vault Secrets Officer role, and the two roles of the Entra ID admin group.
+- Every role marked "written and not applied" above: the two roles of the Entra ID admin group.
 - A rotation process for the cluster secret.
