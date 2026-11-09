@@ -5,6 +5,10 @@
 #   paths:      the files the entry applies to
 #   statement:  the reason the finding is accepted
 # expired_at is optional. Entries are reviewed in pull requests.
-misconfigurations: []
+misconfigurations:
+  - id: AZU-0013
+    paths:
+      - infrastructure/environments/dev/persistent/keyvault.tf
+    statement: "No role is assigned on the dev vault. A deny-by-default network rule would also block Terraform runs from the maintainer's machine and the cluster's pods, and the address of the cluster's outbound traffic exists only during a session. The network rule is revisited with workload identity (issue #42)."
 vulnerabilities: []
 secrets: []
