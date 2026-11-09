@@ -26,7 +26,9 @@ Status values:
 | Workflow Open pull request for the image tag | Opens a pull request that changes the tag | `contents: write` and `pull-requests: write`, in the one job. No permissions at the top | The repository | `.github/workflows/image-tag-bump.yml` | In the repository |
 | Argo CD admin credential | Signs in to Argo CD | The admin credential that Argo CD generates when it starts, read from the cluster when asked | The Argo CD instance of the session cluster | `docs/adr/0017-argocd-bootstrap.md`, `infrastructure/session.sh` (`argocd-password`) | Written. The session layer is destroyed |
 | Administrator credential of the session cluster | Lets `session.sh bootstrap` and `argocd-password` reach the cluster | The local administrator credential from `az aks get-credentials --admin` | The session cluster | `infrastructure/session.sh` (`kube_setup`), `docs/adr/0021-entra-id-cluster-access.md` | Written. The session layer is destroyed |
-| People, to the cluster | Day-to-day `kubectl` | Entra ID sign-in with Azure RBAC for Kubernetes. The admin group is a run-time input | The session cluster | `docs/adr/0021-entra-id-cluster-access.md`, issue #45 | Planned |
+| People, to the cluster | Day-to-day `kubectl` | Entra ID sign-in with Azure RBAC for Kubernetes. The admin group is a run-time input | The session cluster | `infrastructure/environments/dev/session/main.tf`, `variables.tf`, `docs/adr/0021-entra-id-cluster-access.md` | Written and not applied |
+| The Entra ID admin group | Administers the cluster | Azure Kubernetes Service RBAC Cluster Admin | The session cluster | `infrastructure/environments/dev/session/access.tf` | Written and not applied |
+| The Entra ID admin group | Fetches the kubeconfig with `az aks get-credentials` | Azure Kubernetes Service Cluster User Role | The session cluster | `infrastructure/environments/dev/session/access.tf` | Written and not applied |
 
 Notes on the rows:
 
@@ -46,7 +48,7 @@ A new role, scope or permission is added in a pull request that changes this tab
    - GitHub repository secrets hold identifiers for the plan workflow (`docs/workflows.md`). They are not credentials.
    - The cluster secret `appinsights-connection` is created at run time in the namespace `observability` (`infrastructure/session.sh`, `create_collector_secret`). It lives with the cluster.
    - Terraform state holds some sensitive values (rule 5).
-2. **Never in Git:** secret values, account identifiers (subscription, tenant and client IDs), the maintainer's address ranges, and email addresses. The identity client ID and the vault name are read from Terraform outputs at run time (`docs/adr/0029-workload-identity-and-vault-access.md`). The alert email and the authorized ranges are run-time inputs (`infrastructure/environments/dev/persistent/README.md`, `infrastructure/README.md`).
+2. **Never in Git:** secret values, account identifiers (subscription, tenant, client and group IDs), the maintainer's address ranges, and email addresses. The identity client ID and the vault name are read from Terraform outputs at run time (`docs/adr/0029-workload-identity-and-vault-access.md`). The alert email, the authorized ranges and the object ID of the admin group are run-time inputs (`infrastructure/environments/dev/persistent/README.md`, `infrastructure/README.md`, `infrastructure/environments/dev/session/variables.tf`).
 3. **What keeps them out of Git.**
    - `.gitignore` covers `*.tfvars`, state files, `kubeconfig`, `.env` files, key and certificate files, and `infrastructure/bootstrap/.state-account-name`.
    - GitHub secret scanning and push protection are on for this repository (`docs/architecture.md`, section 10).
@@ -67,7 +69,7 @@ A new role, scope or permission is added in a pull request that changes this tab
 
 ## 3. Not done yet
 
-- Entra ID access for people to the cluster (issue #45, ADR 0021).
+- Entra ID access for people to the cluster (issue #45, ADR 0021). The code is written and not applied. No one has signed in through it, and whether it works with the pool in ADR 0012 is not tested.
 - The network rule on the Key Vault. The scan finding AZU-0013 is accepted in `.trivyignore.yaml` (ADR 0029).
-- Every role marked "written and not applied" above: the plan identity, the sample service identity and the Key Vault Secrets Officer role.
+- Every role marked "written and not applied" above: the plan identity, the sample service identity, the Key Vault Secrets Officer role, and the two roles of the Entra ID admin group.
 - A rotation process for the cluster secret.

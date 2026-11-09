@@ -6,6 +6,8 @@ locals {
   }
 }
 
+data "azurerm_client_config" "current" {}
+
 resource "azurerm_resource_group" "session" {
   name     = "pp-${var.env}-session-rg"
   location = var.location
@@ -77,6 +79,14 @@ resource "azurerm_kubernetes_cluster" "main" {
 
   api_server_access_profile {
     authorized_ip_ranges = var.api_authorized_ip_ranges
+  }
+
+  # Sign in with Entra ID and authorize with Azure RBAC (ADR 0021). Local accounts
+  # stay on as the fallback, so local_account_disabled is not set. The roles for the
+  # admin group are in access.tf.
+  azure_active_directory_role_based_access_control {
+    azure_rbac_enabled = true
+    tenant_id          = data.azurerm_client_config.current.tenant_id
   }
 
   # Workload identity and the Key Vault secrets provider add-on (ADR 0029).

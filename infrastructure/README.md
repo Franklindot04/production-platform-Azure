@@ -26,6 +26,34 @@ There are two Terraform roots today, `environments/dev/persistent` and `environm
 | `session.sh bootstrap secrets` | Creates only the secret `appinsights-connection` in the namespace `observability`. Planned: it has not run. |
 | `session.sh argocd-password` | Prints the Argo CD admin credential to the terminal. |
 
+### One-time and session steps for Entra ID sign-in (planned, not run)
+
+None of these steps has run. `kubelogin` must be installed. The group name is a name and not an ID. The group ID is read at run time and is not written to a file.
+
+One time, create the group and add the maintainer to it:
+
+```bash
+az ad group create --display-name pp-dev-cluster-admins --mail-nickname pp-dev-cluster-admins --query displayName -o tsv
+az ad group member add --group pp-dev-cluster-admins --member-id "$(az ad signed-in-user show --query id -o tsv)"
+```
+
+Each session, before `session.sh up`, set the group ID:
+
+```bash
+export TF_VAR_cluster_admin_group_object_id="$(az ad group show --group pp-dev-cluster-admins --query id -o tsv)"
+```
+
+After the cluster exists, fetch the kubeconfig without `--admin` into a file outside the repository, and convert it to sign in with the Azure CLI:
+
+```bash
+export KUBECONFIG="${PP_PLAN_DIR:-${TMPDIR:-/tmp}}/kubeconfig-dev-user"
+az aks get-credentials --overwrite-existing --file "$KUBECONFIG" -g pp-dev-session-rg -n pp-dev-aks
+kubelogin convert-kubeconfig -l azurecli
+kubectl get nodes
+```
+
+`session.sh bootstrap` keeps using the local administrator credential (ADR 0021).
+
 ### Set the Key Vault secret (planned, not run)
 
 The sample service pods do not start until the secret `sample-service-secret` exists in the vault. Set it once, after the persistent root is applied. The value is read from a prompt and not from the command line, and the output is limited to the secret ID.
@@ -43,6 +71,8 @@ The signed-in user needs the role Key Vault Secrets Officer on the vault (ADR 00
 `dev` is the default environment. Pass `staging` or `prod` as the second argument for another one.
 
 `up` needs the authorized API range in `TF_VAR_api_authorized_ip_ranges`, a JSON list of CIDR ranges. Set it at run time and do not write it to a file. The saved plan holds the range, so it is kept outside the repository: `PP_PLAN_DIR` sets the folder and defaults to the temporary folder. The range is also stored in the state, which is in the private state container.
+
+`up` also needs the object ID of the Entra ID admin group in `TF_VAR_cluster_admin_group_object_id` (ADR 0021). Set it at run time and do not write it to a file. The session root gives the group two roles on the cluster in `access.tf`. This is written and not applied. `down` uses a placeholder value if the variable is not set, because a destroy only needs a valid value.
 
 `check` exits 1 if any of these remain, and 0 otherwise:
 

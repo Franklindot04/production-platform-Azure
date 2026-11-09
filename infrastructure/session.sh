@@ -30,6 +30,8 @@
 # PP_KUBE_CONTEXT=<context> uses an existing kubectl context instead, for a kind cluster.
 # The ingress source range comes from PP_INGRESS_ALLOWED_RANGES (comma separated) or from
 # TF_VAR_api_authorized_ip_ranges. It is not stored.
+# up needs the object ID of the Entra ID admin group in TF_VAR_cluster_admin_group_object_id
+# (ADR 0021). It is set at run time and is not stored.
 # Exit codes: 0 nothing remains, 1 something remains, 2 error or wrong use.
 # Output is masked: GUIDs and every /32 host range are replaced. See infrastructure/README.md.
 set -euo pipefail
@@ -120,6 +122,10 @@ step_up() {
     echo "Set TF_VAR_api_authorized_ip_ranges to a JSON list of CIDR ranges." >&2
     exit 2
   fi
+  if [ -z "${TF_VAR_cluster_admin_group_object_id:-}" ]; then
+    echo "Set TF_VAR_cluster_admin_group_object_id to the object ID of the Entra ID admin group." >&2
+    exit 2
+  fi
   need_terraform_inputs
   build_mask
   local plan
@@ -140,6 +146,7 @@ step_up() {
 step_down() {
   # A destroy only needs a valid value, so use a documentation address if none is set.
   export TF_VAR_api_authorized_ip_ranges="${TF_VAR_api_authorized_ip_ranges:-[\"203.0.113.10/32\"]}"
+  export TF_VAR_cluster_admin_group_object_id="${TF_VAR_cluster_admin_group_object_id:-00000000-0000-0000-0000-000000000000}"
   need_terraform_inputs
   build_mask
   tf_init
