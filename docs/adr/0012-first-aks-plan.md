@@ -2,7 +2,7 @@
 
 - Status: proposed
 - Date: 2026-11-04
-- Issue: #28
+- Issue: #24, #27
 
 ## Context
 
@@ -47,7 +47,7 @@ Both options break an AKS guideline:
 
 Neither option leaves room for a surge node. Both use the whole quota of 4 vCPU. A surge node cannot start, so an in-place upgrade or a node replacement fails. The policy is to pin the version, leave upgrades off and re-create the cluster to change a version or a node image. Max surge 0 is not available on a system pool, so the default of 1 is kept. It cannot start without free quota.
 
-A plan does not check the VM size, the version or the quota against Azure, so the first real create (#35) tested the pool. The results are in the next section. They cover the create, not an upgrade or a node replacement.
+A plan does not check the VM size, the version or the quota against Azure, so the first real create (#27) tested the pool. The results are in the next section. They cover the create, not an upgrade or a node replacement.
 
 ## Result of the first create
 

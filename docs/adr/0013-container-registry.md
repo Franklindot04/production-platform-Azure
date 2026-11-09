@@ -2,7 +2,7 @@
 
 - Status: proposed
 - Date: 2026-11-06
-- Issue: #39
+- Issue: #28
 
 ## Context
 
@@ -21,7 +21,7 @@ Facts read from the GitHub documentation:
 ## Decision
 
 - Images are stored in `ghcr.io/<owner>/` as public packages. The cluster pulls them without a pull secret and without a role.
-- The first publish is done by the workflow from issue #46, so that the package is linked to the repository. No image is pushed by hand first.
+- The first publish is done by the workflow from issue #34, so that the package is linked to the repository. No image is pushed by hand first.
 - The maintainer makes the package public in the GitHub settings once, after the first publish.
 - Images are tagged with the commit SHA. How the tag reaches the cluster is in ADR 0018.
 - The persistent layer has no registry.
