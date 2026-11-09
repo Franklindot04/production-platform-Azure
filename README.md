@@ -18,7 +18,7 @@ What exists today:
 - `applications/sample-service/`: a Go service with health endpoints and a settable latency and error rate, and its Dockerfile. `helm/sample-service/`: its chart. `kubernetes/`: namespaces, quotas and network policies. `gitops/`: the Argo CD Applications and `dev` values. `tests/kind/`: a script that checks all of it in a local `kind` cluster. None of it has run on AKS.
 - Planned work, written up as GitHub issues.
 
-What does not exist yet: a running cluster, build and deploy pipelines, dashboards, runbooks. The README will change as each of these is built.
+Runbooks are written in `docs/runbooks/` and have not been exercised. What does not exist yet: a running cluster, build and deploy pipelines, dashboards. The README will change as each of these is built.
 
 ## Planned tools
 
@@ -49,7 +49,7 @@ The folders below marked as existing are in the repository. The others are plann
 - `tests/`: checks that need no Azure. Exists.
 - `monitoring/`: dashboards, alert rules and SLO definitions.
 - `security/`: policies and scanning configuration.
-- `docs/`: architecture documents, ADRs, runbooks and postmortems. Exists.
+- `docs/`: architecture documents, ADRs and runbooks (`docs/runbooks/`, written, not exercised). Postmortems are planned. Exists.
 
 ## How work is tracked
 

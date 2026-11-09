@@ -42,4 +42,4 @@ The rule group exists in Azure only after the persistent layer is applied. This 
 - The windows are shorter than the usual 1h/5m and 6h/30m, because a live session lasts about two hours.
 - A service that is down and receives no requests produces no data, and no alert fires. An alert for missing data is planned.
 - The alerts have not been applied and have not fired. Session 2 experiment 3 is the first test.
-- Runbooks are planned.
+- Runbooks for the four alerts are written and not exercised: [availability-burn](runbooks/availability-burn.md) and [latency-burn](runbooks/latency-burn.md).
