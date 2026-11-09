@@ -2,7 +2,7 @@
 
 - Status: proposed
 - Date: 2026-11-06
-- Issue: #39
+- Issue: #28
 
 ## Context
 
@@ -10,12 +10,12 @@ Epic 6 needs checks that stop unsafe changes. The architecture document left the
 
 ## Decision
 
-- Checks run in CI, on pull requests (issue #55):
+- Checks run in CI, on pull requests (issue #44):
   - Trivy scans the Terraform and the Kubernetes manifests and chart for misconfiguration, and the image for vulnerabilities and secrets.
   - `kubeconform` checks the manifests against the Kubernetes schemas.
 - A finding of severity HIGH or CRITICAL fails the run. An accepted finding is recorded in an ignore file with a reason.
 - Actions and tool versions are pinned (full SHAs for actions) when the workflow is written.
-- No admission policy engine is installed in the cluster. Namespaces carry Pod Security Admission labels instead (issue #41), which the cluster enforces without extra pods.
+- No admission policy engine is installed in the cluster. Namespaces carry Pod Security Admission labels instead (issue #30), which the cluster enforces without extra pods.
 
 The behaviour of the tools was not verified for this record. It is checked when the workflow is written.
 

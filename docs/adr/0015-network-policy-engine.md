@@ -2,7 +2,7 @@
 
 - Status: proposed
 - Date: 2026-11-06
-- Issue: #39
+- Issue: #28
 
 ## Context
 
@@ -21,7 +21,7 @@ Facts read from the AKS documentation:
 ## Decision
 
 - Use Azure Network Policy Manager. It is Azure's own engine, and it is set in the session Terraform with `network_policy = "azure"`.
-- Namespaces start with a default-deny policy. Allowed paths are listed in the manifests under `kubernetes/` (issue #41).
+- Namespaces start with a default-deny policy. Allowed paths are listed in the manifests under `kubernetes/` (issue #30).
 - The end of support in 2028 is after the planned life of this project. The cluster is also re-created each session, so a change of engine needs no migration.
 
 Assumption: Azure NPM works with Azure CNI Overlay on this cluster. The documentation does not state it, and a plan does not check it. The first create tests it. If AKS refuses the setting, the create fails and the work stops. If it is accepted, Session 1 checks that a test pod in another namespace is blocked.

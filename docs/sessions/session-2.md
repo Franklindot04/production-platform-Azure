@@ -1,6 +1,6 @@
 # Live session 2: load, failure and rebuild
 
-Status: planned. Not run. Issue #61. Commands marked (planned) do not exist yet.
+Status: planned. Not run. Issue #50. Commands marked (planned) do not exist yet.
 
 Goal: time a full rebuild from zero, measure the sample service under load, run failure experiments, and destroy everything.
 
@@ -37,7 +37,7 @@ Rules are the same as in [Session 1](session-1.md): approved plans, masked outpu
 5. Edit a resource by hand with `kubectl`. Hypothesis: Argo CD reverts it.
 6. Optional: apply a network policy that blocks the service. Hypothesis: the probes fail and the alert fires.
 
-Each experiment feeds a runbook (#57). A runbook that no experiment exercised says `not exercised`.
+Each experiment feeds a runbook (#46). A runbook that no experiment exercised says `not exercised`.
 
 ## What is recorded
 
@@ -50,5 +50,5 @@ Each experiment feeds a runbook (#57). A runbook that no experiment exercised sa
 ## After the session
 
 1. `session.sh check` exits 0.
-2. The results go into a pull request, with the first postmortem (#58).
-3. The issue #61 criteria are ticked only for what was run.
+2. The results go into a pull request, with the first postmortem (#47).
+3. The issue #50 criteria are ticked only for what was run.
