@@ -135,6 +135,54 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# Helpers for the Key Vault mount checks. The values are plain words, not real IDs.
+FAKE_VAULT=(--set vaultSecret.enabled=true --set vaultSecret.clientId=fake-client
+  --set vaultSecret.tenantId=fake-tenant --set vaultSecret.vaultName=fake-vault
+  --set vaultSecret.objectName=fake-object)
+
+# render_chart [helm args...]   Renders the chart with the dev values.
+render_chart() {
+  helm template sample-service "$REPO/helm/sample-service" -n apps -f "$REPO/gitops/dev/values/sample-service.yaml" "$@"
+}
+
+# vault_mount_needs_client_id   Succeeds if the render fails and names vaultSecret.clientId.
+vault_mount_needs_client_id() {
+  local out
+  if out="$(render_chart --set vaultSecret.enabled=true --set vaultSecret.tenantId=fake-tenant \
+    --set vaultSecret.vaultName=fake-vault --set vaultSecret.objectName=fake-object 2>&1)"; then
+    return 1
+  fi
+  case "$out" in
+    *vaultSecret.clientId*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+# vault_mount_renders   Succeeds if the render has the annotation, the class, the label and the mount.
+vault_mount_renders() {
+  local out want
+  out="$(render_chart "${FAKE_VAULT[@]}")" || return 1
+  for want in 'azure.workload.identity/client-id: "fake-client"' 'kind: SecretProviderClass' \
+    'azure.workload.identity/use: "true"' 'driver: secrets-store.csi.k8s.io' 'mountPath: "/mnt/secrets"'; do
+    if ! printf '%s\n' "$out" | grep -qF -- "$want"; then return 1; fi
+  done
+}
+
+# vault_mount_absent_by_default   Succeeds if the default render has none of the mount.
+vault_mount_absent_by_default() {
+  local out unwanted
+  out="$(render_chart)" || return 1
+  for unwanted in 'azure.workload.identity' 'SecretProviderClass' 'secrets-store.csi'; do
+    if printf '%s\n' "$out" | grep -qF -- "$unwanted"; then return 1; fi
+  done
+}
+
+# vault_mount_valid   Validates the render with the CRD catalog. kubeconform fails if a schema is missing.
+vault_mount_valid() {
+  render_chart "${FAKE_VAULT[@]}" | kubeconform -strict -summary -kubernetes-version "$K8S_SCHEMA" \
+    -schema-location default -schema-location "$CRD_CATALOG"
+}
+
 static_checks() {
   echo "== static checks"
   need go
@@ -148,6 +196,10 @@ static_checks() {
   check "helm lint with the dev values" helm lint "$REPO/helm/sample-service" -f "$REPO/gitops/dev/values/sample-service.yaml"
   check "chart fails to render without an image tag" bash -c "! helm template x '$REPO/helm/sample-service' >/dev/null 2>&1"
   check "chart renders valid resources with the dev values" bash -c "helm template sample-service '$REPO/helm/sample-service' -n apps -f '$REPO/gitops/dev/values/sample-service.yaml' | kubeconform -strict -summary -kubernetes-version $K8S_SCHEMA"
+  check "chart fails to render with the Key Vault mount on and no client ID" vault_mount_needs_client_id
+  check "chart renders the Key Vault mount when it is on" vault_mount_renders
+  check "chart renders no Key Vault mount by default" vault_mount_absent_by_default
+  check "chart with the Key Vault mount on is valid, with the CRD catalog" vault_mount_valid
   check "cluster rules are valid resources" kubeconform -strict -summary -kubernetes-version "$K8S_SCHEMA" "$REPO/kubernetes"
   check "Argo CD Applications are valid resources" kubeconform -strict -summary -kubernetes-version "$K8S_SCHEMA" \
     -schema-location default -schema-location "$CRD_CATALOG" \

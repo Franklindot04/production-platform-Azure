@@ -7,8 +7,9 @@
 #   down --yes      Destroy the session root.
 #   check           List every resource by resource group and report what remains.
 #   bootstrap       Install Argo CD with Helm, set the ingress source range, and apply
-#                   the root Application, then create the cluster secret for the Collector.
-#                   It can be repeated. A part (argocd, ingress, root or secrets) runs only
+#                   the root Application, set the identity of the sample service, then create
+#                   the cluster secret for the Collector.
+#                   It can be repeated. A part (argocd, ingress, root, identity or secrets) runs only
 #                   that part, for example `bootstrap ingress` to set the ingress range
 #                   again after the maintainer's address changed. The secrets part reads the
 #                   Application Insights connection string from the persistent root at run
@@ -16,6 +17,12 @@
 #                   observability. The value only travels through pipes. It is not printed,
 #                   masked, stored or written to a file. It is skipped on a kind cluster in a
 #                   full bootstrap, and `bootstrap secrets` stops there (PP_KUBE_CONTEXT).
+#                   The identity part reads the client ID and the vault name from the
+#                   persistent root and the tenant ID from the signed-in Azure account, at run
+#                   time. It sets them as Helm parameters, with the Key Vault mount turned on,
+#                   on the Argo CD Application sample-service (ADR 0029). No value is printed,
+#                   written to a file or stored by the script. It is skipped on a kind cluster
+#                   in a full bootstrap, and `bootstrap identity` stops there.
 #   argocd-password Print the Argo CD admin credential to the terminal. It is generated
 #                   by Argo CD, read from the cluster when asked, and never stored.
 # env is dev, staging or prod. Default: dev.
@@ -36,7 +43,7 @@ PART="all"
 for arg in "$@"; do
   case "$arg" in
     dev | staging | prod) ENV_NAME="$arg" ;;
-    argocd | ingress | root | secrets) PART="$arg" ;;
+    argocd | ingress | root | identity | secrets) PART="$arg" ;;
     --apply | --yes) FLAG="$arg" ;;
     *)
       echo "unknown argument: $arg" >&2
@@ -306,6 +313,21 @@ set_ingress_range() {
     echo "warning: the scaling of the ingress controller was not changed"
 }
 
+# init_persistent   Initialises the backend of the persistent root. The output is discarded.
+init_persistent() {
+  need_terraform_inputs
+  [ -d "$PERSISTENT_ROOT" ] || {
+    echo "no persistent root for ${ENV_NAME}" >&2
+    exit 2
+  }
+  terraform -chdir="$PERSISTENT_ROOT" init -input=false -no-color -reconfigure \
+    -backend-config="resource_group_name=${STATE_RG}" \
+    -backend-config="storage_account_name=$(cat "$NAME_FILE")" >/dev/null 2>&1 || {
+    echo "Could not initialise the backend of the persistent root." >&2
+    exit 1
+  }
+}
+
 # create_collector_secret   Creates the secret appinsights-connection in the namespace
 # observability from the connection string in the state of the persistent root.
 # The value is never put in a variable or a file, and it is never printed or masked.
@@ -317,18 +339,7 @@ create_collector_secret() {
     echo "Create the secret appinsights-connection (key connection-string) by hand if it is needed there." >&2
     exit 2
   fi
-  need_terraform_inputs
-  [ -d "$PERSISTENT_ROOT" ] || {
-    echo "no persistent root for ${ENV_NAME}" >&2
-    exit 2
-  }
-  # Initialise the backend of the persistent root. The output is discarded.
-  terraform -chdir="$PERSISTENT_ROOT" init -input=false -no-color -reconfigure \
-    -backend-config="resource_group_name=${STATE_RG}" \
-    -backend-config="storage_account_name=$(cat "$NAME_FILE")" >/dev/null 2>&1 || {
-    echo "Could not initialise the backend of the persistent root." >&2
-    exit 1
-  }
+  init_persistent
   for i in $(seq 1 60); do
     "${K[@]}" get namespace observability >/dev/null 2>&1 && break
     [ "$i" = "60" ] && {
@@ -352,6 +363,59 @@ create_collector_secret() {
     exit 1
   }
   echo "The secret appinsights-connection is set in the namespace observability."
+}
+
+# set_sample_service_identity   Sets the Helm parameters of the Key Vault mount on the
+# Argo CD Application sample-service (ADR 0029). The client ID and the vault name come
+# from the outputs of the persistent root and the tenant ID from the signed-in account.
+# They are passed to python in the environment, and the patch goes to kubectl on a pipe,
+# so no value is on a command line. Nothing is printed, masked or written to a file.
+set_sample_service_identity() {
+  local i client_id vault_name tenant_id
+  if [ -n "${PP_KUBE_CONTEXT:-}" ]; then
+    echo "The identity part reads Azure state, and a kind cluster has none." >&2
+    exit 2
+  fi
+  init_persistent
+  client_id="$(terraform -chdir="$PERSISTENT_ROOT" output -raw sample_service_identity_client_id 2>/dev/null)" || client_id=""
+  vault_name="$(terraform -chdir="$PERSISTENT_ROOT" output -raw key_vault_name 2>/dev/null)" || vault_name=""
+  tenant_id="$(az account show --query tenantId -o tsv 2>/dev/null)" || tenant_id=""
+  if [ -z "$client_id" ] || [ -z "$vault_name" ] || [ -z "$tenant_id" ]; then
+    echo "Could not read the identity, the vault name or the tenant. Apply the persistent root and sign in to Azure." >&2
+    exit 1
+  fi
+  for i in $(seq 1 60); do
+    "${K[@]}" -n "$ARGOCD_NAMESPACE" get application sample-service >/dev/null 2>&1 && break
+    [ "$i" = "60" ] && {
+      echo "The Application sample-service does not exist. Check the root Application." >&2
+      exit 1
+    }
+    sleep 5
+  done
+  PP_CLIENT_ID="$client_id" PP_TENANT_ID="$tenant_id" PP_VAULT_NAME="$vault_name" python3 -I -c '
+import json
+import os
+
+def param(name, value, force_string=True):
+    item = {"name": name, "value": value}
+    if force_string:
+        item["forceString"] = True
+    return item
+
+params = [
+    param("vaultSecret.enabled", "true", False),
+    param("vaultSecret.clientId", os.environ["PP_CLIENT_ID"]),
+    param("vaultSecret.tenantId", os.environ["PP_TENANT_ID"]),
+    param("vaultSecret.vaultName", os.environ["PP_VAULT_NAME"]),
+]
+print(json.dumps({"spec": {"source": {"helm": {"parameters": params}}}}))
+' |
+    "${K[@]}" -n "$ARGOCD_NAMESPACE" patch application sample-service --type merge \
+      --patch-file /dev/stdin >/dev/null 2>&1 || {
+    echo "The identity of the sample service was not set." >&2
+    exit 1
+  }
+  echo "The Key Vault mount is turned on for the Application sample-service."
 }
 
 step_bootstrap() {
@@ -378,6 +442,18 @@ step_bootstrap() {
   if [ "$PART" = "all" ] || [ "$PART" = "root" ]; then
     echo "== root application"
     "${K[@]}" apply -f "$root_app" 2>&1 | mask
+  fi
+
+  if [ "$PART" = "identity" ]; then
+    echo "== identity"
+    set_sample_service_identity
+  elif [ "$PART" = "all" ]; then
+    echo "== identity"
+    if [ -n "${PP_KUBE_CONTEXT:-}" ]; then
+      echo "Skipped: a kind cluster has no Azure state. The Key Vault mount stays off."
+    else
+      set_sample_service_identity
+    fi
   fi
 
   if [ "$PART" = "secrets" ]; then

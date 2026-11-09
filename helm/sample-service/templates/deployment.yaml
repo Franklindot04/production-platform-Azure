@@ -13,6 +13,9 @@ spec:
     metadata:
       labels:
         {{- include "sample-service.selectorLabels" . | nindent 8 }}
+        {{- if .Values.vaultSecret.enabled }}
+        azure.workload.identity/use: "true"
+        {{- end }}
     spec:
       serviceAccountName: {{ include "sample-service.name" . }}
       automountServiceAccountToken: false
@@ -63,6 +66,12 @@ spec:
               port: http
             periodSeconds: 5
             failureThreshold: 2
+          {{- if .Values.vaultSecret.enabled }}
+          volumeMounts:
+            - name: vault-secret
+              mountPath: {{ .Values.vaultSecret.mountPath | quote }}
+              readOnly: true
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           securityContext:
@@ -71,3 +80,12 @@ spec:
             capabilities:
               drop:
                 - ALL
+      {{- if .Values.vaultSecret.enabled }}
+      volumes:
+        - name: vault-secret
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: {{ include "sample-service.name" . }}-vault
+      {{- end }}
