@@ -35,7 +35,7 @@ These are the tools planned for the project. None is in use yet.
 
 Tool choices may change. Changes will be recorded as ADRs.
 
-The planned design is described in [docs/architecture.md](docs/architecture.md). The plan for the remaining epics and the live sessions is in [docs/plan.md](docs/plan.md).
+The planned design is described in [docs/architecture.md](docs/architecture.md). The plan for the remaining epics and the live sessions is in [docs/plan.md](docs/plan.md). The roles and the secret rules are in [docs/security.md](docs/security.md).
 
 ## Planned repository layout
 
