@@ -1,6 +1,6 @@
 # dev persistent layer
 
-The resources of `dev` that outlive a session. The resource group `pp-dev-persistent-rg` in `swedencentral` was applied once. The files below are written and not applied, so every resource in them is planned. Images are stored in `ghcr.io`, outside Azure, so this layer has no registry (ADR 0013).
+The resources of `dev` that outlive a session. Every resource in the files below is applied. The resource group is `pp-dev-persistent-rg` in `swedencentral`. Images are stored in `ghcr.io`, outside Azure, so this layer has no registry (ADR 0013).
 
 | File | Defines |
 |---|---|
@@ -25,8 +25,6 @@ export TF_VAR_state_account_name="$(cat infrastructure/bootstrap/.state-account-
 
 Applying `identity.tf` needs permission to create applications in the Entra tenant and to create role assignments. After the apply, store the output `plan_identity_client_id`, the tenant ID, the subscription ID and the state account name as the repository secrets `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID` and `TFSTATE_ACCOUNT_NAME`. Until `AZURE_CLIENT_ID` is set, the plan workflow does nothing (`docs/workflows.md`).
 
-The lock file must be regenerated with `terraform init -upgrade` after the `azuread` and `random` providers were added.
-
 State file: `persistent.tfstate` in the `tfstate-dev` container, set in `backend.tf`. Initialise the backend with:
 
 ```bash
@@ -37,5 +35,6 @@ terraform -chdir=infrastructure/environments/dev/persistent init \
 
 The state account name is not committed. `.state-account-name` is written by `infrastructure/bootstrap/bootstrap.sh`. Access uses Microsoft Entra ID, so the signed-in user needs Storage Blob Data Contributor on the `tfstate-dev` container. The pull request plan identity has the read role only. The format and validate workflow runs `init -backend=false`, so it does not use the backend.
 
+The resource group `pp-dev-persistent-rg` holds the resources defined by the files above. Azure creates two things around them: the resource group `MA_pp-dev-amw_swedencentral_managed` for the Monitor workspace, and an action group named "Application Insights Smart Detection" in the persistent resource group. Neither is defined in Terraform. The provider block does not register resource providers, and it holds no credentials. Terraform reads the subscription from `ARM_SUBSCRIPTION_ID` and the Azure CLI login.
 
-The resource group `pp-dev-persistent-rg` exists and is empty. The provider block does not register resource providers, and it holds no credentials. Terraform reads the subscription from `ARM_SUBSCRIPTION_ID` and the Azure CLI login.
+The resource providers that must be registered are listed in [Resource providers](../../../README.md#resource-providers).
