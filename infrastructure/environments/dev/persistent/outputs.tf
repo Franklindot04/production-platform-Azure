@@ -35,3 +35,12 @@ output "plan_identity_client_id" {
   description = "Client ID of the pull request plan identity. Store it as the secret AZURE_CLIENT_ID."
   value       = azuread_application.plan.client_id
 }
+
+output "sample_service_identity_name" {
+  value = azurerm_user_assigned_identity.sample_service.name
+}
+
+output "sample_service_identity_client_id" {
+  description = "Client ID of the sample service identity. Read it at run time. It is not written to any file."
+  value       = azurerm_user_assigned_identity.sample_service.client_id
+}
