@@ -18,6 +18,8 @@ ADR 0022 defined the persistent layer with a Key Vault that uses Azure RBAC and 
   - Key Vault Secrets User for the sample service identity. It reads values and cannot change them.
   - Key Vault Secrets Officer for the principal that runs apply, so the maintainer can set the secret by hand. Issue #43 reviews roles.
 - No identity ID, client ID or tenant ID is written in Git. They are read from the Terraform outputs at run time.
+- The chart has a `vaultSecret` block, off by default. When it is on, the chart adds the client ID annotation to the service account, a `SecretProviderClass`, the pod label `azure.workload.identity/use` and a CSI volume mounted read-only at `/mnt/secrets`. The token mount stays off in the service account and in the pod, because the driver gets the token from the kubelet. The values file in Git holds only the secret name `sample-service-secret`.
+- The run-time path: the part `identity` of `session.sh bootstrap` reads the client ID and the vault name from the persistent root outputs and the tenant ID from the signed-in account. It sets them as Helm parameters, with `vaultSecret.enabled` true, on the Argo CD Application `sample-service`. The root Application ignores differences on `/spec/source/helm/parameters` of Applications and respects that setting when it syncs, so its self-heal does not remove the parameters.
 - The secret value is set by hand. It is never in Terraform and never in state, and Terraform creates no `azurerm_key_vault_secret`.
 - The network rule on the vault is deferred. A deny-by-default rule would block Terraform runs from the maintainer's machine and the cluster's pods, and the outbound address of the cluster exists only during a session. The scan finding is accepted in `.trivyignore.yaml` (AZU-0013).
 
@@ -25,7 +27,9 @@ ADR 0022 defined the persistent layer with a Key Vault that uses Azure RBAC and 
 
 - No Azure credential is stored in the cluster or in the repository.
 - The add-on adds pods to the cluster. Their requests are not measured, and their fit on the two-node pool is not verified.
-- The chart, the session script and the kind check are not part of this record. They are planned. The chart's service account currently disables the token mount, so the chart change must allow the projected token.
+- The pod does not start until the secret exists in the vault, because the mount fails. The maintainer sets the secret once (`infrastructure/README.md`).
+- The chart, the session script part and the kind check are written. The kind check renders the chart and validates it. It does not mount a secret, because a kind cluster has no vault.
+- That the root Application leaves the parameters alone, and that the driver gets a token with the token mount off, are not verified.
 - Rotation is off, so a changed secret value is read after the pod restarts.
 - The vault is reachable from any network that has a role on it, until the network rule is added.
 - Everything here is written and not applied. It is unverified until a live session.

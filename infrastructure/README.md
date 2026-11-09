@@ -22,8 +22,23 @@ There are two Terraform roots today, `environments/dev/persistent` and `environm
 | `session.sh down --yes` | Destroys the session root. |
 | `session.sh check` | Lists every resource by resource group and reports what remains. |
 | `session.sh bootstrap` | Installs Argo CD with Helm, sets the source range of the ingress, applies the root Application, and creates the Collector secret. It can be repeated. |
+| `session.sh bootstrap identity` | Reads the identity client ID and the vault name from the persistent root and the tenant from the signed-in account, and sets them as Helm parameters on the Argo CD Application `sample-service`, with the Key Vault mount on (ADR 0029). Planned: it has not run. |
 | `session.sh bootstrap secrets` | Creates only the secret `appinsights-connection` in the namespace `observability`. Planned: it has not run. |
 | `session.sh argocd-password` | Prints the Argo CD admin credential to the terminal. |
+
+### Set the Key Vault secret (planned, not run)
+
+The sample service pods do not start until the secret `sample-service-secret` exists in the vault. Set it once, after the persistent root is applied. The value is read from a prompt and not from the command line, and the output is limited to the secret ID.
+
+```bash
+IFS= read -r -s -p "Secret value: " PP_SECRET_VALUE; echo
+printf '%s' "$PP_SECRET_VALUE" | az keyvault secret set \
+  --vault-name "$(terraform -chdir=infrastructure/environments/dev/persistent output -raw key_vault_name)" \
+  --name sample-service-secret --file /dev/stdin --query id -o tsv
+unset PP_SECRET_VALUE
+```
+
+The signed-in user needs the role Key Vault Secrets Officer on the vault (ADR 0029). Reading the value from `/dev/stdin` is not verified.
 
 `dev` is the default environment. Pass `staging` or `prod` as the second argument for another one.
 
