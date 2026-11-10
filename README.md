@@ -4,9 +4,11 @@ A personal project to build and operate a platform on Microsoft Azure: infrastru
 
 The goal is to practice the full SRE and DevOps loop on one system: build it, deploy it, measure it, break it and fix it.
 
+The documentation site is at https://franklindot04.github.io/production-platform-Azure/. Its pages are the files in `docs/`.
+
 ## Status
 
-Early stage. Session 1 created, checked and destroyed the session layer. No cluster is running now. The results are in [docs/sessions/session-1-results.md](docs/sessions/session-1-results.md).
+Early stage. Sessions 1 and 2 created, checked and destroyed the session layer. No cluster is running now. The results are in [docs/sessions/session-1-results.md](docs/sessions/session-1-results.md) and [docs/sessions/session-2-results.md](docs/sessions/session-2-results.md).
 
 What exists today:
 
