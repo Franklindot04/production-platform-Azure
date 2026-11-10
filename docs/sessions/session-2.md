@@ -6,7 +6,7 @@ Goal: time a full rebuild from zero, measure the sample service under load, run 
 
 Time box: about 2 hours. Teardown starts at 1:45 whatever is unfinished. An experiment marked optional is skipped when time is short.
 
-Rules are the same as in [Session 1](session-1.md): approved plans, masked output, no stored credentials.
+Rules are the same as in [Session 1](session-1.md) ([results](session-1-results.md)): approved plans, masked output, no stored credentials.
 
 ## Before the session
 
