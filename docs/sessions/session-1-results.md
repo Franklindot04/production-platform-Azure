@@ -94,5 +94,5 @@ AKS refused none of them.
 
 ## Open issues
 
-- #88: the failed-requests query filters on `/work`, and the table holds `GET /work`.
+- #88: the failed-requests and slow-requests queries filter on `GET /work`. They have not been run with failing or slow requests.
 - #89: the first destroy run stops on a public IP that the load balancer still holds, and a second run is needed.
