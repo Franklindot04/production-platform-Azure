@@ -5,7 +5,7 @@ The GitHub Actions workflows of the repository. Every action is pinned to a full
 | Workflow | File | Runs on | Permissions |
 |---|---|---|---|
 | Terraform checks | `terraform-checks.yml` | Pull requests that change `infrastructure/` | `contents: read` |
-| Terraform plan | `terraform-plan.yml` | Pull requests that change `infrastructure/` | None at the top, and `contents: read` and `id-token: write` in the one job |
+| Terraform plan | `terraform-plan.yml` | Pull requests that change `infrastructure/` or `.github/workflows/terraform-plan.yml` | None at the top, and `contents: read` and `id-token: write` in the one job |
 | Service, chart and manifest checks | `app-checks.yml` | Pull requests that change `applications/`, `helm/`, `kubernetes/`, `gitops/` or `tests/kind/` | `contents: read` |
 | Security scans | `security-scans.yml` | Pull requests that change `infrastructure/`, `kubernetes/`, `helm/`, `gitops/`, `applications/` or `.trivyignore.yaml` | `contents: read` |
 | Publish image | `image-publish.yml` | Pushes to `main` that change `applications/sample-service/`, and manual runs | `contents: read`, and `packages: write` in the one job that pushes |
