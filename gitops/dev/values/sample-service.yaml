@@ -3,7 +3,7 @@
 # (.github/workflows/image-tag-bump.yml, ADR 0018).
 image:
   repository: ghcr.io/franklindot04/sample-service
-  tag: does-not-exist
+  tag: 43247ebb83a06162a08ed1d9cb729718218bc886
 
 ingress:
   enabled: true
