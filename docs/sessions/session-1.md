@@ -39,7 +39,7 @@ Rules:
 | 1:15 | Observability | A metric in the Azure Monitor workspace, a trace in the backend, test queries from `monitoring/prometheus/request-rate.promql` and `monitoring/logs/failed-requests.kql`. `metrics.scrape.enabled` is set to `true` in `gitops/dev/values/sample-service.yaml` through a pull request after Gate A, and the target is then checked in the Azure Monitor workspace. The bootstrap creates the secret `appinsights-connection`, and the Collector pod is checked Running | Masked screenshots |
 | 1:35 | Identity | The bootstrap part `identity` has turned on the Key Vault mount. The sample service reads one Key Vault secret with workload identity. `kubectl get nodes` works through the Entra ID sign-in with the non-admin kubeconfig, and the local credential still works for the bootstrap. The maintainer reads the Argo CD credential once with `./infrastructure/session.sh argocd-password` | Pass or fail of each check |
 | 1:45 | Wrap up | Save output and screenshots in `docs/images`, masked | Files saved |
-| 1:50 | Teardown | `./infrastructure/session.sh down` then `down --yes`, then `./infrastructure/session.sh check`. If the first `down --yes` stops on a public IP, run it again (#89) | Output of `check`. The session ends when `check` exits 0 |
+| 1:50 | Teardown | `./infrastructure/session.sh down` then `down --yes`, then `./infrastructure/session.sh check`. If the first `down --yes` stops on a public IP, run it again (#89). `down --yes` now repeats once after a wait (#89). The repeat has not been run against the failure yet | Output of `check`. The session ends when `check` exits 0 |
 
 ## Gates
 
