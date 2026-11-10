@@ -1,8 +1,8 @@
 // Failed /work requests, newest first.
 // Run in: Logs view of the Log Analytics workspace pp-dev-law or of Application Insights.
-// Reads: AppRequests. The mapping from server spans to this table is not verified.
+// Reads: AppRequests. The request name includes the method.
 AppRequests
-| where Name == "/work"
+| where Name == "GET /work"
 | where Success == false
 | project TimeGenerated, Name, ResultCode, DurationMs, OperationId
 | order by TimeGenerated desc

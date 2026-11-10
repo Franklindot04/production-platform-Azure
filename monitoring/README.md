@@ -36,7 +36,7 @@ These portal steps are not verified.
 
 Nothing in this directory is deployed by Terraform or GitOps. The queries are run by hand.
 
-Session 1 ran `prometheus/request-rate.promql` in the Azure Monitor workspace, and it answered by route. Server spans of the sample service appear in `AppRequests` with the request name `GET /work`. `logs/failed-requests.kql` returned no rows because it filters on `/work` (#88). The other queries have not been run. Treat them as unverified.
+Session 1 ran `prometheus/request-rate.promql` in the Azure Monitor workspace, and it answered by route. Server spans of the sample service appear in `AppRequests` with the request name `GET /work`. `logs/failed-requests.kql` and `logs/slow-requests.kql` filter on `GET /work`, the request name in `AppRequests`. They have not been run with failing or slow requests. The other queries have not been run. Treat them as unverified.
 
 ## Not built
 
