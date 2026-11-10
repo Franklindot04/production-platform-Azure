@@ -39,7 +39,7 @@ The repository is at [github.com/Franklindot04/production-platform-Azure](https:
 
 ## Decision records
 
-- [ADR NNNN: Title](adr/0001-template.md)
+- [ADR 0001: Template](adr/0001-template.md)
 - [ADR 0002: Record decisions as ADRs](adr/0002-record-decisions-as-adrs.md)
 - [ADR 0003: Choose Azure region and resource naming convention](adr/0003-region-and-naming-convention.md)
 - [ADR 0004: Use Azure Storage as the Terraform state backend](adr/0004-terraform-state-backend.md)
