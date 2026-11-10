@@ -55,14 +55,14 @@ The saved output can contain the address. Mask it before the file is committed.
 
 The admin port (8081) is not exposed by the Service or the ingress. To change the latency or the error rate, forward the port to a pod and call `PUT /admin/config`. The namespace is `apps` and the Deployment is `sample-service`.
 
-These commands are planned and have not been run:
+Example:
 
 ```bash
 kubectl port-forward -n apps deploy/sample-service 8081:8081
 curl -X PUT http://localhost:8081/admin/config -d '{"latency":"800ms","error_rate":0.2}'
 ```
 
-A setting applies to one pod only and is lost when the pod restarts. See `applications/sample-service/README.md`. The Service sends requests to all pods, so a change on one pod changes only part of the traffic.
+The response echoes the new config, for example `{"error_rate":1,"latency":"0s"}`. A setting applies to one pod only and is lost when the pod restarts. See `applications/sample-service/README.md`. The Service sends requests to all pods, so a change on one pod changes only part of the traffic.
 
 ## Thresholds
 
@@ -75,9 +75,8 @@ k6 reports whether each threshold held. The thresholds do not stop the run.
 
 ## Status
 
-The `smoke` scenario has been run against the service on a local machine. The `baseline` and `ramp` scenarios have not been run, and nothing has been run against a cluster.
+The `smoke` scenario has been run against the service on a local machine. The `baseline` and `ramp` scenarios were run against the cluster in Session 2. The results are in [docs/sessions/session-2-results.md](../../docs/sessions/session-2-results.md).
 
 Not built:
 
 - A CI job for the script (planned if it is wanted).
-- Results. They come from Session 2.

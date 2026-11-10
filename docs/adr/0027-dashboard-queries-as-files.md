@@ -18,7 +18,7 @@ ADR 0019 ruled out Grafana and said dashboards are saved queries on the workspac
 
 - Queries are reviewed in pull requests.
 - Nobody opens a dashboard. A query has to be copied into the portal to run it.
-- Session 1 ran `prometheus/request-rate.promql` in the Azure Monitor workspace, and it answered by route. Server spans of the sample service appear in `AppRequests` with the request name `GET /work`. `logs/failed-requests.kql` and `logs/slow-requests.kql` filter on `GET /work`, the request name in `AppRequests`. They have not been run with failing or slow requests. The other queries have not been run.
+- Session 1 ran `prometheus/request-rate.promql` in the Azure Monitor workspace, and it answered by route. Server spans of the sample service appear in `AppRequests` with the request name `GET /work`. `logs/failed-requests.kql` and `logs/slow-requests.kql` filter on `GET /work`, the request name in `AppRequests`. In Session 2 `logs/failed-requests.kql` returned the 6,001 failed requests, and `logs/slow-requests.kql` returned 0 rows because no latency was injected. The other queries have not been run.
 - Deploying the KQL files as saved searches is planned. It needs a change in the persistent layer.
 - Alert rules and SLO queries are not part of this decision (issue #41).
 

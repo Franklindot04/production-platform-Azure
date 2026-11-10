@@ -19,7 +19,7 @@ The design covers:
 - Build, test and deploy pipelines, and GitOps delivery (Epic 4, #4).
 - Metrics, logs, traces, SLOs and alerts (Epic 5, #5).
 - Identity, secrets and policy checks (Epic 6, #6).
-- Runbooks, incident handling and recovery (Epic 7, #7). The runbooks are written and not exercised: [docs/runbooks/](runbooks/README.md).
+- Runbooks, incident handling and recovery (Epic 7, #7). Three runbooks were exercised in Session 2 and the others were not: [docs/runbooks/](runbooks/README.md).
 - Load tests, failure experiments and cost review (Epic 8, #8).
 
 ## 3. Goals
@@ -132,7 +132,7 @@ The status column is `built` for a component that exists, `written` for a compon
 | Dashboards | Saved queries on the workspaces, no Grafana | persistent | 5 (#5) | planned |
 | Pull request plan identity | Reads Azure and state so a pull request can run `terraform plan` | persistent | 6 (#6) | built |
 | Policy checks | Block unsafe changes | n/a | 6 (#6) | built (Trivy scans in the Security scans workflow) |
-| Runbooks and postmortems | Incident handling | n/a | 7 (#7) | runbooks written, not exercised ([docs/runbooks/](runbooks/README.md)); incident process and postmortem template written, not used ([docs/incident-process.md](incident-process.md)) |
+| Runbooks and postmortems | Incident handling | n/a | 7 (#7) | runbooks written, three exercised in Session 2 ([docs/runbooks/](runbooks/README.md)); incident process and postmortem template written, one postmortem written ([docs/incident-process.md](incident-process.md), [docs/postmortems/](postmortems/README.md)) |
 
 ### Capacity limit
 
@@ -344,7 +344,7 @@ Other open decisions are listed in section 15.
 1. When is `staging` created, and what check must `dev` pass before a change moves on? (ADR 0010)
 2. Which alert thresholds do the budgets of `staging` and `prod` use? (ADR 0009)
 3. What SLO targets and window fit a service that is only up during sessions?
-4. How long does a full create take? The session layer took about 7 minutes to create and about 7 minutes to destroy in single runs (ADR 0012). The full platform is measured once it exists, and it sets the recovery time that Epic 7 (#7) can claim.
+4. How long does a full create take? The session layer took about 7 minutes to create and about 7 minutes to destroy in single runs (ADR 0012). The full platform is measured once it exists, and it sets the recovery time that Epic 7 (#7) can claim. Session 2 measured 772 seconds from start to healthy ([results](sessions/session-2-results.md)).
 5. Do the tools fit in the capacity that is left after the system pods? (ADR 0012) Answered in Session 1: they fit.
 6. Does Azure Network Policy Manager work with Azure CNI Overlay on this cluster? (ADR 0015) Answered in Session 1: AKS accepted it, and a pod in another namespace is blocked.
 7. Which ingress replaces the managed NGINX add-on after its support ends? (ADR 0016)
