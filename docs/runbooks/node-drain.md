@@ -6,7 +6,7 @@ A node of the session cluster is drained, and sample service pods stay pending o
 
 ## Impact
 
-The cluster has two nodes and the regional quota is 4 vCPU, so there is no spare capacity for a third node (ADR 0003, ADR 0012). The hypothesis of experiment 2 is that the pods move to the other node, or stay pending if it has no room. Which one happens is not known. Pods of other tools on the node (Argo CD, the Collector, system pods) are evicted too, and whether they fit is not known.
+The cluster has two nodes and the regional quota is 4 vCPU, so there is no spare capacity for a third node (ADR 0003, ADR 0012). The hypothesis of experiment 2 is that the pods move to the other node, or stay pending if it has no room. In Session 2 seven pods stayed Pending with insufficient CPU on the remaining node: one sample service replica, three Argo CD pods, the second metrics-server pod, retina-agent and the collector. The drain did not complete (#98). Pods of other tools on the node are evicted too.
 
 The chart has a PodDisruptionBudget with `minAvailable: 1` and 2 replicas. The pods are spread over nodes with `whenUnsatisfiable: ScheduleAnyway`, so both can land on one node.
 
@@ -21,19 +21,19 @@ The chart has a PodDisruptionBudget with `minAvailable: 1` and 2 replicas. The p
 ## Likely causes
 
 - The other node has no room for the pods that were evicted. The events of the pending pod say so.
-- An eviction is held back by the PodDisruptionBudget. With 2 replicas and `minAvailable: 1`, the drain evicts one pod and waits before it evicts the other. This follows from the budget in the chart and is not observed.
+- An eviction is held back by the PodDisruptionBudget. With 2 replicas and `minAvailable: 1`, the drain evicts one pod and waits before it evicts the other. This follows from the budget in the chart and is not observed for the sample service. In Session 2 the disruption budget of metrics-server blocked its eviction.
 - The quota of the namespace `apps` is used up. See [pod-not-ready.md](pod-not-ready.md).
 
 Other causes are not known from the repository.
 
 ## Fix
 
-1. Start the drain for the experiment: `kubectl drain <node name> --ignore-daemonsets` (planned, not run). It evicts the pods of the node and marks it unschedulable.
+1. Start the drain for the experiment: `kubectl drain <node name> --ignore-daemonsets` (planned, not run). It evicts the pods of the node and marks it unschedulable. The drain does not complete on the two node cluster today (#98).
 2. When the experiment ends, make the node schedulable again: `kubectl uncordon <node name>` (planned, not run). Pending pods can then be placed on it.
 3. If a pod is still pending after the uncordon, delete it: `kubectl delete pod -n apps <pod name>` (planned, not run). The Deployment creates a new one.
 4. Do not add a node. The quota of 4 vCPU is in use (`docs/sessions/session-2.md`).
 
-Unsure: whether `--ignore-daemonsets` is the only flag the drain needs on this cluster. The drain reports what blocks it if more are needed.
+The flags `--ignore-daemonsets` and `--delete-emptydir-data` were accepted in Session 2.
 
 ## Verify
 
@@ -51,4 +51,4 @@ Session 2 experiment 2, ADR 0003, ADR 0012, `helm/sample-service/templates/pdb.y
 
 ## Status
 
-not exercised
+exercised in Session 2. The drain did not complete (#98)

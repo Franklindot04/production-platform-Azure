@@ -6,7 +6,7 @@ A pull request changes `image.tag` in `gitops/dev/values/sample-service.yaml` to
 
 ## Impact
 
-Argo CD syncs the new tag (automated sync with prune and self-heal). The Deployment starts new pods with the bad image. The chart sets no update strategy, so the Kubernetes defaults apply. With 2 replicas the defaults start one extra pod and allow no pod to be unavailable, so the old pods keep serving while the new pod fails. This follows from the defaults and is not observed. The hypothesis of experiment 4 is that Argo CD rolls back and the service recovers after the revert.
+Argo CD syncs the new tag (automated sync with prune and self-heal). The Deployment starts new pods with the bad image. The chart sets no update strategy, so the Kubernetes defaults apply. With 2 replicas the defaults start one extra pod and allow no pod to be unavailable, so the old pods keep serving while the new pod fails. In Session 2 the new pod went `ErrImagePull`, then `ImagePullBackOff` with a not found error. The two old pods kept running, `/healthz` returned 200 on every probe, and the Deployment stayed at 2/2 ready with 1 up to date. Argo CD showed the change about 165 s after the merge.
 
 If the tag is empty, the chart fails to render (`image.tag must be set`) and the Application `sample-service` shows an error instead of a rollout.
 
@@ -29,7 +29,7 @@ If the tag is empty, the chart fails to render (`image.tag must be set`) and the
 ## Fix
 
 1. Revert the pull request that changed the tag. Use the revert button on the merged pull request on GitHub, or make a revert commit on a branch and open a pull request. Merge it. `main` accepts changes through pull requests only.
-2. Argo CD syncs the revert by itself. In Session 1 a change on `main` was synced in up to about 3 minutes.
+2. Argo CD syncs the revert by itself. In Session 1 a change on `main` was synced in up to about 3 minutes. In Session 2 the Deployment was back to 2/2 ready and up to date 4 min 30 s after the revert was merged, and the Application went from Degraded to Healthy.
 3. To see the sync without waiting, read the Application: `kubectl get application sample-service -n argocd -w` (planned, not run). It shows the state change.
 4. Do not fix it with `kubectl set image` or `kubectl edit`. Self-heal reverts it to the tag in Git. See [argocd-drift.md](argocd-drift.md).
 
@@ -52,4 +52,4 @@ Session 2 experiment 4, ADR 0018, ADR 0013, `docs/workflows.md`.
 
 ## Status
 
-not exercised
+exercised in Session 2

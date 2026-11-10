@@ -1,6 +1,6 @@
 # Live session 2: load, failure and rebuild
 
-Status: planned. Not run. Issue #50. Commands marked (planned) do not exist yet.
+Status: run. The results are in [session-2-results.md](session-2-results.md). Issue #50. Commands marked (planned) do not exist yet.
 
 Goal: time a full rebuild from zero, measure the sample service under load, run failure experiments, and destroy everything.
 
@@ -32,13 +32,13 @@ Rules are the same as in [Session 1](session-1.md) ([results](session-1-results.
 ## Experiments
 
 1. Delete a pod of the sample service. Hypothesis: traffic continues, and a new pod is ready within the probe time.
-2. Drain one node. Hypothesis: the pods move to the other node, or stay pending if it has no room. Record which.
+2. Drain one node. Hypothesis: the pods move to the other node, or stay pending if it has no room. Record which. The drain does not complete on the two node cluster today (#98).
 3. Inject errors and latency with the service settings. Hypothesis: the burn-rate alert fires and the email arrives. Then run `monitoring/logs/failed-requests.kql` and `monitoring/logs/slow-requests.kql` and record whether they list the requests.
 4. Deploy a bad image tag with a pull request, then revert it with Git. Hypothesis: Argo CD rolls back and the service recovers.
 5. Edit a resource by hand with `kubectl`. Hypothesis: Argo CD reverts it.
 6. Optional: apply a network policy that blocks the service. Hypothesis: the probes fail and the alert fires.
 
-Each experiment feeds a runbook (#46). A runbook that no experiment exercised says `not exercised`. The runbooks are written and not exercised. See [docs/runbooks/](../runbooks/README.md).
+Each experiment feeds a runbook (#46). A runbook that no experiment exercised says `not exercised`. Three runbooks were exercised in Session 2: availability-burn, bad-image-tag and node-drain. The others were not. See [docs/runbooks/](../runbooks/README.md).
 
 | Experiment | Runbook |
 |---|---|

@@ -2,7 +2,7 @@
 
 A postmortem is a short written account of an incident: what happened, why, and what changes because of it. It follows the [incident process](../incident-process.md).
 
-No postmortem has been written yet.
+One postmortem has been written.
 
 ## When one is written
 
@@ -23,3 +23,4 @@ The levels are in the severity table of the incident process.
 
 | Title | Level | Runbook | Link |
 |---|---|---|---|
+| Planned error injection and the availability alerts | 1 | [availability-burn.md](../runbooks/availability-burn.md) | [1-error-injection-availability-alerts.md](1-error-injection-availability-alerts.md) |
