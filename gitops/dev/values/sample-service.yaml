@@ -9,6 +9,12 @@ ingress:
   enabled: true
   className: webapprouting.kubernetes.azure.com
 
+# The PodMonitor sends the metrics of the service to the managed Prometheus
+# add-on, which is part of the cluster, so scraping is on in dev.
+metrics:
+  scrape:
+    enabled: true
+
 # The Key Vault secret that the pods mount as a file (ADR 0029). Only the name is
 # here. The client ID, the tenant ID and the vault name are not in Git. The step
 # `session.sh bootstrap identity` sets them and turns the mount on at run time.
