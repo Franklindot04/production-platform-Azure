@@ -41,5 +41,5 @@ The rule group is part of the persistent layer and is applied.
 
 - The windows are shorter than the usual 1h/5m and 6h/30m, because a live session lasts about two hours.
 - A service that is down and receives no requests produces no data, and no alert fires. An alert for missing data is planned.
-- The alerts are applied and have not been tested. Session 2 experiment 3 is the first test.
-- Runbooks for the four alerts are written and not exercised: [availability-burn](runbooks/availability-burn.md) and [latency-burn](runbooks/latency-burn.md).
+- The alerts are applied. The availability alerts fired, sent mail and resolved in Session 2 experiment 3. The latency alerts have not been tested.
+- Runbooks for the four alerts: [availability-burn](runbooks/availability-burn.md) was exercised in Session 2, and [latency-burn](runbooks/latency-burn.md) was not.

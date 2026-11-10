@@ -6,10 +6,10 @@ Issue #46. The incident process and the severity table are in [incident-process.
 
 ## Status
 
-No runbook has been exercised. Every runbook is written from the repository files and from the experiment list in [Session 2](../sessions/session-2.md). Each one has the status `not exercised`.
+Three runbooks were exercised in Session 2: availability-burn, bad-image-tag and node-drain. The others have not been exercised. Every runbook is written from the repository files and from the experiment list in [Session 2](../sessions/session-2.md). The results are in [session-2-results.md](../sessions/session-2-results.md).
 
 - `not exercised`: written from the code, never run in a session.
-- `exercised in <session>`: run in that session, with the date and the result recorded in that session's record. No runbook has this status.
+- `exercised in <session>`: run in that session, with the date and the result recorded in that session's record. Availability-burn, bad-image-tag and node-drain have this status.
 
 A command in a runbook is for the maintainer to run. Each command that has not been run is marked (planned, not run). A command that also depends on a fact the repository does not confirm carries a line that starts with "Unsure:". Where the repository does not say, the runbook says it is not known.
 
@@ -40,18 +40,18 @@ Every runbook has these headings, in this order.
 
 | Runbook | Trigger | Status |
 |---|---|---|
-| [availability-burn.md](availability-burn.md) | Alerts AvailabilityFastBurn (severity 1) and AvailabilitySlowBurn (severity 2) | not exercised |
+| [availability-burn.md](availability-burn.md) | Alerts AvailabilityFastBurn (severity 1) and AvailabilitySlowBurn (severity 2) | exercised in Session 2 |
 | [latency-burn.md](latency-burn.md) | Alerts LatencyFastBurn (severity 1) and LatencySlowBurn (severity 2) | not exercised |
 | [pod-not-ready.md](pod-not-ready.md) | A pod of the sample service is deleted or is not ready | not exercised |
-| [node-drain.md](node-drain.md) | A node is drained and pods stay pending or move | not exercised |
-| [bad-image-tag.md](bad-image-tag.md) | A bad image tag is deployed | not exercised |
+| [node-drain.md](node-drain.md) | A node is drained and pods stay pending or move | exercised in Session 2. The drain did not complete (#98) |
+| [bad-image-tag.md](bad-image-tag.md) | A bad image tag is deployed | exercised in Session 2 |
 | [argocd-drift.md](argocd-drift.md) | A resource is edited by hand | not exercised |
 | [network-policy-blocks-service.md](network-policy-blocks-service.md) | Probes fail because a policy blocks the service | not exercised |
 | [key-vault-mount-fails.md](key-vault-mount-fails.md) | Sample service pods stay in ContainerCreating because the secret mount fails | not exercised |
 | [image-pull-refused.md](image-pull-refused.md) | The image cannot be pulled from `ghcr.io` | not exercised |
 | [session-leftovers.md](session-leftovers.md) | `session.sh check` exits 1 | not exercised |
 
-Session 2 experiment 3 (inject errors and latency) has no runbook of its own. It is how the two burn-rate runbooks are exercised.
+Session 2 experiment 3 (inject errors and latency) has no runbook of its own. It was run with errors only, which exercised availability-burn. Latency was not injected, so latency-burn was not exercised.
 
 ## Changing a runbook
 
