@@ -1,6 +1,6 @@
 # Live session 1: converge and measure
 
-Status: planned. Not run. Issue #32. Commands marked (planned) do not exist yet.
+Status: run. The results are in [session-1-results.md](session-1-results.md). Issue #32. Items marked planned have not been built or run.
 
 Goal: create the cluster, let the code bring it to a working state without manual steps, measure what the tools use, and destroy everything.
 
@@ -31,15 +31,15 @@ Rules:
 | 0:00 | Preflight | `az account show`, vCPU use is 0 of 4, `./infrastructure/session.sh check` exits 0, the authorized range is set in `TF_VAR_api_authorized_ip_ranges`, the admin group is set in `TF_VAR_cluster_admin_group_object_id` | Pass or fail of each item |
 | 0:05 | Plan | `./infrastructure/session.sh up` | The masked plan, shown for approval |
 | 0:08 | Create | `./infrastructure/session.sh up --apply` after approval | Time taken |
-| 0:15 | Bootstrap | `./infrastructure/session.sh bootstrap` (planned) | Time to Argo CD ready |
+| 0:15 | Bootstrap | `./infrastructure/session.sh bootstrap` | Time to Argo CD ready |
 | 0:25 | **Gate A** | Nodes Ready. Applications Healthy and Synced. The sample service answers `/healthz` on the ingress address | Time from `up` to healthy |
 | 0:35 | **Gate B**, capacity | `kubectl describe nodes`, `kubectl top pods -A`, requests and limits per tool | The capacity budget table |
 | 0:50 | Network policy | A test pod in another namespace cannot reach the service. The allowed path works. DNS works | Result of each check |
 | 1:00 | GitOps flow | Merge a prepared tag-bump pull request, watch the sync, then revert it and watch the rollback | Time to sync and to roll back |
 | 1:15 | Observability | A metric in the Azure Monitor workspace, a trace in the backend, test queries from `monitoring/prometheus/request-rate.promql` and `monitoring/logs/failed-requests.kql`. `metrics.scrape.enabled` is set to `true` in `gitops/dev/values/sample-service.yaml` through a pull request after Gate A, and the target is then checked in the Azure Monitor workspace. The bootstrap creates the secret `appinsights-connection`, and the Collector pod is checked Running | Masked screenshots |
-| 1:35 | Identity | The bootstrap part `identity` has turned on the Key Vault mount. The sample service reads one Key Vault secret with workload identity. `kubectl get nodes` works through the Entra ID sign-in with the non-admin kubeconfig, and the local credential still works for the bootstrap. The maintainer reads the Argo CD credential once (planned command) | Pass or fail of each check |
+| 1:35 | Identity | The bootstrap part `identity` has turned on the Key Vault mount. The sample service reads one Key Vault secret with workload identity. `kubectl get nodes` works through the Entra ID sign-in with the non-admin kubeconfig, and the local credential still works for the bootstrap. The maintainer reads the Argo CD credential once with `./infrastructure/session.sh argocd-password` | Pass or fail of each check |
 | 1:45 | Wrap up | Save output and screenshots in `docs/images`, masked | Files saved |
-| 1:50 | Teardown | `./infrastructure/session.sh down` then `down --yes`, then `./infrastructure/session.sh check` | Output of `check`. Exit 0 is the end |
+| 1:50 | Teardown | `./infrastructure/session.sh down` then `down --yes`, then `./infrastructure/session.sh check`. If the first `down --yes` stops on a public IP, run it again (#89) | Output of `check`. The session ends when `check` exits 0 |
 
 ## Gates
 

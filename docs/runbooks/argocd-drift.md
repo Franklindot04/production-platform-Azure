@@ -6,7 +6,7 @@ A resource that Argo CD manages is edited by hand with `kubectl`, and the cluste
 
 ## Impact
 
-All Applications under `gitops/dev/apps/` use automated sync with prune and self-heal: `cluster-rules`, `sample-service` and `opentelemetry-collector`, and the `root` Application that creates them. Self-heal restores the state in Git when a resource changes. A hand edit is therefore expected to be undone. This is written and not verified.
+All Applications under `gitops/dev/apps/` use automated sync with prune and self-heal: `cluster-rules`, `sample-service` and `opentelemetry-collector`, and the `root` Application that creates them. Self-heal restores the state in Git when a resource changes. A hand edit is therefore expected to be undone. Session 1 showed that self-heal reverted a manual change to the Ingress.
 
 ## First checks
 
@@ -26,7 +26,7 @@ The edit was not reverted because:
 - The Application cannot sync. For example the chart does not render, or the repository cannot be read. The Application status shows the error.
 - The Argo CD components are not running.
 - The resource is not in Git. Argo CD does not remove a resource it does not manage. A resource that someone created by hand in `apps` stays.
-- Argo CD has not noticed yet. The refresh interval is not set in this repository, so it is not known.
+- Argo CD has not noticed yet. A change on `main` was synced in up to about 3 minutes in Session 1.
 
 ## Fix
 

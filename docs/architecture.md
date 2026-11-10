@@ -142,10 +142,10 @@ The target subscription has a regional vCPU quota of 4 in `swedencentral`. This 
 - The node pools together stay within 4 vCPU. ADR 0012 plans two nodes with 2 vCPU. The alternative is one node with 4 vCPU. The AKS documentation asks for system pool nodes of at least 4 vCPU and at least two nodes, so each option breaks a guideline.
 - An upgrade or a node replacement creates an extra node first (surge). It needs free quota, and it cannot run when all 4 vCPU are in use. The plan is to pin versions, turn automatic upgrades off, and re-create the cluster instead of upgrading it. (ADR 0012)
 - The cluster autoscaler cannot add nodes beyond the quota.
-- Argo CD, the metrics agent, the OpenTelemetry Collector and the sample service must fit in the capacity that is left. This is not measured.
+- Argo CD, the metrics agent, the OpenTelemetry Collector and the sample service must fit in the capacity that is left. They fit. CPU requests, not memory, set the limit: 619m CPU is free across the two nodes ([session 1 results](sessions/session-1-results.md)).
 - Nodes left behind by a failed destroy keep using quota and block the next create.
 
-The first AKS plan and the result of the first create are in ADR 0012. AKS accepted two `Standard_D2s_v5` nodes. The allocatable capacity is 3.8 vCPU and about 11.3 GiB, and the fit of the tools is not measured. The saved plans are in [docs/plans/](plans/README.md).
+The first AKS plan and the result of the first create are in ADR 0012. AKS accepted two `Standard_D2s_v5` nodes. The allocatable capacity is 3.8 vCPU and about 11.3 GiB, and the tools fit ([session 1 results](sessions/session-1-results.md)). The saved plans are in [docs/plans/](plans/README.md).
 
 ### Repository layout
 
@@ -245,7 +245,7 @@ The access to the Terraform state, the Key Vault and the identities of the persi
 
 - **People.** The maintainer signs in with Microsoft Entra ID. The settings for cluster sign-in with Entra ID and Azure RBAC, the admin group input and the two role assignments for the group are written in the session root and not applied (ADR 0021). Local accounts stay on as a fallback. Until the settings are applied the cluster uses local accounts.
 - **Pipelines.** GitHub Actions logs in to Azure using OIDC federation. No client secret is stored in GitHub. (ADR 0007) The identity for pull request plans is defined in `infrastructure/environments/dev/persistent/identity.tf` and is applied. Its federated credential subject is `repo:<owner>@<owner-id>/<name>@<repo-id>:pull_request`, and it has Reader on the persistent resource group and Storage Blob Data Reader on the `tfstate-dev` container. (ADR 0022)
-- **Workloads.** Pods use workload identity to read Key Vault. No Azure credentials are stored in the cluster. The sample service identity `pp-<env>-sample-service` is defined in `infrastructure/environments/dev/persistent/workload-identity.tf` with Key Vault Secrets User on the vault, and is applied. The cluster settings (OIDC issuer, workload identity, the Key Vault secrets provider add-on) and the federated credential for the service account `apps/sample-service` are written in the session root and are not applied. The chart mounts one secret as a file when `vaultSecret.enabled` is true. The bootstrap part `identity` turns it on at run time and no ID is written in Git. The chart mount and the bootstrap part have not run on a cluster. (ADR 0029)
+- **Workloads.** Pods use workload identity to read Key Vault. No Azure credentials are stored in the cluster. The sample service identity `pp-<env>-sample-service` is defined in `infrastructure/environments/dev/persistent/workload-identity.tf` with Key Vault Secrets User on the vault, and is applied. The cluster settings (OIDC issuer, workload identity, the Key Vault secrets provider add-on) and the federated credential for the service account `apps/sample-service` are in the session root and are applied with the session layer. The chart mounts one secret as a file when `vaultSecret.enabled` is true. The bootstrap part `identity` turns it on at run time and no ID is written in Git. In Session 1 the chart mount and the bootstrap part ran, and both sample service pods mounted the secret. (ADR 0029)
 - **Secrets.** The rules are in [docs/security.md](security.md). Secrets live in Key Vault, which uses Azure RBAC. The sample service identity has Key Vault Secrets User and the maintainer has Key Vault Secrets Officer. Both roles are applied. The secret value is set by hand and is not in Terraform or in state. The secret `sample-service-secret` is set in the vault. (ADR 0022, ADR 0029) They are not committed. `.gitignore` covers common secret files, and GitHub secret scanning and push protection are on for this repository.
 - **Terraform state.** Access with Entra ID only. Shared key access is turned off. (ADR 0004)
 - **Least privilege.** Each identity gets the lowest role that works, scoped as narrowly as possible. Roles for an environment are scoped to its resource groups. (ADR 0010) The roles are listed in [docs/security.md](security.md).
@@ -345,7 +345,7 @@ Other open decisions are listed in section 15.
 2. Which alert thresholds do the budgets of `staging` and `prod` use? (ADR 0009)
 3. What SLO targets and window fit a service that is only up during sessions?
 4. How long does a full create take? The session layer took about 7 minutes to create and about 7 minutes to destroy in single runs (ADR 0012). The full platform is measured once it exists, and it sets the recovery time that Epic 7 (#7) can claim.
-5. Do the tools fit in the capacity that is left after the system pods? (ADR 0012)
-6. Does Azure Network Policy Manager work with Azure CNI Overlay on this cluster? (ADR 0015)
+5. Do the tools fit in the capacity that is left after the system pods? (ADR 0012) Answered in Session 1: they fit.
+6. Does Azure Network Policy Manager work with Azure CNI Overlay on this cluster? (ADR 0015) Answered in Session 1: AKS accepted it, and a pod in another namespace is blocked.
 7. Which ingress replaces the managed NGINX add-on after its support ends? (ADR 0016)
 8. Does the Collector send traces to Application Insights with workload identity in the capacity that is left? (ADR 0019)

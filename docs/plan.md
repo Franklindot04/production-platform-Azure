@@ -7,7 +7,7 @@ The plan covers the Kubernetes platform, delivery, observability, security, inci
 ## 1. Constraints
 
 1. The cluster is created at the start of a session and destroyed at the end (ADR 0009). Everything in it must come from code, with no manual step.
-2. About 2.5 vCPU and 9.8 GiB of requests are left for workloads after the system pods (ADR 0012). The tools below are not measured yet:
+2. About 2.5 vCPU and 9.8 GiB of requests are left for workloads after the system pods (ADR 0012). The tools below were measured in Session 1 and fit (`docs/sessions/session-1-results.md`):
    - Argo CD
    - the metrics agent
    - the OpenTelemetry Collector

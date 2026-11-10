@@ -13,12 +13,12 @@ ADR 0008 sends Prometheus metrics to an Azure Monitor workspace in the persisten
 - Managed Prometheus is enabled with an empty `monitor_metrics` block on the cluster in the session root.
 - The data collection endpoint, the data collection rule and the rule association are in the session root. They are destroyed with the cluster. Their shapes follow the Terraform template that Microsoft publishes for the add-on.
 - The Azure Monitor workspace stays in the persistent layer. The session root looks it up by name, so metric history outlives the cluster.
-- The PodMonitor of the sample service stays off in the `dev` values. It is turned on after Session 1 shows that the add-on installed its custom resource definition.
+- The PodMonitor of the sample service was off in the `dev` values until Session 1 showed that the add-on installed its custom resource definition. It is on in the `dev` values.
 
 ## Consequences
 
 - Metric history survives teardown, because the workspace is not part of the session.
-- The add-on adds pods in `kube-system`. Their requests are not measured, and they may not fit in the capacity that is left after the system pods (ADR 0012, open question). Not checked on AKS.
+- The add-on adds pods in `kube-system`. They fit in the capacity that is left after the system pods, with the other tools (Session 1, `docs/sessions/session-1-results.md`).
 - The add-on needs no extra role assignment for the cluster. This is taken from Microsoft's template and is not checked on AKS.
 - The association name follows the template. Not checked on AKS.
 - The session plan fails if the persistent workspace does not exist, because it is read with a data source.

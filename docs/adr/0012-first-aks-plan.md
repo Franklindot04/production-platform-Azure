@@ -98,16 +98,16 @@ Timing, as reported by Terraform. These are single runs, and the times are not a
 What the create did not test:
 
 - An upgrade, a node replacement or a surge. With all 4 vCPU in use, a surge node cannot start. This follows from the quota and was not tried.
-- The fit of Argo CD, the metrics agent, the OpenTelemetry Collector and the sample service. They do not exist yet.
+- The fit of Argo CD, the metrics agent, the OpenTelemetry Collector and the sample service. They did not exist when this plan was written.
 - A second create after the destroy, and a create after a failed destroy.
 - A LoadBalancer service, ingress, or network policy.
 - Cost. It was not read.
 
 Sizing against the in-cluster tools:
 
-- Argo CD, the metrics agent, the OpenTelemetry Collector and the sample service do not exist yet. Their requests are not measured.
+- Argo CD, the metrics agent, the OpenTelemetry Collector and the sample service did not exist when this plan was written.
 - The allocatable capacity is now read: 3.8 vCPU and about 11.3 GiB across both nodes, with about 1267m CPU and 1558 Mi requested by the system pods.
-- The requests of each tool are not measured. Until they are, the sizing is not shown to fit. The measurement is part of Epic 3 (#3).
+- Session 1 measured the requests of the tools, and they fit (`docs/sessions/session-1-results.md`).
 
 Limitations of this plan:
 
@@ -131,7 +131,7 @@ The plan output is saved in [docs/plans/](../plans/README.md). After the first c
 
 ## Open questions
 
-- Do the tools fit in the capacity that is left after the system pods, about 2.5 vCPU and 9.8 GiB of requests across two nodes?
+- Do the tools fit in the capacity that is left after the system pods, about 2.5 vCPU and 9.8 GiB of requests across two nodes? Answered in Session 1: they fit.
 - Does a LoadBalancer service work without a role for the cluster identity on the node subnet?
 - Does AKS accept one `Standard_D4s_v5` node? Only the two-node pool was created.
 - Does the quota need to be raised, and can it be?

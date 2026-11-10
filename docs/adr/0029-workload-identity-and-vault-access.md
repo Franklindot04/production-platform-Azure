@@ -26,13 +26,13 @@ ADR 0022 defined the persistent layer with a Key Vault that uses Azure RBAC and 
 ## Consequences
 
 - No Azure credential is stored in the cluster or in the repository.
-- The add-on adds pods to the cluster. Their requests are not measured, and their fit on the two-node pool is not verified.
+- The add-on adds pods to the cluster. They fit on the two-node pool with the other tools (Session 1, `docs/sessions/session-1-results.md`).
 - The pod does not start until the secret exists in the vault, because the mount fails. The maintainer sets the secret once (`infrastructure/README.md`).
 - The chart, the session script part and the kind check are written. The kind check renders the chart and validates it. It does not mount a secret, because a kind cluster has no vault.
-- That the root Application leaves the parameters alone, and that the driver gets a token with the token mount off, are not verified.
+- Session 1 showed that the root Application leaves the parameters alone, and that the driver gets a token with the token mount off. Both sample service pods mounted the secret with no mount warnings.
 - Rotation is off, so a changed secret value is read after the pod restarts.
 - The vault is reachable from any network that has a role on it, until the network rule is added.
-- The persistent resources (the identity and the Key Vault roles) are applied. The session resources (the cluster settings, the federated credential and the chart mount) are written and not applied, and are unverified until a live session.
+- The persistent resources (the identity and the Key Vault roles) are applied. The session resources (the cluster settings, the federated credential and the chart mount) were applied in Session 1 and destroyed with the session layer. The mount was checked there.
 
 ## Alternatives considered
 

@@ -15,9 +15,8 @@ The namespace `apps` has a default-deny policy for ingress and egress. Only the 
 | `allow-egress-to-collector` | Egress from the sample service to the Collector in `observability`, ports 4317 and 4318 |
 | `allow-metrics-scrape` | Ingress to the sample service on port 8081 from pods labelled `rsName: ama-metrics` in `kube-system` |
 
-The hypothesis of experiment 6 is that the probes fail and the alert fires. Two things are not known:
+The hypothesis of experiment 6 is that the probes fail and the alert fires. Probe traffic is not blocked by the default-deny policy: both sample service pods stayed Ready, with no restarts, while it was applied in Session 1 (`kubernetes/README.md`). One thing is not known:
 
-- Whether kubelet probes pass under default deny on AKS. It was checked on `kind` only (`kubernetes/README.md`).
 - Whether an alert fires. If no request reaches the pods, the service counts no requests and the alert expressions return no data. A service that receives no requests produces no alert (`docs/slos.md`).
 
 The repository has no manifest for the experiment policy. Which policy the experiment applies is not known.
@@ -36,7 +35,7 @@ The repository has no manifest for the experiment policy. Which policy the exper
 - A policy that was added by hand and selects the sample service pods.
 - One of the four allow policies was deleted or changed by hand. Argo CD restores policies that are in `kubernetes/` (the Application `cluster-rules`). See [argocd-drift.md](argocd-drift.md).
 - A change to `kubernetes/network-policies/` in Git that removed a path.
-- The engine does not enforce policies the way the files assume. The first create tests the engine setting (ADR 0015). Enforcement and probe behaviour on AKS are checked in Session 1.
+- The engine does not enforce policies the way the files assume. Session 1 showed that a pod in another namespace is blocked and that the ingress controller path and DNS work (ADR 0015).
 
 Other causes are not known from the repository.
 

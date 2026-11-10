@@ -40,8 +40,8 @@ The expected output is `Registered`.
 | `session.sh down --yes` | Destroys the session root. |
 | `session.sh check` | Lists every resource by resource group and reports what remains. |
 | `session.sh bootstrap` | Installs Argo CD with Helm, sets the source range of the ingress, applies the root Application, and creates the Collector secret. It can be repeated. |
-| `session.sh bootstrap identity` | Reads the identity client ID and the vault name from the persistent root and the tenant from the signed-in account, and sets them as Helm parameters on the Argo CD Application `sample-service`, with the Key Vault mount on (ADR 0029). Planned: it has not run. |
-| `session.sh bootstrap secrets` | Creates only the secret `appinsights-connection` in the namespace `observability`. Planned: it has not run. |
+| `session.sh bootstrap identity` | Reads the identity client ID and the vault name from the persistent root and the tenant from the signed-in account, and sets them as Helm parameters on the Argo CD Application `sample-service`, with the Key Vault mount on (ADR 0029). |
+| `session.sh bootstrap secrets` | Creates only the secret `appinsights-connection` in the namespace `observability`. It ran in Session 1 and set the Application Insights connection secret. |
 | `session.sh argocd-password` | Prints the Argo CD admin credential to the terminal. |
 
 ### Create the Entra ID admin group
@@ -53,9 +53,9 @@ az ad group create --display-name pp-dev-cluster-admins --mail-nickname pp-dev-c
 az ad group member add --group pp-dev-cluster-admins --member-id "$(az ad signed-in-user show --query id -o tsv)"
 ```
 
-### Entra ID sign-in (planned, not run)
+### Entra ID sign-in
 
-None of these session steps has run. `kubelogin` must be installed.
+Session 1 ran these steps: the nodes were listed with the non-admin kubeconfig through the admin group and Azure RBAC. `kubelogin` must be installed.
 
 Each session, before `session.sh up`, set the group ID:
 

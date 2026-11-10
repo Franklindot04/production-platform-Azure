@@ -1,6 +1,8 @@
 # Network policies of the `apps` namespace. Everything is denied, then the
 # allowed paths are listed. The engine is Azure Network Policy Manager
-# (ADR 0015). Enforcement on AKS is checked in Session 1.
+# (ADR 0015). Enforcement on AKS was checked in Session 1: a pod in another
+# namespace cannot reach the service, the ingress controller path works and DNS
+# resolves.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -81,7 +83,8 @@ spec:
           port: 4318
 ---
 # The pod label comes from the documentation of the managed Prometheus add-on.
-# It is checked on a live cluster in Session 1. Ingress only: no egress rule.
+# In Session 1 both sample service replicas were scraped with this policy and
+# the default-deny policy applied. Ingress only: no egress rule.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

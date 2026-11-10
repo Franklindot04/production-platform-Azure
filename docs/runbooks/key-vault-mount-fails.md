@@ -29,11 +29,11 @@ All four are named in ADR 0029.
 1. The secret `sample-service-secret` is not set in the vault. The pod does not start until it exists. The maintainer sets it by hand. Terraform never creates it.
 2. A role is missing. The identity `pp-dev-sample-service` needs Key Vault Secrets User on the vault (`infrastructure/environments/dev/persistent/workload-identity.tf`). The roles are defined in the persistent root, which is applied.
 3. The federated credential is missing. It is in the session root (`infrastructure/environments/dev/session/workload-identity.tf`). Its subject is `system:serviceaccount:apps:sample-service` and its audience is `api://AzureADTokenExchange`. It is created with the cluster. A credential bound to an earlier cluster does not match a new one.
-4. The Application parameters are missing. `session.sh bootstrap identity` has not run, or the parameters were removed. Whether the root Application leaves them alone is not verified (ADR 0029).
+4. The Application parameters are missing. `session.sh bootstrap identity` has not run, or the parameters were removed. Session 1 showed that the root Application leaves them alone (ADR 0029).
 
 If the parameters are partly set while the mount is on, the chart fails to render with a message such as `vaultSecret.clientId must be set`. The pods are then not created, and the Application shows the error.
 
-The driver, the workload identity webhook and the cluster add-on settings are in the session root. Whether the driver pods fit on the two nodes is not verified.
+The driver, the workload identity webhook and the cluster add-on settings are in the session root. The driver pods fit on the two nodes (Session 1).
 
 ## Fix
 

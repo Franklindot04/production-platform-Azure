@@ -21,8 +21,8 @@ ADR 0008 sends Prometheus metrics to an Azure Monitor workspace through managed 
 - No new dependency, no `go.sum` and no Dockerfile change.
 - The service has no Go runtime or process metrics by default.
 - The text format is maintained in this repository, and the tests cover its output.
-- The scrape rule and the pod label come from the add-on documentation. They are not checked on AKS.
-- The PodMonitor has not been applied to any cluster. It needs the custom resource definition from the managed Prometheus add-on, which is not enabled yet.
+- The scrape rule and the pod label come from the add-on documentation. Session 1 checked them on AKS: the managed Prometheus scraped both sample service replicas through the PodMonitor.
+- The PodMonitor needs the custom resource definition from the managed Prometheus add-on. A `kind` cluster has none, so the `kind` install turns scraping off.
 
 ## Alternatives considered
 
