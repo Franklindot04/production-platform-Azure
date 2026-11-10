@@ -4,7 +4,7 @@
 #   up              Plan the session root. The plan is saved outside the repository.
 #   up --apply      Apply the saved plan. It bills until the session layer is destroyed.
 #   down            Show the destroy plan.
-#   down --yes      Destroy the session root.
+#   down --yes      Destroy the session root. If the destroy fails, it waits and runs once more.
 #   check           List every resource by resource group and report what remains.
 #   bootstrap       Install Argo CD with Helm, set the ingress source range, and apply
 #                   the root Application, set the identity of the sample service, then create
@@ -30,6 +30,8 @@
 # PP_KUBE_CONTEXT=<context> uses an existing kubectl context instead, for a kind cluster.
 # The ingress source range comes from PP_INGRESS_ALLOWED_RANGES (comma separated) or from
 # TF_VAR_api_authorized_ip_ranges. It is not stored.
+# PP_DESTROY_RETRY_WAIT=<seconds> sets the wait before the second destroy attempt of down --yes.
+# Default: 120.
 # up needs the object ID of the Entra ID admin group in TF_VAR_cluster_admin_group_object_id
 # (ADR 0021). It is set at run time and is not stored.
 # Exit codes: 0 nothing remains, 1 something remains, 2 error or wrong use.
@@ -153,7 +155,16 @@ step_down() {
   build_mask
   tf_init
   if [ "$FLAG" = "--yes" ]; then
-    terraform -chdir="$ROOT" destroy -input=false -no-color -auto-approve 2>&1 | mask
+    # pipefail is set, so the status of the pipe is the status of terraform.
+    local retry_wait="${PP_DESTROY_RETRY_WAIT:-120}"
+    if ! terraform -chdir="$ROOT" destroy -input=false -no-color -auto-approve 2>&1 | mask; then
+      echo "The destroy stopped. It will try once more after ${retry_wait} seconds."
+      sleep "$retry_wait"
+      if ! terraform -chdir="$ROOT" destroy -input=false -no-color -auto-approve 2>&1 | mask; then
+        echo "The destroy stopped again. Run 'session.sh down --yes' again, then 'session.sh check'." >&2
+        exit 1
+      fi
+    fi
   else
     terraform -chdir="$ROOT" plan -destroy -input=false -no-color 2>&1 | mask
     echo "Nothing was destroyed. Use 'session.sh down --yes' to destroy."
