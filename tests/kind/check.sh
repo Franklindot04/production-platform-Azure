@@ -195,7 +195,10 @@ static_checks() {
 
   check "helm lint with the dev values" helm lint "$REPO/helm/sample-service" -f "$REPO/gitops/dev/values/sample-service.yaml"
   check "chart fails to render without an image tag" bash -c "! helm template x '$REPO/helm/sample-service' >/dev/null 2>&1"
-  check "chart renders valid resources with the dev values" bash -c "helm template sample-service '$REPO/helm/sample-service' -n apps -f '$REPO/gitops/dev/values/sample-service.yaml' | kubeconform -strict -summary -kubernetes-version $K8S_SCHEMA"
+  # The PodMonitor belongs to the managed Prometheus add-on and has no public schema, so
+  # the validation skips that kind. The next check makes sure it is still rendered.
+  check "chart renders valid resources with the dev values" bash -c "helm template sample-service '$REPO/helm/sample-service' -n apps -f '$REPO/gitops/dev/values/sample-service.yaml' | kubeconform -strict -summary -skip PodMonitor -kubernetes-version $K8S_SCHEMA"
+  check "chart renders a PodMonitor with the dev values" bash -c "helm template sample-service '$REPO/helm/sample-service' -n apps -f '$REPO/gitops/dev/values/sample-service.yaml' | grep -q '^kind: PodMonitor'"
   check "chart fails to render with the Key Vault mount on and no client ID" vault_mount_needs_client_id
   check "chart renders the Key Vault mount when it is on" vault_mount_renders
   check "chart renders no Key Vault mount by default" vault_mount_absent_by_default
@@ -259,8 +262,10 @@ live_checks() {
   pass "images built and loaded"
 
   check "cluster rules apply" retry 3 k apply -R -f "$REPO/kubernetes"
+  # The PodMonitor needs the managed Prometheus add-on, which kind does not have, so the
+  # install turns scraping off. The static checks still render and validate it.
   check "chart installs and rolls out" retry 3 bash -c "helm --kube-context '$CTX' upgrade --install sample-service '$REPO/helm/sample-service' -n apps \
-    -f '$REPO/gitops/dev/values/sample-service.yaml' --set ingress.enabled=false \
+    -f '$REPO/gitops/dev/values/sample-service.yaml' --set ingress.enabled=false --set metrics.scrape.enabled=false \
     --set image.repository=sample-service --set image.tag=kind --set image.pullPolicy=Never --wait --timeout 150s"
 
   local ready nodes
