@@ -37,7 +37,7 @@ The driver, the workload identity webhook and the cluster add-on settings are in
 
 ## Fix
 
-1. Cause 1: set the secret with the command in [infrastructure/README.md](../../infrastructure/README.md), section "Set the Key Vault secret". It reads the value from a prompt. Do not put the value on a command line.
+1. Cause 1: set the secret with the command in [infrastructure/README.md](https://github.com/Franklindot04/production-platform-Azure/blob/main/infrastructure/README.md), section "Set the Key Vault secret". It reads the value from a prompt. Do not put the value on a command line.
 2. Cause 2: apply the persistent root so the role assignments exist. The apply is the maintainer's step and is not described here.
 3. Cause 3: apply the session root so the federated credential exists for the current cluster. Run `./infrastructure/session.sh up` and read the plan, then `./infrastructure/session.sh up --apply` (planned, not run).
 4. Cause 4: run `./infrastructure/session.sh bootstrap identity` (planned, not run). It sets the Helm parameters on the Application `sample-service` and turns the mount on.
