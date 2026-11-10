@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "infrastructure/**"
+      - ".github/workflows/terraform-plan.yml"
 
 permissions: {}
 
@@ -71,6 +72,8 @@ jobs:
           TFSTATE_ACCOUNT_NAME: ${{ secrets.TFSTATE_ACCOUNT_NAME }}
           # Documentation range (RFC 5737). The plan is not applied.
           TF_VAR_api_authorized_ip_ranges: '["192.0.2.0/24"]'
+          # Placeholder group ID. The plan sends nothing to Azure.
+          TF_VAR_cluster_admin_group_object_id: "00000000-0000-0000-0000-000000000000"
         run: |
           set -euo pipefail
           dir=infrastructure/environments/dev/session

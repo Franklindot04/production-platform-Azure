@@ -5,7 +5,7 @@ The GitHub Actions workflows of the repository. Every action is pinned to a full
 | Workflow | File | Runs on | Permissions |
 |---|---|---|---|
 | Terraform checks | `terraform-checks.yml` | Pull requests that change `infrastructure/` | `contents: read` |
-| Terraform plan | `terraform-plan.yml` | Pull requests that change `infrastructure/` | None at the top, and `contents: read` and `id-token: write` in the one job |
+| Terraform plan | `terraform-plan.yml` | Pull requests that change `infrastructure/` or `.github/workflows/terraform-plan.yml` | None at the top, and `contents: read` and `id-token: write` in the one job |
 | Service, chart and manifest checks | `app-checks.yml` | Pull requests that change `applications/`, `helm/`, `kubernetes/`, `gitops/` or `tests/kind/` | `contents: read` |
 | Security scans | `security-scans.yml` | Pull requests that change `infrastructure/`, `kubernetes/`, `helm/`, `gitops/`, `applications/` or `.trivyignore.yaml` | `contents: read` |
 | Publish image | `image-publish.yml` | Pushes to `main` that change `applications/sample-service/`, and manual runs | `contents: read`, and `packages: write` in the one job that pushes |
@@ -18,7 +18,7 @@ Runs `terraform plan -lock=false` for the two `dev` roots (ADR 0022) on pull req
 - One job. It does nothing for pull requests from forks.
 - If the secret `AZURE_CLIENT_ID` is not set, the first step prints a notice and every other step is skipped.
 - It logs in with `azure/login` and an OIDC token. No client secret is used.
-- The persistent plan uses `-refresh=false`. It sets `TF_VAR_alert_email` to a placeholder address, so the plan shows a change to the action group receiver. The session plan sets `TF_VAR_api_authorized_ip_ranges` to a documentation range.
+- The persistent plan uses `-refresh=false`. It sets `TF_VAR_alert_email` to a placeholder address, so the plan shows a change to the action group receiver. The session plan sets `TF_VAR_api_authorized_ip_ranges` to a documentation range and `TF_VAR_cluster_admin_group_object_id` to a placeholder GUID.
 - The plan identity has no access to the session resource group. The session plan works while the session layer is destroyed. If the layer exists, the refresh fails.
 - The plan output is not saved.
 
