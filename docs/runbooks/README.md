@@ -15,7 +15,7 @@ A command in a runbook is for the maintainer to run. Each command that has not b
 
 ## Before you use a runbook
 
-- The `kubectl` commands assume that `kubectl` points at the session cluster. `session.sh bootstrap` writes the administrator kubeconfig outside the repository (`PP_PLAN_DIR`). The Entra ID kubeconfig is described in [infrastructure/README.md](../../infrastructure/README.md). Both ran in Session 1.
+- The `kubectl` commands assume that `kubectl` points at the session cluster. `session.sh bootstrap` writes the administrator kubeconfig outside the repository (`PP_PLAN_DIR`). The Entra ID kubeconfig is described in [infrastructure/README.md](https://github.com/Franklindot04/production-platform-Azure/blob/main/infrastructure/README.md). Both ran in Session 1.
 - The namespace of the service is `apps`, the Deployment is `sample-service`, and the Argo CD Applications are in the namespace `argocd`: `root`, `cluster-rules`, `sample-service` and `opentelemetry-collector`.
 - The cluster exists only during a live session (ADR 0009). Between sessions there is nothing to run these commands against.
 - Output from `kubectl` and `az` can hold identifiers and addresses. `session.sh` masks its own output, and these commands do not. Do not paste unmasked output into a pull request, an issue or a file in the repository.
