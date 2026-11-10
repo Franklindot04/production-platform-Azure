@@ -24,7 +24,7 @@ Facts read from the AKS documentation:
 - Namespaces start with a default-deny policy. Allowed paths are listed in the manifests under `kubernetes/` (issue #30).
 - The end of support in 2028 is after the planned life of this project. The cluster is also re-created each session, so a change of engine needs no migration.
 
-Assumption: Azure NPM works with Azure CNI Overlay on this cluster. The documentation does not state it, and a plan does not check it. The first create tests it. If AKS refuses the setting, the create fails and the work stops. If it is accepted, Session 1 checks that a test pod in another namespace is blocked.
+Assumption: Azure NPM works with Azure CNI Overlay on this cluster. The documentation does not state it, and a plan does not check it. AKS accepted the setting. In Session 1 a test pod in another namespace could not reach the service (the connection timed out), the ingress controller path worked and DNS resolved.
 
 Fallback: Cilium, set with `network_data_plane = "cilium"` and `network_policy = "cilium"`. It replaces the data plane, and its resource use is not measured. Using it needs a new decision.
 

@@ -6,7 +6,7 @@ Issue #46. The incident process and the severity table are in [incident-process.
 
 ## Status
 
-Nothing has been exercised yet. No live session has run. Every runbook is written from the repository files and from the experiment list in [Session 2](../sessions/session-2.md). Each one has the status `not exercised`.
+No runbook has been exercised. Every runbook is written from the repository files and from the experiment list in [Session 2](../sessions/session-2.md). Each one has the status `not exercised`.
 
 - `not exercised`: written from the code, never run in a session.
 - `exercised in <session>`: run in that session, with the date and the result recorded in that session's record. No runbook has this status.
@@ -15,7 +15,7 @@ A command in a runbook is for the maintainer to run. Each command that has not b
 
 ## Before you use a runbook
 
-- The `kubectl` commands assume that `kubectl` points at the session cluster. `session.sh bootstrap` writes the administrator kubeconfig outside the repository (`PP_PLAN_DIR`). The Entra ID kubeconfig is described in [infrastructure/README.md](../../infrastructure/README.md). Both are planned and have not run.
+- The `kubectl` commands assume that `kubectl` points at the session cluster. `session.sh bootstrap` writes the administrator kubeconfig outside the repository (`PP_PLAN_DIR`). The Entra ID kubeconfig is described in [infrastructure/README.md](../../infrastructure/README.md). Both ran in Session 1.
 - The namespace of the service is `apps`, the Deployment is `sample-service`, and the Argo CD Applications are in the namespace `argocd`: `root`, `cluster-rules`, `sample-service` and `opentelemetry-collector`.
 - The cluster exists only during a live session (ADR 0009). Between sessions there is nothing to run these commands against.
 - Output from `kubectl` and `az` can hold identifiers and addresses. `session.sh` masks its own output, and these commands do not. Do not paste unmasked output into a pull request, an issue or a file in the repository.

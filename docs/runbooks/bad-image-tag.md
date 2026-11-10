@@ -29,7 +29,7 @@ If the tag is empty, the chart fails to render (`image.tag must be set`) and the
 ## Fix
 
 1. Revert the pull request that changed the tag. Use the revert button on the merged pull request on GitHub, or make a revert commit on a branch and open a pull request. Merge it. `main` accepts changes through pull requests only.
-2. Argo CD syncs the revert by itself. The refresh interval is not set in this repository, so how long it takes is not known.
+2. Argo CD syncs the revert by itself. In Session 1 a change on `main` was synced in up to about 3 minutes.
 3. To see the sync without waiting, read the Application: `kubectl get application sample-service -n argocd -w` (planned, not run). It shows the state change.
 4. Do not fix it with `kubectl set image` or `kubectl edit`. Self-heal reverts it to the tag in Git. See [argocd-drift.md](argocd-drift.md).
 

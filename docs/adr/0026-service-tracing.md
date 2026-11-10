@@ -24,7 +24,7 @@ ADR 0019 chose traces from the sample service through an OpenTelemetry Collector
 
 - The service now has module dependencies and a `go.sum`. The Dockerfile copies `go.sum` and runs `go mod download` before the build.
 - The change takes effect after the next image publish and tag bump (ADR 0018). Until then the running image has no tracing, even though the `dev` values enable it.
-- The path from the service through the Collector to Application Insights is unverified until live Session 1.
+- Session 1 showed that server spans of the service reach Application Insights through the Collector and appear in the `AppRequests` table.
 - With the default sampler every `/work` request is exported. Cost and volume are not estimated.
 - If the Collector is down, the exporter drops spans after its retries. The service keeps answering requests.
 

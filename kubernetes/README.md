@@ -24,12 +24,12 @@ The `argocd` namespace has no quota and no network policy, so that the bootstrap
 
 The engine is Azure Network Policy Manager (ADR 0015).
 
-- `apps`: ingress to the sample service on port 8080 from `app-routing-system`, ingress on port 8081 from pods labelled `rsName: ama-metrics` in `kube-system` (the scrape rule), egress to DNS, and egress to the Collector on ports 4317 and 4318. The metrics add-on pods named by the scrape rule do not exist yet, and the label is checked on a cluster in Session 1.
+- `apps`: ingress to the sample service on port 8080 from `app-routing-system`, ingress on port 8081 from pods labelled `rsName: ama-metrics` in `kube-system` (the scrape rule), egress to DNS, and egress to the Collector on ports 4317 and 4318. In Session 1 the managed Prometheus scraped both sample service replicas while the default-deny and `allow-metrics-scrape` policies were applied, so the scrape path through the policy works.
 - `observability`: ingress to the Collector on ports 4317 and 4318 from `apps`, egress to DNS, and egress to port 443.
 
-The Collector and the ingress controller do not exist yet. The policies that name them allow nothing until they do.
+The Collector and the ingress controller exist only while a session runs. The policies that name them allow nothing until they do.
 
-Whether the policies are enforced on AKS, and whether kubelet probes pass under default deny, is checked in a live session. On `kind` both were checked: see `tests/kind/check.sh`.
+Session 1 checked the policies on AKS: a pod in another namespace cannot reach the service, the ingress controller path works and DNS resolves. Both sample service pods became Ready and stayed Ready, with no restarts, while the default-deny policy was applied, so probe traffic is not blocked. On `kind` the enforcement and the probes were also checked: see `tests/kind/check.sh`.
 
 ## Check
 
