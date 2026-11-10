@@ -7,7 +7,7 @@ image:
 
 ingress:
   enabled: true
-  className: nginx.approuting.kubernetes.azure.com
+  className: webapprouting.kubernetes.azure.com
 
 # The Key Vault secret that the pods mount as a file (ADR 0029). Only the name is
 # here. The client ID, the tenant ID and the vault name are not in Git. The step
