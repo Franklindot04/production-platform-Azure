@@ -20,19 +20,20 @@ Rules are the same as in [Session 1](session-1.md) ([results](session-1-results.
 | Time | Step | Command or action | Record |
 |---|---|---|---|
 | 0:00 | Preflight | vCPU use is 0 of 4, `./infrastructure/session.sh check` exits 0, the authorized range is set | Pass or fail |
-| 0:05 | Timed rebuild | `./infrastructure/session.sh up --apply` after the plan is approved, then `bootstrap` (planned), with no other command | Time for each step and the time to a healthy service. This is the recovery time |
+| 0:05 | Timed rebuild | `./infrastructure/session.sh up --apply` after the plan is approved, then `bootstrap`, with no other command | Time for each step and the time to a healthy service. This is the recovery time |
+| 0:22 | Range | From an address outside the allowed range (a phone hotspot, for example), a `curl` to the ingress address and `kubectl get nodes` both time out. From the allowed address both work | The result of each, without printing the address |
 | 0:25 | Baseline | 10 minutes of steady load with k6 from the maintainer's machine | Request rate, error rate, latency percentiles, the SLIs |
 | 0:40 | Ramp | Raise the load in steps until latency or errors rise | The load at which they rise |
 | 1:00 | Experiments | The list below, one at a time. State the hypothesis first | Hypothesis, result, time to recover |
 | 1:35 | Optional | Remove one node instance and watch AKS repair it. Skipped if time is short, because all 4 vCPU are in use and a retry can fail | Result |
 | 1:45 | Wrap up | Cost snapshot, saved output and masked screenshots | Files saved |
-| 1:50 | Teardown | `./infrastructure/session.sh down` then `down --yes`, then `./infrastructure/session.sh check` | Output of `check`. Exit 0 is the end |
+| 1:50 | Teardown | `./infrastructure/session.sh down` then `down --yes`, then `./infrastructure/session.sh check`. `down --yes` repeats once after a wait if the destroy stops (#89) | Output of `check`. Exit 0 is the end. Whether the repeat ran and whether it recovered |
 
 ## Experiments
 
 1. Delete a pod of the sample service. Hypothesis: traffic continues, and a new pod is ready within the probe time.
 2. Drain one node. Hypothesis: the pods move to the other node, or stay pending if it has no room. Record which.
-3. Inject errors and latency with the service settings. Hypothesis: the burn-rate alert fires and the email arrives.
+3. Inject errors and latency with the service settings. Hypothesis: the burn-rate alert fires and the email arrives. Then run `monitoring/logs/failed-requests.kql` and `monitoring/logs/slow-requests.kql` and record whether they list the requests.
 4. Deploy a bad image tag with a pull request, then revert it with Git. Hypothesis: Argo CD rolls back and the service recovers.
 5. Edit a resource by hand with `kubectl`. Hypothesis: Argo CD reverts it.
 6. Optional: apply a network policy that blocks the service. Hypothesis: the probes fail and the alert fires.
@@ -57,6 +58,7 @@ The runbooks [key-vault-mount-fails.md](../runbooks/key-vault-mount-fails.md), [
 3. The result of each experiment against its hypothesis.
 4. The cost snapshot, as an amount per hour of cluster time.
 5. Anything done by hand.
+6. Whether the destroy repeat ran, and whether it recovered (#89).
 
 ## After the session
 
