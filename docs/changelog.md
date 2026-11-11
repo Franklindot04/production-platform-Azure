@@ -1,8 +1,10 @@
 # Changelog
 
-This page lists what is on `main`. Release notes are in [release-notes.md](release-notes.md). There are no dates and no version numbers. Anything not built is marked planned.
+This page lists what is on `main`. Release notes are in [release-notes.md](release-notes.md). There are no dates. Anything not built is marked planned.
 
-## Unreleased
+## v0.1.0
+
+The first release. The release notes are in [release-notes.md](release-notes.md#v010).
 
 ### Infrastructure
 
