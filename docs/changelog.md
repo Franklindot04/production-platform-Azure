@@ -64,3 +64,4 @@ This page lists what is on `main`. Release notes are in [release-notes.md](relea
 - The architecture document, the plan, the project history and the workflows page.
 - Run sheets and results for Session 1 and Session 2.
 - Files for a documentation site built from the `docs/` folder (#51).
+- A custom theme for the documentation site, kept in `docs/`: grouped navigation, search, and light and dark mode (#51).

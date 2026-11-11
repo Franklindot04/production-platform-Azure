@@ -1,8 +1,39 @@
+---
+layout: home
+start:
+  - title: Architecture
+    url: /architecture.html
+    stage: build
+  - title: Runbooks
+    url: /runbooks/
+    stage: fix
+  - title: Session 1 results
+    url: /sessions/session-1-results.html
+    stage: break
+  - title: Session 2 results
+    url: /sessions/session-2-results.html
+    stage: break
+lead: "A personal project to build and operate a platform on Microsoft Azure: infrastructure as code, a Kubernetes cluster, delivery pipelines, monitoring, incident handling and cost control."
+---
 # Production Platform / Azure
 
-A personal project to build and operate a platform on Microsoft Azure: infrastructure as code, a Kubernetes cluster, delivery pipelines, monitoring, incident handling and cost control.
-
 The goal is to practice the full SRE and DevOps loop on one system: build it, deploy it, measure it, break it and fix it.
+
+## The loop
+
+1. [Build](architecture.md)
+   The components, the layers and the decisions behind them.
+2. [Deploy](workflows.md)
+   The workflows that check, scan and publish the code.
+3. [Measure](slos.md)
+   The SLIs, the targets and the burn-rate alerts.
+4. [Break](sessions/session-2-results.md)
+   The load runs and the failure experiments of Session 2.
+5. [Fix](runbooks/README.md)
+   One runbook for each known failure.
+{: .loop}
+
+Then the loop starts again with build.
 
 The repository is at [github.com/Franklindot04/production-platform-Azure](https://github.com/Franklindot04/production-platform-Azure). These pages are the files of its `docs/` folder.
 
@@ -28,14 +59,15 @@ The repository is at [github.com/Franklindot04/production-platform-Azure](https:
 ## Live sessions
 
 - [Session 1](sessions/session-1.md): the plan.
-- [Session 1 results](sessions/session-1-results.md)
+- [Session 1 results](sessions/session-1-results.md): the measured results of the first live session.
 - [Session 2](sessions/session-2.md): the plan.
-- [Session 2 results](sessions/session-2-results.md)
+- [Session 2 results](sessions/session-2-results.md): the measured results of the second live session.
 
 ## Changes
 
 - [Changelog](changelog.md): what is on `main`.
 - [Release notes](release-notes.md): no release has been published.
+- [Documentation site](site.md): how the site is built and previewed.
 
 ## Decision records
 
