@@ -696,6 +696,45 @@ const MERMAID_VERSION = "11";
     });
   }
 
+  /* Footer: the latest release tag of the repository, read in the browser. The item stays hidden
+     until a tag that passes the checks has loaded. The answer is kept for the browser tab. */
+  function initVersion() {
+    var item = qs(".footer-version");
+    if (!item) { return; }
+    var api = item.getAttribute("data-release-api");
+    var repo = item.getAttribute("data-repo");
+    var link = qs("a", item);
+    if (!api || !repo || !link) { return; }
+    var KEY = "pp-latest-release";
+    var TAG = /^v?\d+\.\d+\.\d+[A-Za-z0-9.-]*$/;
+
+    function valid(tag, url) {
+      return typeof tag === "string" && typeof url === "string" && TAG.test(tag) && url.indexOf(repo + "/") === 0;
+    }
+    function show(tag, url) {
+      link.textContent = tag;
+      link.setAttribute("href", url);
+      item.removeAttribute("hidden");
+    }
+
+    try {
+      var saved = JSON.parse(sessionStorage.getItem(KEY));
+      if (saved && valid(saved.tag, saved.url)) { show(saved.tag, saved.url); return; }
+    } catch (e) { /* storage can throw */ }
+
+    if (typeof fetch !== "function") { return; }
+    fetch(api, { headers: { Accept: "application/vnd.github+json" } })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (data) {
+        if (!data || !valid(data.tag_name, data.html_url)) { return; }
+        show(data.tag_name, data.html_url);
+        try {
+          sessionStorage.setItem(KEY, JSON.stringify({ tag: data.tag_name, url: data.html_url }));
+        } catch (e) { /* storage can throw */ }
+      })
+      .catch(function () { /* the item stays hidden */ });
+  }
+
   function init() {
     initMode();
     initMenu();
@@ -707,6 +746,7 @@ const MERMAID_VERSION = "11";
     initDiagrams();
     initHome();
     initSearch();
+    initVersion();
   }
 
   if (document.readyState === "loading") {

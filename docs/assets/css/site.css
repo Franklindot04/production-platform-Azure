@@ -406,6 +406,10 @@ th { background: var(--surface); border-top: 1px solid var(--line); border-botto
 .site-footer ul { display: flex; flex-wrap: wrap; gap: 4px 24px; margin: 0; padding: 0; list-style: none; }
 .site-footer a { display: inline-flex; align-items: center; min-height: var(--hit); }
 .footer-maint { display: flex; align-items: center; gap: 8px; margin-right: auto; color: var(--muted); }
+.site-footer li { min-width: 0; }
+.footer-version { display: inline-flex; align-items: center; gap: 4px; }
+.footer-version[hidden] { display: none; }
+.footer-version span { color: var(--accent); }
 
 /* On this page: the right column on wide screens, a disclosure above it. */
 .toc-title { margin: 0 0 8px; padding-left: 12px; font-size: 0.875rem; font-weight: 600; color: var(--muted); }
