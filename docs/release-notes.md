@@ -4,6 +4,8 @@ v0.1.0 is the first release.
 
 ## v0.1.0
 
+Released 2026-11-11
+
 v0.1.0 is the `dev` environment as built. It was created, checked and destroyed in two live sessions. The cluster exists only while a live session runs.
 
 ### What is in this release

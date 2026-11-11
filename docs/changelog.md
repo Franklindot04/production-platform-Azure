@@ -1,8 +1,10 @@
 # Changelog
 
-This page lists what is on `main`. Release notes are in [release-notes.md](release-notes.md). There are no dates. Anything not built is marked planned.
+This page lists what is on `main`. Release notes are in [release-notes.md](release-notes.md). Status text carries no dates. Each release entry carries its release date under its heading, in the form YYYY-MM-DD. Anything not built is marked planned.
 
 ## v0.1.0
+
+Released 2026-11-11
 
 The first release. The release notes are in [release-notes.md](release-notes.md#v010).
 
