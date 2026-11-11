@@ -18,7 +18,7 @@ On 2026-11-06 a pull request branch was found to contain commits with metadata t
 ## What was kept and what was not
 
 - **Kept:** every file and the full commit history of `main`, up to the last merged pull request.
-- **Not kept:** issues, pull requests, review discussion and the open branch. The open branch added the persistent monitoring layer, a Key Vault and the identity for pull request plans. That work is planned again.
+- **Not kept:** issues, pull requests, review discussion and the open branch. The open branch added the persistent monitoring layer, a Key Vault and the identity for pull request plans. The persistent monitoring layer, the Key Vault and the identity for pull request plans have been rebuilt and are applied.
 - **Issue numbers changed.** A number such as `(#43)` in an older commit message refers to the earlier repository, not to the issue with that number here.
 
 ## Why most epics were recreated

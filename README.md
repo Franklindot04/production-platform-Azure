@@ -20,11 +20,11 @@ What exists today:
 - `applications/sample-service/`: a Go service with health endpoints and a settable latency and error rate, and its Dockerfile. `helm/sample-service/`: its chart. `kubernetes/`: namespaces, quotas and network policies. `gitops/`: the Argo CD Applications and `dev` values. `tests/kind/`: a script that checks all of it in a local `kind` cluster. The sample service ran on AKS in Session 1. It was served through the managed ingress, its metrics reached the Azure Monitor workspace and its traces reached Application Insights.
 - Planned work, written up as GitHub issues.
 
-Runbooks are written in `docs/runbooks/` and have not been exercised. What does not exist now: a running cluster and dashboards. The README will change as each of these is built.
+Ten runbooks are written in `docs/runbooks/`. Three were exercised in Session 2. What does not exist now: a running cluster and dashboards. The README will change as each of these is built.
 
-## Planned tools
+## Tools
 
-These are the tools planned for the project. None is in use yet.
+These are the tools of the project. Azure, AKS, Argo CD, Azure Monitor, Prometheus, OpenTelemetry, Microsoft Entra ID, Azure Key Vault and Azure RBAC ran in a live session.
 
 - Cloud: Microsoft Azure
 - Infrastructure as code: Terraform
@@ -51,7 +51,7 @@ The folders below marked as existing are in the repository. The others are plann
 - `tests/`: checks that need no Azure. Exists.
 - `monitoring/`: dashboards, alert rules and SLO definitions.
 - `security/`: policies and scanning configuration.
-- `docs/`: architecture documents, ADRs and runbooks (`docs/runbooks/`, written, not exercised). Postmortems have a template (`docs/postmortems/`), and one has been written: [1-error-injection-availability-alerts.md](docs/postmortems/1-error-injection-availability-alerts.md). Exists.
+- `docs/`: architecture documents, ADRs and runbooks (`docs/runbooks/`, written, three exercised in Session 2). Postmortems have a template (`docs/postmortems/`), and one has been written: [1-error-injection-availability-alerts.md](docs/postmortems/1-error-injection-availability-alerts.md). Exists.
 
 ## How work is tracked
 
