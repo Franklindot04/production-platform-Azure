@@ -101,3 +101,4 @@ The repository is at [github.com/Franklindot04/production-platform-Azure](https:
 - [ADR 0028: Set SLOs for the sample service and alert on burn rate](adr/0028-slos-and-burn-rate-alerts.md)
 - [ADR 0029: Give the sample service access to Key Vault with workload identity](adr/0029-workload-identity-and-vault-access.md)
 - [ADR 0030: Set the incident process and write postmortems](adr/0030-incident-process-and-postmortems.md)
+- [ADR 0031: Deploy the KQL queries as saved searches](adr/0031-kql-saved-searches.md)
