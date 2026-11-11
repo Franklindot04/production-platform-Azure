@@ -1,0 +1,44 @@
+groups:
+  - title: Overview
+    stage: build
+    url: /
+    items:
+      - path: index.md
+        label: Home
+      - path: architecture.md
+      - path: plan.md
+      - path: history.md
+  - title: Delivery and security
+    stage: deploy
+    url: /#delivery-and-security
+    items:
+      - path: workflows.md
+      - path: security.md
+  - title: Reliability
+    stage: measure
+    url: /#reliability
+    items:
+      - path: slos.md
+      - path: incident-process.md
+  - title: Changes
+    url: /#changes
+    items:
+      - path: changelog.md
+      - path: release-notes.md
+singles:
+  - path: site.md
+folders:
+  - folder: adr
+    title: Decision records
+  - folder: runbooks
+    title: Runbooks
+    url: /runbooks/
+  - folder: postmortems
+    title: Postmortems
+    url: /postmortems/
+  - folder: sessions
+    title: Live sessions
+    url: /#live-sessions
+  - folder: plans
+    title: Saved plans
+    url: /plans/

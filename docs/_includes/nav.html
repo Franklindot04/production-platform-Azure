@@ -1,0 +1,67 @@
+<nav class="site-nav" aria-label="Documentation">
+  {% for group in site.data.navigation.groups %}
+  {% assign gkey = group.title | slugify %}
+  {% assign has_current = false %}
+  {% assign label_current = false %}
+  {% if group.url and page.url == group.url %}{% assign label_current = true %}{% endif %}
+  {% for item in group.items %}{% assign t = site.pages | where: "path", item.path | first %}{% if t and t.url == page.url %}{% assign has_current = true %}{% endif %}{% if t and group.url and t.url == group.url %}{% assign label_current = false %}{% endif %}{% endfor %}
+  <div class="nav-group" data-group="{{ gkey }}" data-kind="fixed" data-title="{{ group.title }}" data-stage="{{ group.stage | default: 'none' }}"{% if has_current %} data-has-current="true"{% endif %}>
+    <div class="nav-head">
+      <button type="button" class="nav-chev" aria-expanded="true" aria-controls="nav-list-{{ gkey }}" aria-label="Collapse {{ group.title }}"><span class="chev" aria-hidden="true"></span></button>
+      <span class="nav-dot" aria-hidden="true"></span>
+      {% if group.url %}<a class="nav-label" href="{{ group.url | relative_url }}"{% if label_current %} aria-current="page"{% endif %}>{{ group.title }}</a>{% else %}<button type="button" class="nav-label nav-label-toggle" aria-expanded="true" aria-controls="nav-list-{{ gkey }}">{{ group.title }}</button>{% endif %}
+      {% if group.stage %}<span class="stage-name">{{ group.stage }}</span>{% endif %}
+    </div>
+    <ul class="nav-list" id="nav-list-{{ gkey }}">
+      {% for item in group.items %}
+      {% assign target = site.pages | where: "path", item.path | first %}
+      {% if target %}
+      <li><a href="{{ target.url | relative_url }}"{% if target.url == page.url %} aria-current="page"{% endif %}>{{ item.label | default: target.title }}</a></li>
+      {% endif %}
+      {% endfor %}
+    </ul>
+  </div>
+  {% endfor %}
+
+  {% for single in site.data.navigation.singles %}
+  {% assign target = site.pages | where: "path", single.path | first %}
+  {% if target %}
+  <div class="nav-group nav-single" data-stage="none">
+    <div class="nav-head">
+      <span class="nav-chev-spacer" aria-hidden="true"></span>
+      <span class="nav-dot" aria-hidden="true"></span>
+      <a class="nav-label" href="{{ target.url | relative_url }}"{% if target.url == page.url %} aria-current="page"{% endif %}>{{ single.label | default: target.title }}</a>
+    </div>
+  </div>
+  {% endif %}
+  {% endfor %}
+
+  {% for f in site.data.navigation.folders %}
+  {% assign dirname = "/" | append: f.folder | append: "/" %}
+  {% assign folder_key = f.folder | append: "/" %}
+  {% assign folder_stage = site.data.stages[folder_key] | default: "none" %}
+  {% assign group_pages = site.pages | where_exp: "p", "p.dir == dirname" | sort: "path" %}
+  {% assign readme = group_pages | where: "name", "README.md" | first %}
+  {% assign landing = f.url %}
+  {% unless landing %}{% if readme %}{% assign landing = readme.url %}{% endif %}{% endunless %}
+  {% assign others = group_pages | where_exp: "p", "p.name != 'README.md'" %}
+  {% assign has_current = false %}
+  {% for p in group_pages %}{% if p.url == page.url %}{% assign has_current = true %}{% endif %}{% endfor %}
+  {% assign other_count = others | size %}
+  <div class="nav-group" data-group="{{ f.folder }}" data-kind="folder" data-title="{{ f.title }}" data-stage="{{ folder_stage }}"{% if has_current %} data-has-current="true"{% endif %}>
+    <div class="nav-head">
+      {% if other_count > 0 %}<button type="button" class="nav-chev" aria-expanded="true" aria-controls="nav-list-{{ f.folder }}" aria-label="Collapse {{ f.title }}"><span class="chev" aria-hidden="true"></span></button>{% else %}<span class="nav-chev-spacer" aria-hidden="true"></span>{% endif %}
+      <span class="nav-dot" aria-hidden="true"></span>
+      {% if landing %}<a class="nav-label" href="{{ landing | relative_url }}"{% if page.url == landing %} aria-current="page"{% endif %}>{{ f.title }}</a>{% else %}<button type="button" class="nav-label nav-label-toggle" aria-expanded="true" aria-controls="nav-list-{{ f.folder }}">{{ f.title }}</button>{% endif %}
+      {% if folder_stage != "none" %}<span class="stage-name">{{ folder_stage }}</span>{% endif %}
+    </div>
+    {% if other_count > 0 %}
+    <ul class="nav-list" id="nav-list-{{ f.folder }}">
+      {% for p in others %}
+      <li><a href="{{ p.url | relative_url }}"{% if p.url == page.url %} aria-current="page"{% endif %}>{{ p.title | default: p.name }}</a></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+  {% endfor %}
+</nav>

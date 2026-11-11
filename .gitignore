@@ -70,3 +70,9 @@ temp/
 
 # Bootstrap
 infrastructure/bootstrap/.state-account-name
+
+# Documentation site
+docs/_site/
+docs/.jekyll-cache/
+docs/.sass-cache/
+docs/Gemfile.lock
