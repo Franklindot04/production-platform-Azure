@@ -1,6 +1,6 @@
 # Delivery plan for Epics 3 to 8
 
-Status: planned. None of the work below is done, except where an issue is marked closed.
+Status: [Session 1](sessions/session-1-results.md) and [Session 2](sessions/session-2-results.md) have run. For the other work below, only an issue that is marked closed is done.
 
 The plan covers the Kubernetes platform, delivery, observability, security, incident handling and reliability work. It is built around two limits: the cluster exists only during a live session, and the target subscription has a regional vCPU quota of 4 in `swedencentral` (ADR 0003).
 
@@ -144,12 +144,11 @@ A release is created when the maintainer approves it.
 
 | Tag | After |
 |---|---|
-| v0.1.0 | Foundation and Azure infrastructure (Epics 1 and 2, done) |
-| v0.2.0 | PR 3 to 5, checked on `kind` |
-| v0.3.0 | Session 1: the GitOps flow and the first observability data |
-| v0.4.0 | Security and identity (PR 8) |
-| v0.5.0 | SLOs and alerts proven |
-| v0.6.0 | Runbooks and incident process (PR 10) |
-| v0.7.0 | Load tests and failure experiments (Session 2) |
-| v0.9.0 | Cost review and the documentation site |
+| v0.1.0 | The platform after Session 1 and Session 2, the first release ([release-notes.md](release-notes.md)) |
+| v0.2.0 | The latency alerts LatencyFastBurn and LatencySlowBurn tested, and the latency-burn runbook exercised (#41). `slow-requests.kql` run with real slow requests (#88). The alert for missing data (planned) |
+| v0.3.0 | The six runbooks not yet exercised: pod-not-ready, argocd-drift, network-policy-blocks-service, key-vault-mount-fails, image-pull-refused and session-leftovers (#46). A node drain that completes on the two node cluster (#98). The destroy repeat tested against a failed destroy (#89). Removal of a node instance. The network policy block experiment |
+| v0.4.0 | Dashboards as code, and saved searches for the KQL files (#40) |
+| v0.5.0 | Cost review: a cost snapshot (#52), and the budget with alerts defined in Terraform (planned) |
+| v0.6.0 | The environments `staging` and `prod` (planned) |
+| v0.7.0 | Remaining checks: the range test from a second address, a screenshot of the Argo CD UI, and the image tag bump pull request tested |
 | v1.0.0 | All epics closed and the documents consistent |

@@ -66,7 +66,7 @@ The repository is at [github.com/Franklindot04/production-platform-Azure](https:
 ## Changes
 
 - [Changelog](changelog.md): what is on `main`.
-- [Release notes](release-notes.md): no release has been published.
+- [Release notes](release-notes.md): the notes of v0.1.0, the first release.
 - [Documentation site](site.md): how the site is built and previewed.
 
 ## Decision records

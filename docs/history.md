@@ -18,9 +18,9 @@ On 2026-11-06 a pull request branch was found to contain commits with metadata t
 ## What was kept and what was not
 
 - **Kept:** every file and the full commit history of `main`, up to the last merged pull request.
-- **Not kept:** issues, pull requests, review discussion and the open branch. The open branch added the persistent monitoring layer, a Key Vault and the identity for pull request plans. That work is planned again.
+- **Not kept:** issues, pull requests, review discussion and the open branch. The open branch added the persistent monitoring layer, a Key Vault and the identity for pull request plans. The persistent monitoring layer, the Key Vault and the identity for pull request plans have been rebuilt and are applied.
 - **Issue numbers changed.** A number such as `(#43)` in an older commit message refers to the earlier repository, not to the issue with that number here.
 
 ## Why most epics were recreated
 
-The old issues were lost with the repository. Epics 1 and 2 and most of Epics 3 and 4 were recreated and closed, so the issue list matches the work that is already on `main`. Epics 5 to 8 and the live cluster session are open, because that work has not been done.
+The old issues were lost with the repository. Epics 1 and 2 and most of Epics 3 and 4 were recreated and closed, so the issue list matches the work that is already on `main`. Epics 5 to 8 were recreated as open issues, because that work had not been done. Both live sessions have run since, and their results are in [Session 1 results](sessions/session-1-results.md) and [Session 2 results](sessions/session-2-results.md). The open work is listed in the [release notes](release-notes.md).

@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Nothing has been released yet. Only the `main` branch is maintained.
+v0.1.0 is the first release. Only the `main` branch is maintained.
 
 ## Reporting a vulnerability
 
@@ -30,4 +30,4 @@ A credential committed to this repository counts as a security report. This incl
 
 ## Scope
 
-Right now the repository holds documentation and templates only. There is no deployed infrastructure and no application code. The scope will grow as code is added, and this file will be updated when it does.
+The repository holds documentation, Terraform for the `dev` environment, a sample service with its Helm chart, Kubernetes and GitOps manifests, and GitHub Actions workflows. The cluster exists only while a live session runs. The session layer, which holds the cluster, is created at the start of a session and destroyed at the end. The scope will grow as code is added, and this file will be updated when it does.
