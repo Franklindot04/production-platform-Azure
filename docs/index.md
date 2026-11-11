@@ -62,6 +62,7 @@ The repository is at [github.com/Franklindot04/production-platform-Azure](https:
 - [Session 1 results](sessions/session-1-results.md): the measured results of the first live session.
 - [Session 2](sessions/session-2.md): the plan.
 - [Session 2 results](sessions/session-2-results.md): the measured results of the second live session.
+- [Session 3](sessions/session-3.md): the plan for the latency alerts test. Status planned.
 
 ## Changes
 
