@@ -1,6 +1,6 @@
 # Monitoring queries
 
-Saved queries for the metrics and traces of the sample service. There is no Grafana (ADR 0019). Each file holds one query. The decision is in ADR 0027.
+Saved queries for the metrics and traces of the sample service. There is no Grafana (ADR 0019). Each file holds one query. The decisions are in ADR 0027 and ADR 0031.
 
 ## Files
 
@@ -32,15 +32,16 @@ The PromQL files read the metrics of the sample service (`http_requests_total` a
 
 These portal steps are not verified.
 
+The three KQL queries are saved searches on `pp-dev-law` with the category `Sample service`. `az monitor log-analytics workspace saved-search list` lists them.
+
 ## Status
 
-Nothing in this directory is deployed by Terraform or GitOps. The queries are run by hand.
+The three KQL files are read by Terraform and defined as saved searches in `infrastructure/environments/dev/persistent/saved-searches.tf` (ADR 0031). They are applied. The six PromQL files are still run by hand.
 
 Session 1 ran `prometheus/request-rate.promql` in the Azure Monitor workspace, and it answered by route. Server spans of the sample service appear in `AppRequests` with the request name `GET /work`. `logs/failed-requests.kql` and `logs/slow-requests.kql` filter on `GET /work`, the request name in `AppRequests`. In Session 2 `logs/failed-requests.kql` returned the 6,001 failed requests, and `logs/slow-requests.kql` returned 0 rows because no latency was injected. The other queries have not been run. Treat them as unverified.
 
 ## Not built
 
-- Queries deployed as saved searches (planned).
 - Alerts for missing data (planned).
 
 The alert rules are defined in `infrastructure/environments/dev/persistent/alerts.tf` (ADR 0028, `docs/slos.md`). They exist in Azure only after the persistent layer is applied.

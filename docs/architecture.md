@@ -336,6 +336,7 @@ The target subscription has a regional vCPU quota of 4, which limits node sizes 
 | [0028](adr/0028-slos-and-burn-rate-alerts.md) | Set SLOs for the sample service and alert on burn rate | proposed |
 | [0029](adr/0029-workload-identity-and-vault-access.md) | Give the sample service access to Key Vault with workload identity | proposed |
 | [0030](adr/0030-incident-process-and-postmortems.md) | Set the incident process and write postmortems | proposed |
+| [0031](adr/0031-kql-saved-searches.md) | Deploy the KQL queries as saved searches | proposed |
 
 Other open decisions are listed in section 15.
 
