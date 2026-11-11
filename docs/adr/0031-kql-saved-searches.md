@@ -21,7 +21,7 @@ What stays from ADR 0027: queries as files under `monitoring/`, review in pull r
 
 - A change to a KQL file reaches Azure at the next persistent-layer apply.
 - A saved search that is edited in the portal is overwritten by the next apply.
-- The saved searches exist in Azure only after the persistent layer is applied. They are defined and not applied yet.
+- The three saved searches are applied and exist on `pp-dev-law`.
 - `trace-by-operation` keeps its placeholder operation id.
 - Running the other queries is not part of this decision.
 
