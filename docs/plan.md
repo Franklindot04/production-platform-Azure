@@ -148,7 +148,7 @@ A release is created when the maintainer approves it.
 | v0.2.0 | The latency alerts LatencyFastBurn and LatencySlowBurn tested, and the latency-burn runbook exercised (#41). `slow-requests.kql` run with real slow requests (#41). The test is planned in [Session 3](sessions/session-3.md). The alert for missing data (planned) |
 | v0.3.0 | The six runbooks not yet exercised: pod-not-ready, argocd-drift, network-policy-blocks-service, key-vault-mount-fails, image-pull-refused and session-leftovers (#46). A node drain that completes on the two node cluster (#98). The destroy repeat tested against a failed destroy (#89). Removal of a node instance. The network policy block experiment |
 | v0.4.0 | Dashboards as code, and saved searches for the KQL files (#40) |
-| v0.5.0 | Cost review: a cost snapshot (#52), and the budget with alerts defined in Terraform (planned) |
+| v0.5.0 | Cost review: the cost snapshot (#52, [cost.md](cost.md)), and the budget with alerts defined in Terraform (planned) |
 | v0.6.0 | The environments `staging` and `prod` (planned) |
 | v0.7.0 | Remaining checks: the range test from a second address, a screenshot of the Argo CD UI, and the image tag bump pull request tested |
 | v1.0.0 | All epics closed and the documents consistent |

@@ -267,7 +267,7 @@ The persistent layer (workspaces, Application Insights, action group, alerts) is
 
 ## 12. Cost notes
 
-The budget of `dev` is set in Azure. The rest is planned. No cost has been measured. See ADR 0009.
+The budget of `dev` is set in Azure. The rest is planned. The cost after Session 1 and Session 2 is in [cost.md](cost.md). See ADR 0009.
 
 Plan:
 
