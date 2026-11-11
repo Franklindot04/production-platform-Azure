@@ -1,0 +1,6 @@
+---
+layout: none
+---
+[
+{% assign doc_pages = site.pages | where_exp: "p", "p.name contains '.md'" | where_exp: "p", "p.name != '404.md'" | where_exp: "p", "p.title.size > 0" | where_exp: "p", "p.content.size > 0" %}{% for p in doc_pages %}  {"title": {{ p.title | default: p.name | jsonify }}, "url": {{ p.url | relative_url | jsonify }}, "excerpt": {{ p.content | markdownify | strip_html | normalize_whitespace | truncate: 400 | jsonify }}}{% unless forloop.last %},{% endunless %}
+{% endfor %}]
