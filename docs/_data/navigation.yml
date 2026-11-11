@@ -6,6 +6,7 @@ groups:
       - path: index.md
         label: Home
       - path: architecture.md
+      - path: cost.md
       - path: plan.md
       - path: history.md
   - title: Delivery and security
