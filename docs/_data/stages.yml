@@ -1,6 +1,7 @@
 # Maps a page to a stage of the loop. A key is a file path or a folder prefix.
 # The first key that the page path starts with wins. "none" uses the build blue.
 architecture.md: build
+cost.md: build
 plan.md: build
 history.md: build
 adr/: build
