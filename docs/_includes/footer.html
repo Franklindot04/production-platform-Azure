@@ -1,8 +1,11 @@
+{% assign repo = site.data.maintainer.repo %}
+{% assign release_api = repo | replace: "https://github.com/", "https://api.github.com/repos/" | append: "/releases/latest" %}
 <footer class="site-footer">
   <ul>
     <li class="footer-maint">{% include logo.html size=16 %}<span>Maintained by {{ site.data.maintainer.name }}</span></li>
-    <li><a href="https://github.com/Franklindot04/production-platform-Azure">Repository</a></li>
-    <li><a href="https://github.com/Franklindot04/production-platform-Azure/edit/main/docs/{{ page.path }}">Edit this page</a></li>
+    <li><a href="{{ repo }}">Repository</a></li>
+    <li><a href="{{ repo }}/blob/main/LICENSE">Licensed under MIT</a></li>
+    <li class="footer-version" data-release-api="{{ release_api }}" data-repo="{{ repo }}" hidden><span>Version:</span> <a href="{{ repo }}/releases"></a></li>
     <li><a href="#top">Back to top</a></li>
   </ul>
 </footer>
