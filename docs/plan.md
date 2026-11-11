@@ -145,7 +145,7 @@ A release is created when the maintainer approves it.
 | Tag | After |
 |---|---|
 | v0.1.0 | The platform after Session 1 and Session 2, the first release ([release-notes.md](release-notes.md)) |
-| v0.2.0 | The latency alerts LatencyFastBurn and LatencySlowBurn tested, and the latency-burn runbook exercised (#41). `slow-requests.kql` run with real slow requests (#88). The alert for missing data (planned) |
+| v0.2.0 | The latency alerts LatencyFastBurn and LatencySlowBurn tested, and the latency-burn runbook exercised (#41). `slow-requests.kql` run with real slow requests (#41). The test is planned in [Session 3](sessions/session-3.md). The alert for missing data (planned) |
 | v0.3.0 | The six runbooks not yet exercised: pod-not-ready, argocd-drift, network-policy-blocks-service, key-vault-mount-fails, image-pull-refused and session-leftovers (#46). A node drain that completes on the two node cluster (#98). The destroy repeat tested against a failed destroy (#89). Removal of a node instance. The network policy block experiment |
 | v0.4.0 | Dashboards as code, and saved searches for the KQL files (#40) |
 | v0.5.0 | Cost review: a cost snapshot (#52), and the budget with alerts defined in Terraform (planned) |

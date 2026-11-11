@@ -11,7 +11,7 @@ One of two alerts in the rule group `pp-dev-slo-alerts` (`infrastructure/environ
 
 The two differ in how fast the 30 day error budget (0.05) is used. At the fast burn rate (14.4) it is used up in about two days. At the slow burn rate (6) it is used up in about five days. Fast burn is severity 1 and is the one to act on first. Slow burn is severity 2. The response to each level is given as actions, not times: see the [severity table](../incident-process.md).
 
-The alerts are applied and have not been tested. This runbook is exercised by Session 2 experiment 3 (inject errors and latency), which is its first test.
+The alerts are applied. They have not been seen firing. Session 2 injected errors and no latency. The first test of this runbook is the latency test in [Session 3](../sessions/session-3.md).
 
 ## Impact
 
@@ -29,7 +29,7 @@ More than the allowed share of `/work` requests take longer than 0.5 seconds. If
 
 ## Likely causes
 
-- A latency set through the admin port (`PUT /admin/config`). This is what experiment 3 does.
+- A latency set through the admin port (`PUT /admin/config`). This is what the latency test in [Session 3](../sessions/session-3.md) does.
 - Load above what the pods carry. The load test `ramp` scenario in `tests/load/README.md` finds that point. It has not run, so the limit is not known.
 - Fewer pods than the two in the chart, for example after a node drain. See [node-drain.md](node-drain.md).
 - The starting latency in the chart values (`settings.latency`, default "0s") was changed in Git.
@@ -57,7 +57,7 @@ The fix in step 1 and step 2 sets the service back to its chart values. There is
 
 ## Source
 
-The alerts LatencyFastBurn and LatencySlowBurn, ADR 0028, `docs/slos.md`, and Session 2 experiment 3.
+The alerts LatencyFastBurn and LatencySlowBurn, ADR 0028, `docs/slos.md`, and the latency test in [Session 3](../sessions/session-3.md).
 
 ## Status
 
