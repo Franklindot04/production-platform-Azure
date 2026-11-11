@@ -5,9 +5,8 @@ Who and what has access, and how secrets are handled. Each statement names the f
 Status values:
 
 - applied: the resource exists, or the state is stated as built in `docs/architecture.md`.
-- written and not applied: the code exists and has not been applied to Azure.
+- A resource of the session layer exists only while a live session runs. Its status says that the session layer is destroyed.
 - in the repository: a GitHub Actions workflow. Whether it has run on GitHub is in `docs/workflows.md`.
-- planned: no code exists yet.
 
 ## 1. Roles
 
@@ -24,11 +23,11 @@ Status values:
 | Workflow Terraform plan | Logs in to Azure as the plan identity | `contents: read` and `id-token: write`, in the one job. No permissions at the top | The repository, and a token for the federated credential | `.github/workflows/terraform-plan.yml` | In the repository |
 | Workflow Publish image | Pushes the sample service image | `contents: read` at the top, and `packages: write` in the one job | The repository and its package on `ghcr.io` | `.github/workflows/image-publish.yml` | In the repository |
 | Workflow Open pull request for the image tag | Opens a pull request that changes the tag | `contents: write` and `pull-requests: write`, in the one job. No permissions at the top | The repository | `.github/workflows/image-tag-bump.yml` | In the repository |
-| Argo CD admin credential | Signs in to Argo CD | The admin credential that Argo CD generates when it starts, read from the cluster when asked | The Argo CD instance of the session cluster | `docs/adr/0017-argocd-bootstrap.md`, `infrastructure/session.sh` (`argocd-password`) | Written. The session layer is destroyed |
-| Administrator credential of the session cluster | Lets `session.sh bootstrap` and `argocd-password` reach the cluster | The local administrator credential from `az aks get-credentials --admin` | The session cluster | `infrastructure/session.sh` (`kube_setup`), `docs/adr/0021-entra-id-cluster-access.md` | Written. The session layer is destroyed |
-| People, to the cluster | Day-to-day `kubectl` | Entra ID sign-in with Azure RBAC for Kubernetes. The admin group is a run-time input | The session cluster | `infrastructure/environments/dev/session/main.tf`, `variables.tf`, `docs/adr/0021-entra-id-cluster-access.md` | Written and not applied |
-| The Entra ID admin group | Administers the cluster | Azure Kubernetes Service RBAC Cluster Admin | The session cluster | `infrastructure/environments/dev/session/access.tf` | Written and not applied |
-| The Entra ID admin group | Fetches the kubeconfig with `az aks get-credentials` | Azure Kubernetes Service Cluster User Role | The session cluster | `infrastructure/environments/dev/session/access.tf` | Written and not applied |
+| Argo CD admin credential | Signs in to Argo CD | The admin credential that Argo CD generates when it starts, read from the cluster when asked | The Argo CD instance of the session cluster | `docs/adr/0017-argocd-bootstrap.md`, `infrastructure/session.sh` (`argocd-password`) | Applied. The session layer is destroyed |
+| Administrator credential of the session cluster | Lets `session.sh bootstrap` and `argocd-password` reach the cluster | The local administrator credential from `az aks get-credentials --admin` | The session cluster | `infrastructure/session.sh` (`kube_setup`), `docs/adr/0021-entra-id-cluster-access.md` | Applied. The session layer is destroyed |
+| People, to the cluster | Day-to-day `kubectl` | Entra ID sign-in with Azure RBAC for Kubernetes. The admin group is a run-time input | The session cluster | `infrastructure/environments/dev/session/main.tf`, `variables.tf`, `docs/adr/0021-entra-id-cluster-access.md` | Applied. The session layer is destroyed |
+| The Entra ID admin group | Administers the cluster | Azure Kubernetes Service RBAC Cluster Admin | The session cluster | `infrastructure/environments/dev/session/access.tf` | Applied. The session layer is destroyed |
+| The Entra ID admin group | Fetches the kubeconfig with `az aks get-credentials` | Azure Kubernetes Service Cluster User Role | The session cluster | `infrastructure/environments/dev/session/access.tf` | Applied. The session layer is destroyed |
 
 Notes on the rows:
 
@@ -59,7 +58,7 @@ A new role, scope or permission is added in a pull request that changes this tab
    - The `identity` part passes the client ID, the tenant ID and the vault name to a helper in its environment, and sends the patch to `kubectl` on a pipe.
    - `argocd-password` refuses to print unless the output is a terminal (ADR 0017).
    - Inputs such as `TF_VAR_alert_email` and `TF_VAR_api_authorized_ip_ranges` are set in the shell and not written to a file.
-5. **Terraform state.** State can contain sensitive values (ADR 0004). It holds the Application Insights connection string, which is a sensitive output (`infrastructure/environments/dev/persistent/outputs.tf`), the alert email, and the authorized ranges (`infrastructure/README.md`). It does not hold the Key Vault secret value (ADR 0029). Access is with Entra ID only, and shared key access is off. The maintainer has Storage Blob Data Contributor on the container. The plan identity will have Storage Blob Data Reader on it, so a pull request plan can read state. The plan output is not saved (`docs/workflows.md`).
+5. **Terraform state.** State can contain sensitive values (ADR 0004). It holds the Application Insights connection string, which is a sensitive output (`infrastructure/environments/dev/persistent/outputs.tf`), the alert email, and the authorized ranges (`infrastructure/README.md`). It does not hold the Key Vault secret value (ADR 0029). Access is with Entra ID only, and shared key access is off. The maintainer has Storage Blob Data Contributor on the container. The plan identity has Storage Blob Data Reader on it, so a pull request plan can read state. The plan output is not saved (`docs/workflows.md`).
 6. **Images are public and hold no secret** (ADR 0013). The sample service image is a public package on `ghcr.io`, and anyone can pull it.
 7. **Rotation is manual.**
    - The Key Vault secret: rotation is off in the add-on (`infrastructure/environments/dev/session/main.tf`). To change the value, set a new one with the step in `infrastructure/README.md`. The pods read it after they restart (ADR 0029).
@@ -69,7 +68,5 @@ A new role, scope or permission is added in a pull request that changes this tab
 
 ## 3. Not done yet
 
-- Entra ID access for people to the cluster (issue #45, ADR 0021). The code is written and not applied. No one has signed in through it, and whether it works with the pool in ADR 0012 is not tested.
 - The network rule on the Key Vault. The scan finding AZU-0013 is accepted in `.trivyignore.yaml` (ADR 0029).
-- Every role marked "written and not applied" above: the two roles of the Entra ID admin group.
 - A rotation process for the cluster secret.
