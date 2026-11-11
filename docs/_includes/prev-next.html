@@ -1,0 +1,30 @@
+{% comment %}
+  Previous and next page inside a folder group. The order is the same as in nav.html:
+  the README first, then the other pages sorted by path. The sorting is copied from nav.html.
+{% endcomment %}
+{% assign pn_group = nil %}
+{% for f in site.data.navigation.folders %}
+  {% assign f_dir = "/" | append: f.folder | append: "/" %}
+  {% if page.dir == f_dir %}{% assign pn_group = f %}{% endif %}
+{% endfor %}
+{% if pn_group %}
+  {% assign pn_dir = "/" | append: pn_group.folder | append: "/" %}
+  {% assign pn_pages = site.pages | where_exp: "p", "p.dir == pn_dir" | sort: "path" %}
+  {% assign pn_readme = pn_pages | where: "name", "README.md" %}
+  {% assign pn_others = pn_pages | where_exp: "p", "p.name != 'README.md'" %}
+  {% assign pn_ordered = pn_readme | concat: pn_others %}
+  {% assign pn_count = pn_ordered | size %}
+  {% if pn_count > 1 %}
+    {% assign pn_index = -1 %}
+    {% for p in pn_ordered %}{% if p.url == page.url %}{% assign pn_index = forloop.index0 %}{% endif %}{% endfor %}
+    {% assign pn_prev = nil %}
+    {% assign pn_next = nil %}
+    {% if pn_index > 0 %}{% assign pi = pn_index | minus: 1 %}{% assign pn_prev = pn_ordered[pi] %}{% endif %}
+    {% assign ni = pn_index | plus: 1 %}
+    {% if pn_index >= 0 and ni < pn_count %}{% assign pn_next = pn_ordered[ni] %}{% endif %}
+<nav class="prev-next" aria-label="Previous and next pages">
+  {% if pn_prev %}<a class="prev" rel="prev" href="{{ pn_prev.url | relative_url }}"><span class="pn-label">Previous</span><span class="pn-title">{% if pn_prev.name == "README.md" and pn_group.folder != "plans" %}Overview{% else %}{{ pn_prev.title }}{% endif %}</span></a>{% else %}<span></span>{% endif %}
+  {% if pn_next %}<a class="next" rel="next" href="{{ pn_next.url | relative_url }}"><span class="pn-label">Next</span><span class="pn-title">{{ pn_next.title }}</span></a>{% else %}<span></span>{% endif %}
+</nav>
+  {% endif %}
+{% endif %}

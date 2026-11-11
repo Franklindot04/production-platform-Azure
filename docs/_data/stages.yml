@@ -1,0 +1,19 @@
+# Maps a page to a stage of the loop. A key is a file path or a folder prefix.
+# The first key that the page path starts with wins. "none" uses the build blue.
+architecture.md: build
+plan.md: build
+history.md: build
+adr/: build
+workflows.md: deploy
+security.md: deploy
+slos.md: measure
+incident-process.md: fix
+runbooks/: fix
+postmortems/: fix
+sessions/: break
+index.md: none
+changelog.md: none
+release-notes.md: none
+site.md: none
+plans/: none
+404.md: none

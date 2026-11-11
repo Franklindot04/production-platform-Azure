@@ -1,0 +1,26 @@
+{% assign crumb_group = nil %}
+{% for f in site.data.navigation.folders %}
+  {% assign f_dir = "/" | append: f.folder | append: "/" %}
+  {% if page.dir == f_dir %}{% assign crumb_group = f %}{% endif %}
+{% endfor %}
+{% if page.url != "/" %}
+<div class="crumb-row">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <ol>
+      <li><a href="{{ '/' | relative_url }}">Home</a></li>
+      {% if crumb_group %}
+        {% assign group_readme = site.pages | where_exp: "p", "p.dir == page.dir" | where: "name", "README.md" | first %}
+        {% if page.name == "README.md" %}
+      <li><span aria-current="page">{{ crumb_group.title }}</span></li>
+        {% else %}
+      <li>{% if group_readme %}<a href="{{ group_readme.url | relative_url }}">{{ crumb_group.title }}</a>{% else %}{{ crumb_group.title }}{% endif %}</li>
+      <li><span aria-current="page">{{ page.title }}</span></li>
+        {% endif %}
+      {% else %}
+      <li><span aria-current="page">{{ page.title }}</span></li>
+      {% endif %}
+    </ol>
+  </nav>
+  {% if stage_name != "none" %}<p class="stage-tag">Stage: {{ stage_name }}</p>{% endif %}
+</div>
+{% endif %}

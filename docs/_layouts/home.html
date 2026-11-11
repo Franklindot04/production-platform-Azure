@@ -1,0 +1,23 @@
+---
+layout: default
+---
+<section class="hero">
+  <h1 class="page-title">{{ page.title }}</h1>
+  {% if page.lead %}<p class="lead">{{ page.lead }}</p>{% endif %}
+  {% if page.start %}
+  <p class="start-label visually-hidden">Start here</p>
+  <div class="start-row">
+    {% for s in page.start %}<a class="start-link" data-stage="{{ s.stage }}" href="{{ s.url | relative_url }}">{{ s.title }}</a>{% endfor %}
+  </div>
+  {% endif %}
+  <div class="hero-ring">
+    <svg class="ring" viewBox="0 64 340 236" width="340" height="236" aria-hidden="true" focusable="false">
+      <path class="ring-arc ring-build" d="M181.69 86.82A84 84 0 0 1 244.17 130.56"/><polygon class="ring-head ring-build" points="255.65,124.46 252.15,145.57 232.69,136.67"/><circle class="ring-dot ring-build" cx="218.18" cy="101.19" r="15"/><text class="ring-num" x="218.18" y="106.69" text-anchor="middle">1</text><text class="ring-label ring-build" x="231.95" y="86.03" text-anchor="start">build</text>
+      <path class="ring-arc ring-deploy" d="M252.72 155.41A84 84 0 0 1 230.42 228.35"/><polygon class="ring-head ring-deploy" points="239.78,237.38 218.62,240.58 221.07,219.32"/><circle class="ring-dot ring-deploy" cx="250.33" cy="194.56" r="15"/><text class="ring-num" x="250.33" y="200.06" text-anchor="middle">2</text><text class="ring-label ring-deploy" x="273.28" y="206.08" text-anchor="start">deploy</text>
+      <path class="ring-arc ring-measure" d="M209.44 244.17A84 84 0 0 1 133.18 245.5"/><polygon class="ring-head ring-measure" points="127.48,257.18 117.9,238.05 138.88,233.81"/><circle class="ring-dot ring-measure" cx="171.47" cy="253.99" r="15"/><text class="ring-num" x="171.47" y="259.49" text-anchor="middle">3</text><text class="ring-label ring-measure" x="171.47" y="286.99" text-anchor="middle">measure</text>
+      <path class="ring-arc ring-break" d="M111.65 230.42A84 84 0 0 1 86.82 158.31"/><polygon class="ring-head ring-break" points="73.94,156.5 89.18,141.47 99.69,160.12"/><circle class="ring-dot ring-break" cx="90.58" cy="197.35" r="15"/><text class="ring-num" x="90.58" y="202.85" text-anchor="middle">4</text><text class="ring-label ring-break" x="67.88" y="209.66" text-anchor="end">break</text>
+      <path class="ring-arc ring-fix" d="M94.5 133.18A84 84 0 0 1 155.41 87.28"/><polygon class="ring-head ring-fix" points="153.16,74.47 172.16,84.32 157.67,100.08"/><circle class="ring-dot ring-fix" cx="119.45" cy="102.91" r="15"/><text class="ring-num" x="119.45" y="108.41" text-anchor="middle">5</text><text class="ring-label ring-fix" x="105" y="88.25" text-anchor="end">fix</text>
+    </svg>
+  </div>
+</section>
+{{ content }}
