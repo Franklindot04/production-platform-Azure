@@ -4,7 +4,7 @@
 
 This document describes the intended design of the platform. It is the first version.
 
-**Built today:** the repository setup (templates, contribution rules, license, security policy, decision records), the `infrastructure/` folders with two Terraform roots for `dev` (the persistent root is applied and defines the resource group, the Azure Monitor and Log Analytics workspaces, Application Insights, the action group, the four burn-rate alerts, the Key Vault and the identities for pull request plans and for the sample service; the session root defines a virtual network, a node subnet and an AKS cluster, and was applied once in the first create; the session layer was destroyed afterwards; the Azure network policy and the ingress add-on were added to the session root afterwards and are planned, not applied), the bootstrap script and the state backend it created in Azure (a resource group, a storage account and the `tfstate-dev` container), workflows that check Terraform, plan Terraform, check the service, chart and manifests, run the security scans, publish the image and open the pull request for its tag (all have run on GitHub; the Terraform plan workflow plans the two `dev` roots on pull requests from this repository), and the code of the sample service, its Helm chart, the cluster rules, the GitOps layout, a script that checks them in a local `kind` cluster, and the bootstrap step of the session script, which installs Argo CD (run against `kind`, not yet on AKS). **Everything else in this document is planned.** Of the `dev` roots, the persistent layer exists in Azure. Azure creates two things around it: the resource group `MA_pp-dev-amw_swedencentral_managed` for the Monitor workspace, and an action group named "Application Insights Smart Detection" in the persistent resource group.
+**Built today:** the repository setup (templates, contribution rules, license, security policy, decision records), the `infrastructure/` folders with two Terraform roots for `dev` (the persistent root is applied and defines the resource group, the Azure Monitor and Log Analytics workspaces, Application Insights, the action group, the four burn-rate alerts, the Key Vault and the identities for pull request plans and for the sample service; the session root defines a virtual network, a node subnet and an AKS cluster, has been applied, and its session layer was destroyed afterwards; the Azure network policy and the ingress add-on are part of the session root and are applied with it), the bootstrap script and the state backend it created in Azure (a resource group, a storage account and the `tfstate-dev` container), workflows that check Terraform, plan Terraform, check the service, chart and manifests, run the security scans, publish the image and open the pull request for its tag (all have run on GitHub; the Terraform plan workflow plans the two `dev` roots on pull requests from this repository), and the code of the sample service, its Helm chart, the cluster rules, the GitOps layout, a script that checks them in a local `kind` cluster, and the bootstrap step of the session script, which installs Argo CD and runs on AKS. The sample service, the cluster rules, the four Argo CD Applications and the OpenTelemetry Collector ran on AKS in Session 1, and the sample service was served through the managed ingress. **Everything else in this document is planned.** Of the `dev` roots, the persistent layer exists in Azure. Azure creates two things around it: the resource group `MA_pp-dev-amw_swedencentral_managed` for the Monitor workspace, and an action group named "Application Insights Smart Detection" in the persistent resource group.
 
 Where a choice is not made, the text says so. Where a choice is made but not yet tested, it is marked as an assumption. Decisions are recorded as ADRs in [docs/adr/](adr/) and listed in section 14.
 
@@ -59,7 +59,7 @@ Assumptions:
 
 Unknowns:
 
-- Whether the tools fit next to the system pods, and whether the pool can take an upgrade or a node replacement with all 4 vCPU in use. AKS accepted the pool in the first create. (ADR 0012)
+- Whether the pool can take an upgrade, and whether it can take a node replacement, with all 4 vCPU in use. AKS accepted the pool in the first create, and the tools fit next to the system pods ([session 1 results](sessions/session-1-results.md)). (ADR 0012)
 - Whether the quota can be raised.
 
 ## 6. System context
@@ -119,16 +119,16 @@ The status column is `built` for a component that exists, `written` for a compon
 | Terraform | Creates all Azure resources | n/a | 2 (#2) | built |
 | State storage | Holds Terraform state | shared | 2 (#2) | built |
 | Virtual network | Network for nodes | session | 2 (#2) | built |
-| Container registry | Stores images | outside Azure (`ghcr.io`) | 4 (#4) | planned |
+| Container registry | Stores images | outside Azure (`ghcr.io`) | 4 (#4) | built |
 | Key Vault | Holds secrets | persistent | 6 (#6) | built |
 | AKS cluster | Runs workloads | session | 3 (#3) | built |
-| Ingress | Routes outside traffic to the service | session | 3 (#3) | written |
-| Namespaces, quotas, network policy | Cluster rules | session | 3 (#3) | written |
-| Sample service | The workload measured by SLOs | session | 3 (#3) | written |
+| Ingress | Routes outside traffic to the service | session | 3 (#3) | built |
+| Namespaces, quotas, network policy | Cluster rules | session | 3 (#3) | built |
+| Sample service | The workload measured by SLOs | session | 3 (#3) | built |
 | GitHub Actions | Build, test, scan, publish | n/a | 4 (#4) | built |
-| Argo CD | Syncs cluster state from Git | session | 3 (#3) | written |
+| Argo CD | Syncs cluster state from Git | session | 3 (#3) | built |
 | Azure Monitor and Log Analytics | Metric and log storage, alert rules | persistent | 5 (#5) | built (workspaces, Application Insights, action group and the four burn-rate alerts) |
-| OpenTelemetry Collector | Collects traces and metrics | session | 5 (#5) | planned |
+| OpenTelemetry Collector | Collects traces and metrics | session | 5 (#5) | built |
 | Dashboards | Saved queries on the workspaces, no Grafana | persistent | 5 (#5) | planned |
 | Pull request plan identity | Reads Azure and state so a pull request can run `terraform plan` | persistent | 6 (#6) | built |
 | Policy checks | Block unsafe changes | n/a | 6 (#6) | built (Trivy scans in the Security scans workflow) |
@@ -159,7 +159,7 @@ Other folders: `infrastructure/` for Terraform, `applications/` for the sample s
 
 ## 8. Delivery flow
 
-Planned flow from a code change to a running pod. Section 6 shows where each piece sits.
+Flow from a code change to a running pod. The merge, sync, health check and revert steps ran in Session 1 and Session 2. The image tag bump pull request has not been tested. Section 6 shows where each piece sits.
 
 ```mermaid
 flowchart TD
@@ -241,9 +241,9 @@ The end-of-session teardown in ADR 0009 applies to every environment, including 
 
 ## 10. Identity and secrets
 
-The access to the Terraform state, the Key Vault and the identities of the persistent layer are built. The session settings are written and not applied.
+The access to the Terraform state, the Key Vault and the identities of the persistent layer are built. The session settings were applied in Session 1 and Session 2.
 
-- **People.** The maintainer signs in with Microsoft Entra ID. The settings for cluster sign-in with Entra ID and Azure RBAC, the admin group input and the two role assignments for the group are written in the session root and not applied (ADR 0021). Local accounts stay on as a fallback. Until the settings are applied the cluster uses local accounts.
+- **People.** The maintainer signs in with Microsoft Entra ID. The settings for cluster sign-in with Entra ID and Azure RBAC, the admin group input and the two role assignments for the group are in the session root and were applied in Session 1 and Session 2 (ADR 0021). Local accounts stay on as a fallback. In Session 1 `kubelogin` sign-in with the non-admin kubeconfig listed the nodes through the admin group and Azure RBAC.
 - **Pipelines.** GitHub Actions logs in to Azure using OIDC federation. No client secret is stored in GitHub. (ADR 0007) The identity for pull request plans is defined in `infrastructure/environments/dev/persistent/identity.tf` and is applied. Its federated credential subject is `repo:<owner>@<owner-id>/<name>@<repo-id>:pull_request`, and it has Reader on the persistent resource group and Storage Blob Data Reader on the `tfstate-dev` container. (ADR 0022)
 - **Workloads.** Pods use workload identity to read Key Vault. No Azure credentials are stored in the cluster. The sample service identity `pp-<env>-sample-service` is defined in `infrastructure/environments/dev/persistent/workload-identity.tf` with Key Vault Secrets User on the vault, and is applied. The cluster settings (OIDC issuer, workload identity, the Key Vault secrets provider add-on) and the federated credential for the service account `apps/sample-service` are in the session root and are applied with the session layer. The chart mounts one secret as a file when `vaultSecret.enabled` is true. The bootstrap part `identity` turns it on at run time and no ID is written in Git. In Session 1 the chart mount and the bootstrap part ran, and both sample service pods mounted the secret. (ADR 0029)
 - **Secrets.** The rules are in [docs/security.md](security.md). Secrets live in Key Vault, which uses Azure RBAC. The sample service identity has Key Vault Secrets User and the maintainer has Key Vault Secrets Officer. Both roles are applied. The secret value is set by hand and is not in Terraform or in state. The secret `sample-service-secret` is set in the vault. (ADR 0022, ADR 0029) They are not committed. `.gitignore` covers common secret files, and GitHub secret scanning and push protection are on for this repository.
@@ -254,14 +254,14 @@ Argo CD generates its admin credential when it starts. It is read at run time an
 
 ## 11. Observability and SLOs
 
-The persistent layer (workspaces, Application Insights, action group, alerts) is applied. The rest is planned. See ADR 0008.
+The persistent layer (workspaces, Application Insights, action group, alerts) is applied. Managed Prometheus metrics and traces to Application Insights ran in Session 1. Dashboards are planned. See ADR 0008.
 
 - Metrics in Prometheus format go to an Azure Monitor workspace in the persistent layer. History survives cluster teardown.
 - Logs go to a Log Analytics workspace.
 - Traces come from OpenTelemetry in the sample service and go through a Collector to Application Insights. (ADR 0019)
 - Dashboards are saved queries on the workspaces, stored as code in `monitoring/`. There is no Grafana. (ADR 0019)
-- The sample service gets two SLIs to start: availability and latency. Targets are not set yet. The error budget alerts are applied. They have not been tested.
-- **SLO caveat.** The cluster is down between sessions. SLOs are measured over session time, with generated traffic. The window length is decided when the SLO is defined.
+- The sample service gets two SLIs to start: availability and latency. The targets are set and are written in [slos.md](slos.md). The error budget alerts are applied. The availability alerts fired in Session 2. The latency alerts have not been tested.
+- **SLO caveat.** The cluster is down between sessions. SLOs are measured over session time, with generated traffic. The window is 30 days ([slos.md](slos.md)).
 - The persistent root defines the workspaces, Application Insights and an action group with one email receiver. The address is set at run time and is not committed. The persistent root is applied. (ADR 0022)
 - Alerts notify an action group. Email is the first target (assumption). With one maintainer, there is no paging rotation.
 
@@ -343,9 +343,9 @@ Other open decisions are listed in section 15.
 
 1. When is `staging` created, and what check must `dev` pass before a change moves on? (ADR 0010)
 2. Which alert thresholds do the budgets of `staging` and `prod` use? (ADR 0009)
-3. What SLO targets and window fit a service that is only up during sessions?
+3. What SLO targets and window fit a service that is only up during sessions? Answered in [slos.md](slos.md): the targets and the window are set there.
 4. How long does a full create take? The session layer took about 7 minutes to create and about 7 minutes to destroy in single runs (ADR 0012). The full platform is measured once it exists, and it sets the recovery time that Epic 7 (#7) can claim. Session 2 measured 772 seconds from start to healthy ([results](sessions/session-2-results.md)).
 5. Do the tools fit in the capacity that is left after the system pods? (ADR 0012) Answered in Session 1: they fit.
 6. Does Azure Network Policy Manager work with Azure CNI Overlay on this cluster? (ADR 0015) Answered in Session 1: AKS accepted it, and a pod in another namespace is blocked.
 7. Which ingress replaces the managed NGINX add-on after its support ends? (ADR 0016)
-8. Does the Collector send traces to Application Insights with workload identity in the capacity that is left? (ADR 0019)
+8. Does the Collector send traces to Application Insights with workload identity in the capacity that is left? (ADR 0019) Answered in Session 1 for the path to Application Insights: server spans of the sample service reached it, and the Collector fits in the capacity.
