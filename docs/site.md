@@ -17,7 +17,7 @@ GitHub Pages builds the `docs/` folder on `main` with Jekyll. The theme is custo
 | `_includes/nav.html` | The navigation: the fixed groups from `_data/navigation.yml`, then one collapsible group for each folder listed there |
 | `_includes/breadcrumb.html` | The breadcrumb above the title and the name of the stage of the page |
 | `_includes/prev-next.html` | The previous and next links of the pages in a folder group, in the order of the sidebar |
-| `_includes/footer.html` | The maintainer line, the repository link, the "Edit this page" link and "Back to top" |
+| `_includes/footer.html` | The maintainer line, then the footer items: Repository, Licensed under MIT, Version and Back to top |
 | `_includes/logo.html` | The ring of five arcs in the stage colours, drawn inline. It takes a `size` |
 | `_data/navigation.yml` | The fixed groups and pages of the navigation, with their stage, and the folders that become groups |
 | `_data/stages.yml` | Which stage of the loop each page belongs to |
@@ -52,6 +52,12 @@ The GitHub mark in the maintainer block is the `mark-github` icon of Primer Octi
 ## Diagrams
 
 Diagrams written as `mermaid` code blocks are drawn on the site by the Mermaid library. The library is loaded from a public content delivery network, and only on a page that has such a block. The same blocks render on GitHub. The diagram fits the width of the page. The "View full size" button opens it at its natural size in a dialog that scrolls in both directions. The code block stays in the page, inside a "Diagram source" disclosure. If the library cannot be loaded or a diagram cannot be drawn, the code block is shown with a plain note. The Mermaid version is the constant `MERMAID_VERSION` at the top of `assets/js/site.js`.
+
+## Footer
+
+The footer lists four items in this order: Repository, Licensed under MIT, Version and Back to top. The repository and license links are built from the `repo` value in `_data/maintainer.yml`. The license link points to the `LICENSE` file of the repository.
+
+The Version item shows the tag of the latest release of the repository. No file holds the version. The browser reads it from the releases of the repository, so a new release shows up with no edit. The item stays hidden until a tag has loaded, and stays hidden when the request fails. The answer is kept for the browser tab.
 
 ## Screen sizes
 
