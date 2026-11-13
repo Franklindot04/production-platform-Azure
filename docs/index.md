@@ -13,6 +13,9 @@ start:
   - title: Session 2 results
     url: /sessions/session-2-results.html
     stage: break
+  - title: Session 3 results
+    url: /sessions/session-3-results.html
+    stage: break
 lead: "A personal project to build and operate a platform on Microsoft Azure: infrastructure as code, a Kubernetes cluster, delivery pipelines, monitoring, incident handling and cost control."
 ---
 # Production Platform / Azure
