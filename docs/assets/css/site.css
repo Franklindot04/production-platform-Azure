@@ -610,6 +610,7 @@ th { background: var(--surface); border-top: 1px solid var(--line); border-botto
   .loop > li { grid-template-columns: minmax(0, 1fr); padding-left: 12px; }
   .start-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .start-link { justify-content: center; text-align: center; padding: 0 10px; }
+  .start-row > .start-link:last-child:nth-child(odd) { grid-column: 1 / -1; justify-self: center; width: calc(50% - 6px); }
 }
 
 /* Diagrams drawn from mermaid blocks. The inline view fits the width. The full view is a dialog. */
