@@ -44,6 +44,8 @@ The expected output is `Registered`.
 | `session.sh bootstrap secrets` | Creates only the secret `appinsights-connection` in the namespace `observability`. It ran in Session 1 and set the Application Insights connection secret. |
 | `session.sh argocd-password` | Prints the Argo CD admin credential to the terminal. |
 
+`session.sh` exports `KUBECONFIG` only inside its own process. To run `kubectl` in your own shell, export `KUBECONFIG` to the session cluster file `kubeconfig-dev` in the plan directory (`PP_PLAN_DIR`, the temporary folder by default). `session.sh` writes that file when a step needs the cluster. The file holds the administrator credential of the session cluster.
+
 ### Create the Entra ID admin group
 
 The group name is a name and not an ID. The group ID is read at run time and is not written to a file. Create the group once and add the maintainer to it:
