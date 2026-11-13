@@ -1,6 +1,6 @@
 # Live session 3: latency alerts
 
-Status: planned. Issue #41.
+Status: run. The results are in [session-3-results.md](session-3-results.md). Issue #41.
 
 Goal: slow both pods of the sample service under steady load, see LatencyFastBurn and LatencySlowBurn fire, send mail and resolve, run `monitoring/logs/slow-requests.kql` against real slow requests, follow the [latency-burn runbook](../runbooks/latency-burn.md), and destroy everything.
 
@@ -61,6 +61,8 @@ So LatencySlowBurn is calculated to fire before LatencyFastBurn in this session,
 
 - The delay between the condition and the mail is not calculated. Session 2 recorded the time from the fault to the mail for AvailabilityFastBurn in [Session 2 results](session-2-results.md). The plan does not assume a delay.
 - How long resolution takes is not calculated. It is recorded. The rules set `time_to_resolve` to 10 minutes.
+
+The observed times are in [session-3-results.md](session-3-results.md).
 
 ## What is recorded
 
