@@ -22,8 +22,8 @@ The architecture document says that people sign in to the cluster with Microsoft
 - Day-to-day access uses Entra ID. The local credential remains a way in for anyone who has rights to fetch it, so it is protected by Azure roles on the cluster resource.
 - An interactive sign-in is needed for `kubectl` after the cluster is created.
 - A role assignment on the cluster is needed for the maintainer or the group.
-- The first create without Entra ID is the only cluster tested so far. Whether the integration works with the pool in ADR 0012 is not tested.
-- The integration on the cluster, the variable `cluster_admin_group_object_id` and the two role assignments for the group (`access.tf`) are written in the session root and not applied. The role assignments are destroyed with the cluster.
+- The cluster was created with the Entra ID integration and Azure RBAC, on the node pool of ADR 0012 (two `Standard_D2s_v5` nodes). In Session 1 `kubelogin` sign-in in Azure CLI mode with the non-admin kubeconfig listed the nodes through the admin group and Azure RBAC (Session 1 results).
+- The integration on the cluster, the variable `cluster_admin_group_object_id` and the two role assignments for the group (`access.tf`) are in the session root and are applied with it. The role assignments are destroyed with the cluster.
 
 ## Alternatives considered
 

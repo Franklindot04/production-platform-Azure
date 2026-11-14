@@ -14,13 +14,13 @@ What exists today:
 
 - Repository files: `.gitignore`, `.editorconfig`, issue and PR templates, `CONTRIBUTING.md`, `LICENSE`, `CODE_OF_CONDUCT.md`, `SECURITY.md`.
 - A decision record process in `docs/adr/`.
-- `infrastructure/`: two Terraform roots for `dev` and the bootstrap script for the state backend. The persistent root is applied: the monitoring workspaces, the alerts, the Key Vault and the identities. The session root defines a virtual network, a subnet and an AKS cluster. It was applied once and the session layer was destroyed afterwards. `session.sh` creates, destroys and checks the session layer. Plans and the first create are in `docs/plans/` and ADR 0012.
+- `infrastructure/`: two Terraform roots for `dev` and the bootstrap script for the state backend. The persistent root is applied: the monitoring workspaces, the alerts, the workbook, the Key Vault and the identities. The session root defines a virtual network, a subnet and an AKS cluster. It was applied in Sessions 1, 2 and 3 and the session layer was destroyed after each. `session.sh` creates, destroys and checks the session layer. Plans and the first create are in `docs/plans/` and ADR 0012.
 - The state backend in Azure: one resource group, one storage account and the `tfstate-dev` container, created with `infrastructure/bootstrap/bootstrap.sh`.
 - GitHub Actions workflows: Terraform checks, Terraform plan, Service, chart and manifest checks, Security scans, Publish image, and Open pull request for the image tag. See `docs/workflows.md`. All six have run on GitHub. The Terraform plan workflow plans the two `dev` roots on pull requests from this repository.
 - `applications/sample-service/`: a Go service with health endpoints and a settable latency and error rate, and its Dockerfile. `helm/sample-service/`: its chart. `kubernetes/`: namespaces, quotas and network policies. `gitops/`: the Argo CD Applications and `dev` values. `tests/kind/`: a script that checks all of it in a local `kind` cluster. The sample service ran on AKS in Session 1. It was served through the managed ingress, its metrics reached the Azure Monitor workspace and its traces reached Application Insights.
 - Planned work, written up as GitHub issues.
 
-Eleven runbooks are written in `docs/runbooks/`. Three were exercised in Session 2. What does not exist now: a running cluster and dashboards. The README will change as each of these is built.
+Eleven runbooks are written in `docs/runbooks/`. Four are exercised: availability-burn, node-drain and bad-image-tag in Session 2, and latency-burn in Session 3. What does not exist now is a running cluster. The README will change when one runs.
 
 ## Tools
 
