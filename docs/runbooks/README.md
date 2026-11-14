@@ -41,7 +41,7 @@ Every runbook has these headings, in this order.
 | Runbook | Trigger | Status |
 |---|---|---|
 | [availability-burn.md](availability-burn.md) | Alerts AvailabilityFastBurn (severity 1) and AvailabilitySlowBurn (severity 2) | exercised in Session 2 |
-| [latency-burn.md](latency-burn.md) | Alerts LatencyFastBurn (severity 1) and LatencySlowBurn (severity 2) | not exercised |
+| [latency-burn.md](latency-burn.md) | Alerts LatencyFastBurn (severity 1) and LatencySlowBurn (severity 2) | exercised in Session 3. Steps 4 to 6 of the First checks were not run |
 | [pod-not-ready.md](pod-not-ready.md) | A pod of the sample service is deleted or is not ready | not exercised |
 | [node-drain.md](node-drain.md) | A node is drained and pods stay pending or move | exercised in Session 2. The drain did not complete (#98) |
 | [bad-image-tag.md](bad-image-tag.md) | A bad image tag is deployed | exercised in Session 2 |

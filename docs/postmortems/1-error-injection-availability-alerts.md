@@ -52,5 +52,5 @@ The error rate was set to 1 through the admin port on both pods. This was a plan
 
 ## Actions
 
-1. Exercise the latency path and `slow-requests.kql` with injected latency (planned, no issue yet).
+1. Exercise the latency path and `slow-requests.kql` with injected latency (done in Session 3, [results](../sessions/session-3-results.md)).
 2. Decide whether the delay before an alert resolves needs a change (planned, no issue yet).
