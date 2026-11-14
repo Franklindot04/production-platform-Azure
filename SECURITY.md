@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-v0.1.0 is the first release. Only the `main` branch is maintained.
+The latest release is v0.2.0. Only the `main` branch is maintained.
 
 ## Reporting a vulnerability
 
