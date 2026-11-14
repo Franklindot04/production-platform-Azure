@@ -8,7 +8,7 @@ The documentation site is at https://franklindot04.github.io/production-platform
 
 ## Status
 
-Early stage. Sessions 1 and 2 created, checked and destroyed the session layer. No cluster is running now. The results are in [docs/sessions/session-1-results.md](docs/sessions/session-1-results.md) and [docs/sessions/session-2-results.md](docs/sessions/session-2-results.md).
+Early stage. Sessions 1, 2 and 3 created, checked and destroyed the session layer. No cluster is running now. The results are in [docs/sessions/session-1-results.md](docs/sessions/session-1-results.md), [docs/sessions/session-2-results.md](docs/sessions/session-2-results.md) and [docs/sessions/session-3-results.md](docs/sessions/session-3-results.md).
 
 What exists today:
 

@@ -23,4 +23,4 @@ On 2026-11-06 a pull request branch was found to contain commits with metadata t
 
 ## Why most epics were recreated
 
-The old issues were lost with the repository. Epics 1 and 2 and most of Epics 3 and 4 were recreated and closed, so the issue list matches the work that is already on `main`. Epics 5 to 8 were recreated as open issues, because that work had not been done. Both live sessions have run since, and their results are in [Session 1 results](sessions/session-1-results.md) and [Session 2 results](sessions/session-2-results.md). The open work is listed in the [release notes](release-notes.md).
+The old issues were lost with the repository. Epics 1 and 2 and most of Epics 3 and 4 were recreated and closed, so the issue list matches the work that is already on `main`. Epics 5 to 8 were recreated as open issues, because that work had not been done. The three live sessions have run since, and their results are in [Session 1 results](sessions/session-1-results.md), [Session 2 results](sessions/session-2-results.md) and [Session 3 results](sessions/session-3-results.md). The open work is listed in the [release notes](release-notes.md).
