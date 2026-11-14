@@ -68,6 +68,6 @@ The time charts draw a NaN value (no requests in the window) as 0. A range of 24
 
 ## Not built
 
-- Alerts for missing data (planned, #136).
+- Applying and exercising the alert for missing data. It is written in the session layer (ADR 0033, #136).
 
 The alert rules are defined in `infrastructure/environments/dev/persistent/alerts.tf` (ADR 0028, `docs/slos.md`). They exist in Azure only after the persistent layer is applied.
