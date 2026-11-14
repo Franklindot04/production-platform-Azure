@@ -9,7 +9,7 @@ SLOs for `/work` of the sample service. The decision is in ADR 0028. The window 
 | Availability | Share of `/work` requests whose code is not 5xx, among all `/work` requests. Code 499 (client abandoned the request) is not an error | `monitoring/prometheus/availability-sli.promql` |
 | Latency | Share of `/work` requests that finish within 0.5 seconds, from the histogram `http_request_duration_seconds` | `monitoring/prometheus/latency-sli.promql` |
 
-The error ratio is in `monitoring/prometheus/error-ratio.promql`. The queries show a 5 minute window. They have not been run against metric data.
+The error ratio is in `monitoring/prometheus/error-ratio.promql`. The queries show a 5 minute window. In Session 3 `monitoring/prometheus/latency-sli.promql`, `monitoring/prometheus/latency-p95.promql` and `monitoring/prometheus/request-rate.promql` ran in the Azure Monitor workspace. The other queries were not run in Session 3.
 
 ## SLOs and error budget
 
