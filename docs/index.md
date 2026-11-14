@@ -109,3 +109,4 @@ The repository is at [github.com/Franklindot04/production-platform-Azure](https:
 - [ADR 0030: Set the incident process and write postmortems](adr/0030-incident-process-and-postmortems.md)
 - [ADR 0031: Deploy the KQL queries as saved searches](adr/0031-kql-saved-searches.md)
 - [ADR 0032: Define the dashboards as an Azure Monitor workbook](adr/0032-workbook-for-dashboards.md)
+- [ADR 0033: Alert on missing request data in the session layer](adr/0033-missing-data-alert.md)

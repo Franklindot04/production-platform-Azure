@@ -20,7 +20,7 @@ What exists today:
 - `applications/sample-service/`: a Go service with health endpoints and a settable latency and error rate, and its Dockerfile. `helm/sample-service/`: its chart. `kubernetes/`: namespaces, quotas and network policies. `gitops/`: the Argo CD Applications and `dev` values. `tests/kind/`: a script that checks all of it in a local `kind` cluster. The sample service ran on AKS in Session 1. It was served through the managed ingress, its metrics reached the Azure Monitor workspace and its traces reached Application Insights.
 - Planned work, written up as GitHub issues.
 
-Ten runbooks are written in `docs/runbooks/`. Three were exercised in Session 2. What does not exist now: a running cluster and dashboards. The README will change as each of these is built.
+Eleven runbooks are written in `docs/runbooks/`. Three were exercised in Session 2. What does not exist now: a running cluster and dashboards. The README will change as each of these is built.
 
 ## Tools
 

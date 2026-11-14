@@ -28,7 +28,7 @@ Why a leaked credential is level 1: it cannot be undone once pushed, and the rep
    - The alert email from the action group `pp-dev-alerts`. The address is set at run time.
    - A step of `infrastructure/session.sh` that fails, and `session.sh check` at the end of a session.
    - The k6 summary (`tests/load/README.md`) and the query files in `monitoring/prometheus/`, for example `request-rate.promql` and `error-ratio.promql`.
-   - A service that receives no requests produces no data and no alert (`docs/slos.md`). During a session, look at `request-rate.promql` and do not wait for an email.
+   - A service that receives no requests produces no data, so the burn-rate alerts do not fire (`docs/slos.md`). The alert MissingRequestData is written in the session layer and is not yet applied or exercised (ADR 0033, #136). During a session, look at `request-rate.promql` and do not wait for an email.
 2. **Classify.** Choose the level from the table. If unsure between two levels, take the lower number.
 3. **Stabilise.** Find the runbook in the [runbook index](runbooks/README.md) and follow its First checks and Fix. If no runbook fits, that is a gap: note it. The options are a revert in Git, or ending the session with `./infrastructure/session.sh down`.
 4. **Recover and verify.** Use the Verify section of the runbook. The SLI queries `monitoring/prometheus/availability-sli.promql` and `latency-sli.promql` show the service back within its targets. At the end of every session, `./infrastructure/session.sh check` must exit 0.
@@ -42,5 +42,5 @@ Follow `docs/security.md` (rule 8) and `SECURITY.md`. They are not repeated here
 ## Not built
 
 - An issue template for incidents. Not chosen (ADR 0030).
-- An alert for missing data (#136, `docs/slos.md`).
+- Applying and exercising the alert for missing data. It is written in the session layer (ADR 0033, #136, `docs/slos.md`).
 - Budget alerts (`docs/architecture.md`).

@@ -50,6 +50,7 @@ Every runbook has these headings, in this order.
 | [key-vault-mount-fails.md](key-vault-mount-fails.md) | Sample service pods stay in ContainerCreating because the secret mount fails | not exercised |
 | [image-pull-refused.md](image-pull-refused.md) | The image cannot be pulled from `ghcr.io` | not exercised |
 | [session-leftovers.md](session-leftovers.md) | `session.sh check` exits 1 | not exercised |
+| [missing-request-data.md](missing-request-data.md) | Alert MissingRequestData (severity 2) | not exercised |
 
 Session 2 experiment 3 (inject errors and latency) has no runbook of its own. It was run with errors only, which exercised availability-burn. Latency was not injected, so latency-burn was not exercised.
 
