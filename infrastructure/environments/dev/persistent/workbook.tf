@@ -25,30 +25,20 @@ locals {
           content = { json = "### ${q.title}\n${q.description}" }
         },
         {
-          type = 15
-          name = "prom-${q.key}"
+          type = 3
+          name = "${q.key}-chart"
           content = {
             version = "KqlItem/1.0"
             query = jsonencode({
-              version      = "PrometheusQueryProvider/1.0"
-              type         = "query_range"
-              queryText    = file("${path.module}/../../../../monitoring/prometheus/${q.key}.promql")
-              expandResult = true
+              version        = "PrometheusQueryProvider/1.0"
+              customEndpoint = false
+              queryText      = file("${path.module}/../../../../monitoring/prometheus/${q.key}.promql")
+              type           = "query_range"
             })
-            size                    = 0
-            timeContext             = { durationMs = 86400000 }
-            queryType               = 16
-            resourceType            = "microsoft.monitor/accounts"
-            crossComponentResources = [azurerm_monitor_workspace.main.id]
-          }
-        },
-        {
-          type = 16
-          name = "prom-${q.key}-chart"
-          content = {
-            version       = "KqlItem/1.0"
             size          = 0
-            dataSourceId  = "prom-${q.key}"
+            timeContext   = { durationMs = 86400000 }
+            queryType     = 16
+            resourceType  = "microsoft.monitor/accounts"
             visualization = "timechart"
           }
         },
@@ -62,8 +52,8 @@ locals {
           content = { json = "### ${q.title}\n${q.description}" }
         },
         {
-          type = 15
-          name = "kql-${q.key}"
+          type = 3
+          name = "${q.key}-table"
           content = {
             version                 = "KqlItem/1.0"
             query                   = file("${path.module}/../../../../monitoring/logs/${q.key}.kql")
@@ -72,16 +62,7 @@ locals {
             queryType               = 0
             resourceType            = "microsoft.operationalinsights/workspaces"
             crossComponentResources = [azurerm_log_analytics_workspace.main.id]
-          }
-        },
-        {
-          type = 16
-          name = "kql-${q.key}-table"
-          content = {
-            version       = "KqlItem/1.0"
-            size          = 0
-            dataSourceId  = "kql-${q.key}"
-            visualization = "table"
+            visualization           = "table"
           }
         },
       ]
