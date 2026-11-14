@@ -108,3 +108,4 @@ The repository is at [github.com/Franklindot04/production-platform-Azure](https:
 - [ADR 0029: Give the sample service access to Key Vault with workload identity](adr/0029-workload-identity-and-vault-access.md)
 - [ADR 0030: Set the incident process and write postmortems](adr/0030-incident-process-and-postmortems.md)
 - [ADR 0031: Deploy the KQL queries as saved searches](adr/0031-kql-saved-searches.md)
+- [ADR 0032: Define the dashboards as an Azure Monitor workbook](adr/0032-workbook-for-dashboards.md)
