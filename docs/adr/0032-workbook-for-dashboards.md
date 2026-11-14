@@ -30,10 +30,12 @@ What stays from ADR 0019: no Grafana, and queries as files under `monitoring/`. 
 5. Prometheus data stays in the Azure Monitor workspace for 18 months (Microsoft documentation), so the workbook can show data from earlier sessions while the cluster is destroyed.
 6. The portal lists the workbook in the Workbooks gallery of the Azure Monitor workspace when the "Use Workbooks Preview" switch is off. With the switch on, it is not listed.
 7. Checked in the portal after the apply: opened from the Azure Monitor workspace `pp-dev-amw`, under Workbooks, with the "Use Workbooks Preview" switch off, all 8 sections load. None shows an "unsupported" warning or an error box.
-   - Request rate, Latency SLI and Latency p95 draw time charts. Slow requests draws a table. The portal limits the table to the first 250 rows.
-   - Availability SLI, Error ratio, Abandoned requests and Failed requests show "The query returned no results." in the 24 hour range.
+   - Request rate, Availability SLI, Error ratio, Latency SLI and Latency p95 draw time charts. Slow requests draws a table. The portal limits the table to the first 250 rows.
+   - Abandoned requests and Failed requests show "The query returned no results." in the 24 hour range.
    - A section shows no result when its query returns no series in the 24 hour range. Each item uses a fixed range of 24 hours.
    - `availability-sli` and `error-ratio` divide the rate of series with a 5xx code by the rate of all `/work` series. The numerator falls back to 0 when no 5xx series exists, so with requests and no 5xx series they return 1 and 0, and with no requests they return no data. `abandoned-requests` takes the rate of series with code 499. When the range holds no series with that code, the numerator is empty and the query returns no result.
+   - Availability SLI draws 1 where requests arrive and no 5xx series exists. Error ratio draws 0 in the same case.
+   - The Availability SLI line drops to 0 at the times the request rate is 0, the same way the Latency SLI line does. A point with no requests in its window is drawn as 0.
 
 ## Alternatives considered
 
