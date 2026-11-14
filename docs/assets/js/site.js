@@ -1,6 +1,6 @@
 /* Site script: mode toggle, drawer, on this page, anchors, search, copy buttons, tables. No dependencies. */
-/* The Mermaid major version that draws the diagrams. Change it here. */
-const MERMAID_VERSION = "11";
+/* The exact Mermaid version that draws the diagrams. Change it here. */
+const MERMAID_VERSION = "11.17.2";
 
 (function () {
   "use strict";
