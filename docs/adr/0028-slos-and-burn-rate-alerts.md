@@ -28,7 +28,7 @@ The sample service exports `http_requests_total` and `http_request_duration_seco
 
 - With short windows, a short burst can cross the fast-burn threshold. The alerts suit a session, and the windows may need to change for a longer run.
 - No data means no alert, until the alert for missing data (ADR 0033, #136) is applied.
-- The alerts are applied. The availability alerts fired and sent mail in Session 2 experiment 3. The latency alerts are untested.
+- The alerts are applied. The availability alerts fired and sent mail in Session 2 experiment 3. LatencyFastBurn and LatencySlowBurn fired, sent mail and resolved in Session 3.
 - The rule group is part of the persistent layer and is applied.
 - The cost of the rule group and the alert notifications is not estimated.
 
