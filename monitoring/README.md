@@ -34,6 +34,8 @@ These portal steps were run for the queries named under Status. The other querie
 
 `prometheus/latency-sli.promql` returns no chart over a range that includes minutes with no traffic. Set the range to minutes with traffic.
 
+In the workbook, the Latency SLI section draws a chart over its fixed range of 24 hours. A point with no requests in its window is drawn as 0 there (ADR 0032).
+
 The three KQL queries are saved searches on `pp-dev-law` with the category `Sample service`. `az monitor log-analytics workspace saved-search list` lists them.
 
 ## Status
