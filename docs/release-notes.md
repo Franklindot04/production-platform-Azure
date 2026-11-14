@@ -4,7 +4,7 @@ v0.1.0 is the first release. v0.2.0 follows it.
 
 ## v0.2.0
 
-The tag is created when the maintainer approves the release.
+Released 2026-11-14
 
 v0.2.0 adds the latency alerts test, the KQL saved searches and the cost page to v0.1.0. It is the same `dev` environment. The environment was created, checked and destroyed in a third live session. The cluster exists only while a live session runs.
 
