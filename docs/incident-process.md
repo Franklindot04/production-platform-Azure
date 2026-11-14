@@ -42,5 +42,5 @@ Follow `docs/security.md` (rule 8) and `SECURITY.md`. They are not repeated here
 ## Not built
 
 - An issue template for incidents. Not chosen (ADR 0030).
-- An alert for missing data (`docs/slos.md`).
+- An alert for missing data (#136, `docs/slos.md`).
 - Budget alerts (`docs/architecture.md`).
