@@ -10,7 +10,7 @@ ADR 0019 says there is no Grafana and that dashboards are saved queries stored u
 
 ## Decision
 
-The workbook is defined in `workbook.tf`. It exists in Azure only after the persistent layer is applied.
+The workbook is defined in `workbook.tf`. Each chart and table is one query item. It exists in Azure only after the persistent layer is applied.
 
 - One Azure Monitor workbook, defined in Terraform in the persistent layer, in `infrastructure/environments/dev/persistent/workbook.tf`, with the azurerm resource `azurerm_application_insights_workbook`.
 - Terraform reads the query text from the files in `monitoring/`, so each query exists in one place.
@@ -28,7 +28,8 @@ What stays from ADR 0019: no Grafana, and queries as files under `monitoring/`. 
 3. The range sets the resolution. A range of 24 hours returns one point every 30 minutes, so a short incident can fall between two points. A shorter range shows it.
 4. A NaN value (no requests in the window) is drawn as 0 on the time chart, so a 0 on the chart can also mean no requests in the window.
 5. Prometheus data stays in the Azure Monitor workspace for 18 months (Microsoft documentation), so the workbook can show data from earlier sessions while the cluster is destroyed.
-6. Not yet checked, and planned for after the first apply: the table view of the two KQL queries, and the link of the workbook to `pp-dev-amw` in the portal.
+6. The portal lists the workbook in the Workbooks gallery of the Azure Monitor workspace when the "Use Workbooks Preview" switch is off. With the switch on, it is not listed.
+7. The charts and tables are checked in the portal after the apply of this definition. The charts show no data when no traffic runs, because the workspace has no samples in the selected range.
 
 ## Alternatives considered
 
