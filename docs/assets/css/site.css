@@ -381,6 +381,11 @@ th, td {
 }
 .content td code, .content th code, .content td a, .content th a { overflow-wrap: normal; word-break: normal; }
 th { background: var(--surface); border-top: 1px solid var(--line); border-bottom: 2px solid var(--line); font-weight: 600; white-space: nowrap; }
+/* On a phone a table keeps the natural width of its cells and scrolls sideways. A cell is 4.5rem to 24rem wide. */
+@media (max-width: 559px) {
+  .table-wrap table { width: max-content; min-width: 100%; }
+  .table-wrap th, .table-wrap td { min-width: 4.5rem; max-width: 24rem; }
+}
 .chip {
   display: inline-block; padding: 1px 8px; border-radius: 4px;
   font-size: 0.875rem; line-height: 1.5; border: 1px solid transparent;
