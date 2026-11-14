@@ -58,7 +58,7 @@ Opened from the Azure Monitor workspace `pp-dev-amw`, under Workbooks, with the 
 
 A section shows no result when its query returns no series in the 24 hour range. Each item uses a fixed range of 24 hours.
 
-`availability-sli` and `error-ratio` divide the rate of series with a 5xx code by the rate of all `/work` series. `abandoned-requests` takes the rate of series with code 499. When the range holds no series with that code, the numerator is empty and the query returns no result. So `availability-sli` shows no result, and not 1, when no 5xx series exists in the range.
+`availability-sli` and `error-ratio` divide the rate of series with a 5xx code by the rate of all `/work` series. The numerator falls back to 0 when no 5xx series exists, so with requests and no 5xx series they return 1 and 0, and with no requests they return no data. `abandoned-requests` takes the rate of series with code 499. When the range holds no series with that code, the numerator is empty and the query returns no result.
 
 `logs/trace-by-operation.kql` is not in the workbook, because it needs an operation id typed in.
 
