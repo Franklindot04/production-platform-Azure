@@ -21,7 +21,7 @@ Facts read from the Azure Monitor documentation:
 - Traces: a workspace-based Application Insights resource in the persistent layer, linked to the Log Analytics workspace. The Go service sends OTLP to an OpenTelemetry Collector in the cluster, and the Collector sends it to Azure Monitor with the `otlphttp` exporter.
 - The Collector authenticates with workload identity (issue #42). No credential is stored. ADR 0025 changes the Collector authentication.
 - Metrics: managed Prometheus into the Azure Monitor workspace (ADR 0008).
-- Dashboards: no Grafana. Dashboards are saved queries on the workspaces, stored under `monitoring/` and run in the Azure portal.
+- Dashboards: no Grafana. Dashboards are saved queries on the workspaces, stored under `monitoring/` and run in the Azure portal. ADR 0032 replaces this line: the dashboards are an Azure Monitor workbook.
 - Logs: no cluster-wide log collection. Logs are read with `kubectl logs`.
 
 ## Consequences
