@@ -260,7 +260,7 @@ The persistent layer (workspaces, Application Insights, action group, alerts) is
 - Logs go to a Log Analytics workspace.
 - Traces come from OpenTelemetry in the sample service and go through a Collector to Application Insights. (ADR 0019)
 - Dashboards are saved queries on the workspaces, stored as code in `monitoring/`. There is no Grafana. (ADR 0019)
-- The sample service gets two SLIs to start: availability and latency. The targets are set and are written in [slos.md](slos.md). The error budget alerts are applied. The availability alerts fired in Session 2. The latency alerts have not been tested.
+- The sample service gets two SLIs to start: availability and latency. The targets are set and are written in [slos.md](slos.md). The error budget alerts are applied. The availability alerts fired in Session 2. The latency alerts LatencyFastBurn and LatencySlowBurn fired, sent mail and resolved in Session 3.
 - **SLO caveat.** The cluster is down between sessions. SLOs are measured over session time, with generated traffic. The window is 30 days ([slos.md](slos.md)).
 - The persistent root defines the workspaces, Application Insights and an action group with one email receiver. The address is set at run time and is not committed. The persistent root is applied. (ADR 0022)
 - Alerts notify an action group. Email is the first target (assumption). With one maintainer, there is no paging rotation.
