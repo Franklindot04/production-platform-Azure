@@ -30,7 +30,7 @@ The PromQL files read the metrics of the sample service (`http_requests_total` a
 3. Paste the query and run it.
 4. For `slow-requests.kql`, set `thresholdMs` first. For `trace-by-operation.kql`, replace the value of `operationId` with an operation id taken from `failed-requests.kql` or `slow-requests.kql`.
 
-These portal steps are not verified.
+These portal steps were run for the queries named under Status. The other queries have not been run by hand.
 
 `prometheus/latency-sli.promql` returns no chart over a range that includes minutes with no traffic. Set the range to minutes with traffic.
 
@@ -38,15 +38,25 @@ The three KQL queries are saved searches on `pp-dev-law` with the category `Samp
 
 ## Status
 
-The three KQL files are read by Terraform and defined as saved searches in `infrastructure/environments/dev/persistent/saved-searches.tf` (ADR 0031). They are applied. Until the workbook is applied, the six PromQL files are run by hand.
+The three KQL files are read by Terraform and defined as saved searches in `infrastructure/environments/dev/persistent/saved-searches.tf` (ADR 0031). They are applied. The workbook is applied (see Workbook). The six PromQL files can still be run by hand in the Prometheus explorer.
 
 Session 1 ran `prometheus/request-rate.promql` in the Azure Monitor workspace, and it answered by route. Server spans of the sample service appear in `AppRequests` with the request name `GET /work`. `logs/failed-requests.kql` and `logs/slow-requests.kql` filter on `GET /work`, the request name in `AppRequests`. In Session 2 `logs/failed-requests.kql` returned the 6,001 failed requests, and `logs/slow-requests.kql` returned 0 rows because no latency was injected. In Session 3 `prometheus/latency-sli.promql`, `prometheus/latency-p95.promql` and `prometheus/request-rate.promql` ran in the Azure Monitor workspace, and `logs/slow-requests.kql` returned slow requests. A summary query over the same range counted 12001 slow requests with durations from 800.033 ms to 802.873 ms. The queries not named on this page have not been run. Treat them as unverified.
 
 ## Workbook
 
-The workbook is defined in `infrastructure/environments/dev/persistent/workbook.tf` (ADR 0032). Each chart and table is one query item. The six PromQL files become time charts on the Azure Monitor workspace. `logs/failed-requests.kql` and `logs/slow-requests.kql` become tables on the Log Analytics workspace. The workbook exists in Azure only after the persistent layer is applied.
+The workbook is defined in `infrastructure/environments/dev/persistent/workbook.tf` (ADR 0032) and applied with the persistent layer. Each chart and table is one query item. The six PromQL files become time charts on the Azure Monitor workspace. `logs/failed-requests.kql` and `logs/slow-requests.kql` become tables on the Log Analytics workspace.
 
-The portal lists the workbook in the Workbooks gallery of the Azure Monitor workspace when the "Use Workbooks Preview" switch is off. With the switch on, it is not listed. The charts and tables are checked in the portal after the apply of this definition. The charts show no data when no traffic runs, because the workspace has no samples in the selected range.
+The portal lists the workbook in the Workbooks gallery of the Azure Monitor workspace when the "Use Workbooks Preview" switch is off. With the switch on, it is not listed.
+
+Opened from the Azure Monitor workspace `pp-dev-amw`, under Workbooks, with the switch off, all 8 sections load. None shows an "unsupported" warning or an error box.
+
+- Request rate, Latency SLI and Latency p95 draw time charts.
+- Slow requests draws a table. The portal limits the table to the first 250 rows.
+- Availability SLI, Error ratio, Abandoned requests and Failed requests show "The query returned no results." in the 24 hour range.
+
+A section shows no result when its query returns no series in the 24 hour range. Each item uses a fixed range of 24 hours.
+
+`availability-sli` and `error-ratio` divide the rate of series with a 5xx code by the rate of all `/work` series. `abandoned-requests` takes the rate of series with code 499. When the range holds no series with that code, the numerator is empty and the query returns no result. So `availability-sli` shows no result, and not 1, when no 5xx series exists in the range.
 
 `logs/trace-by-operation.kql` is not in the workbook, because it needs an operation id typed in.
 
