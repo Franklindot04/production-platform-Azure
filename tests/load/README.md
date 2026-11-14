@@ -59,7 +59,7 @@ Example:
 
 ```bash
 kubectl port-forward -n apps deploy/sample-service 8081:8081
-curl -X PUT http://localhost:8081/admin/config -d '{"latency":"800ms","error_rate":0.2}'
+curl -X PUT -H 'Content-Type: application/json' http://localhost:8081/admin/config -d '{"latency":"800ms","error_rate":0.2}'
 ```
 
 The response echoes the new config, for example `{"error_rate":1,"latency":"0s"}`. A setting applies to one pod only and is lost when the pod restarts. See `applications/sample-service/README.md`. The Service sends requests to all pods, so a change on one pod changes only part of the traffic.
