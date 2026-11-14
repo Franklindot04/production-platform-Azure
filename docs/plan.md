@@ -147,7 +147,7 @@ A release is created when the maintainer approves it.
 | v0.1.0 | The platform after Session 1 and Session 2, the first release ([release-notes.md](release-notes.md)) |
 | v0.2.0 | The latency alerts LatencyFastBurn and LatencySlowBurn tested, the latency-burn runbook exercised, and `slow-requests.kql` run with real slow requests: done in [Session 3](sessions/session-3-results.md) (#41). The KQL files as saved searches (#40), applied. The cost snapshot (#52, [cost.md](cost.md)). See [release-notes.md](release-notes.md#v020) |
 | v0.3.0 | The six runbooks not yet exercised: pod-not-ready, argocd-drift, network-policy-blocks-service, key-vault-mount-fails, image-pull-refused and session-leftovers (#46). A node drain that completes on the two node cluster (#98). The destroy repeat tested against a failed destroy (#89). Removal of a node instance. The network policy block experiment. The alert for missing data (planned) |
-| v0.4.0 | Dashboards as code (#40) |
+| v0.4.0 | Dashboards as code (#40): the workbook is done on main and not yet in a tagged release |
 | v0.5.0 | Cost review: the budget with alerts defined in Terraform (planned). The cost snapshot is in v0.2.0 ([cost.md](cost.md)) |
 | v0.6.0 | The environments `staging` and `prod` (planned) |
 | v0.7.0 | Remaining checks: the range test from a second address, a screenshot of the Argo CD UI, and the image tag bump pull request tested |

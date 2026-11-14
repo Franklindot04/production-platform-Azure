@@ -1,6 +1,6 @@
 # dev persistent layer
 
-The resources of `dev` that outlive a session. Every resource in the files below is applied, except the items of the workbook as defined in `workbook.tf`, which are not yet applied. The resource group is `pp-dev-persistent-rg` in `swedencentral`. Images are stored in `ghcr.io`, outside Azure, so this layer has no registry (ADR 0013).
+The resources of `dev` that outlive a session. Every resource in the files below is applied. The resource group is `pp-dev-persistent-rg` in `swedencentral`. Images are stored in `ghcr.io`, outside Azure, so this layer has no registry (ADR 0013).
 
 | File | Defines |
 |---|---|
