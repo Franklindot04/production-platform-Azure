@@ -38,9 +38,17 @@ The three KQL queries are saved searches on `pp-dev-law` with the category `Samp
 
 ## Status
 
-The three KQL files are read by Terraform and defined as saved searches in `infrastructure/environments/dev/persistent/saved-searches.tf` (ADR 0031). They are applied. The six PromQL files are still run by hand.
+The three KQL files are read by Terraform and defined as saved searches in `infrastructure/environments/dev/persistent/saved-searches.tf` (ADR 0031). They are applied. Until the workbook is applied, the six PromQL files are run by hand.
 
 Session 1 ran `prometheus/request-rate.promql` in the Azure Monitor workspace, and it answered by route. Server spans of the sample service appear in `AppRequests` with the request name `GET /work`. `logs/failed-requests.kql` and `logs/slow-requests.kql` filter on `GET /work`, the request name in `AppRequests`. In Session 2 `logs/failed-requests.kql` returned the 6,001 failed requests, and `logs/slow-requests.kql` returned 0 rows because no latency was injected. In Session 3 `prometheus/latency-sli.promql`, `prometheus/latency-p95.promql` and `prometheus/request-rate.promql` ran in the Azure Monitor workspace, and `logs/slow-requests.kql` returned slow requests. A summary query over the same range counted 12001 slow requests with durations from 800.033 ms to 802.873 ms. The queries not named on this page have not been run. Treat them as unverified.
+
+## Workbook
+
+The six PromQL files and `logs/failed-requests.kql` and `logs/slow-requests.kql` are items of one Azure Monitor workbook. It is defined in `infrastructure/environments/dev/persistent/workbook.tf` (ADR 0032). It exists in Azure only after the persistent layer is applied.
+
+`logs/trace-by-operation.kql` is not in the workbook, because it needs an operation id typed in.
+
+The time charts draw a NaN value (no requests in the window) as 0. A range of 24 hours returns one point every 30 minutes.
 
 ## Not built
 

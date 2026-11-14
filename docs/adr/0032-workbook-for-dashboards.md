@@ -10,7 +10,7 @@ ADR 0019 says there is no Grafana and that dashboards are saved queries stored u
 
 ## Decision
 
-The workbook is planned and not built. `workbook.tf` does not exist yet.
+The workbook is defined in `workbook.tf`. It exists in Azure only after the persistent layer is applied.
 
 - One Azure Monitor workbook, defined in Terraform in the persistent layer, in `infrastructure/environments/dev/persistent/workbook.tf`, with the azurerm resource `azurerm_application_insights_workbook`.
 - Terraform reads the query text from the files in `monitoring/`, so each query exists in one place.
