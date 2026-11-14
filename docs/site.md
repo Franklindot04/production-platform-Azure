@@ -51,7 +51,7 @@ The GitHub mark in the maintainer block is the `mark-github` icon of Primer Octi
 
 ## Diagrams
 
-Diagrams written as `mermaid` code blocks are drawn on the site by the Mermaid library. The library is loaded from a public content delivery network, and only on a page that has such a block. The same blocks render on GitHub. The diagram fits the width of the page. The "View full size" button opens it at its natural size in a dialog that scrolls in both directions. The code block stays in the page, inside a "Diagram source" disclosure. If the library cannot be loaded or a diagram cannot be drawn, the code block is shown with a plain note. The Mermaid version is the constant `MERMAID_VERSION` at the top of `assets/js/site.js`.
+Diagrams written as `mermaid` code blocks are drawn on the site by the Mermaid library. The library is loaded from a public content delivery network, and only on a page that has such a block. The same blocks render on GitHub. The diagram fits the width of the page. The "View full size" button opens it at its natural size in a dialog that scrolls in both directions. The code block stays in the page, inside a "Diagram source" disclosure. If the library cannot be loaded or a diagram cannot be drawn, the code block is shown with a plain note. The constant `MERMAID_VERSION` at the top of `assets/js/site.js` holds the exact Mermaid version.
 
 ## Footer
 
