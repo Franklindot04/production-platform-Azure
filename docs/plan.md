@@ -1,6 +1,6 @@
 # Delivery plan for Epics 3 to 8
 
-Status: [Session 1](sessions/session-1-results.md) and [Session 2](sessions/session-2-results.md) have run. For the other work below, only an issue that is marked closed is done.
+Status: [Session 1](sessions/session-1-results.md), [Session 2](sessions/session-2-results.md) and [Session 3](sessions/session-3-results.md) have run. For the other work below, only an issue that is marked closed is done.
 
 The plan covers the Kubernetes platform, delivery, observability, security, incident handling and reliability work. It is built around two limits: the cluster exists only during a live session, and the target subscription has a regional vCPU quota of 4 in `swedencentral` (ADR 0003).
 
