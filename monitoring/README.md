@@ -44,7 +44,9 @@ Session 1 ran `prometheus/request-rate.promql` in the Azure Monitor workspace, a
 
 ## Workbook
 
-The six PromQL files and `logs/failed-requests.kql` and `logs/slow-requests.kql` are items of one Azure Monitor workbook. It is defined in `infrastructure/environments/dev/persistent/workbook.tf` (ADR 0032). It exists in Azure only after the persistent layer is applied.
+The workbook is defined in `infrastructure/environments/dev/persistent/workbook.tf` (ADR 0032). Each chart and table is one query item. The six PromQL files become time charts on the Azure Monitor workspace. `logs/failed-requests.kql` and `logs/slow-requests.kql` become tables on the Log Analytics workspace. The workbook exists in Azure only after the persistent layer is applied.
+
+The portal lists the workbook in the Workbooks gallery of the Azure Monitor workspace when the "Use Workbooks Preview" switch is off. With the switch on, it is not listed. The charts and tables are checked in the portal after the apply of this definition. The charts show no data when no traffic runs, because the workspace has no samples in the selected range.
 
 `logs/trace-by-operation.kql` is not in the workbook, because it needs an operation id typed in.
 
