@@ -22,12 +22,12 @@ The sample service exports `http_requests_total` and `http_request_duration_seco
 - The thresholds are literal numbers in the expressions, with the arithmetic in a comment. Terraform does not compute them.
 - There are no recording rules. Each alert expression is self-contained.
 - Each alert sends to `azurerm_monitor_action_group.main`.
-- There is no alert for missing data in this change. A service that is down and receives no requests produces no data and no alert. An alert for missing data is planned.
+- There is no alert for missing data in this change. A service that is down and receives no requests produces no data and no alert. An alert for missing data is planned (#136).
 
 ## Consequences
 
 - With short windows, a short burst can cross the fast-burn threshold. The alerts suit a session, and the windows may need to change for a longer run.
-- No data means no alert, until the alert for missing data is built.
+- No data means no alert, until the alert for missing data (#136) is built.
 - The alerts are applied. The availability alerts fired and sent mail in Session 2 experiment 3. The latency alerts are untested.
 - The rule group is part of the persistent layer and is applied.
 - The cost of the rule group and the alert notifications is not estimated.
