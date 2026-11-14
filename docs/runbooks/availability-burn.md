@@ -39,7 +39,7 @@ Other causes are not known from the repository.
 
 ## Fix
 
-1. If a pod has a non-zero error rate, set it back: `curl -X PUT http://localhost:8081/admin/config -d '{"error_rate":0}'` through a port-forward to that pod. It sets the error rate on that pod. The response echoes the new config. Set it on every pod that has the fault. Use `kubectl port-forward -n apps pod/<pod name> 8081:8081` to choose the pod.
+1. If a pod has a non-zero error rate, set it back: `curl -X PUT -H 'Content-Type: application/json' http://localhost:8081/admin/config -d '{"error_rate":0}'` through a port-forward to that pod. It sets the error rate on that pod. The response echoes the new config. Set it on every pod that has the fault. Use `kubectl port-forward -n apps pod/<pod name> 8081:8081` to choose the pod.
 2. Or delete the pods one at a time: `kubectl delete pod -n apps <pod name>` (planned, not run). The Deployment starts a new pod, and a new pod takes its starting values from the chart.
 3. If the cause is a change in Git, revert the pull request that made it. Argo CD syncs the revert (automated sync). See [bad-image-tag.md](bad-image-tag.md).
 4. Do not fix it by editing the Deployment with `kubectl`. Self-heal reverts it. See [argocd-drift.md](argocd-drift.md).
