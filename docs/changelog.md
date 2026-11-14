@@ -2,6 +2,30 @@
 
 This page lists what is on `main`. Release notes are in [release-notes.md](release-notes.md). Status text carries no dates. Each release entry carries its release date under its heading, in the form YYYY-MM-DD. Anything not built is marked planned.
 
+## v0.2.0
+
+The tag is created when the maintainer approves the release. The release notes are in [release-notes.md](release-notes.md#v020).
+
+### Infrastructure
+
+- The three KQL files in `monitoring/logs` are saved searches on the Log Analytics workspace `pp-dev-law`. They are defined in `infrastructure/environments/dev/persistent/saved-searches.tf` and applied (ADR 0031).
+
+### Observability
+
+- LatencyFastBurn and LatencySlowBurn fired and resolved in Session 3 with 800 ms injected on both pods ([sessions/session-3-results.md](sessions/session-3-results.md)).
+- `slow-requests.kql` was run against real slow requests in Session 3.
+- The alert for missing data is planned for v0.3.0.
+
+### Incident management
+
+- The latency-burn runbook was exercised in Session 3. Four of the ten runbooks are exercised. See [runbooks/README.md](runbooks/README.md).
+
+### Documentation
+
+- The Session 3 plan and results, the cost page ([cost.md](cost.md)), and ADR 0031 with the amendment of ADR 0027.
+- The documentation site footer shows the license and the latest release tag, which the browser reads from the releases of the repository. The home page has a Session 3 results button, the last button of the row is centred on mobile, and the cost page is in the sidebar.
+- Notes on the session kubeconfig and the latency SLI range in the infrastructure and monitoring READMEs.
+
 ## v0.1.0
 
 Released 2026-11-11
