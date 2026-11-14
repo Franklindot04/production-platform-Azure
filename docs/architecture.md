@@ -129,7 +129,7 @@ The status column is `built` for a component that exists, `written` for a compon
 | Argo CD | Syncs cluster state from Git | session | 3 (#3) | built |
 | Azure Monitor and Log Analytics | Metric and log storage, alert rules | persistent | 5 (#5) | built (workspaces, Application Insights, action group and the four burn-rate alerts) |
 | OpenTelemetry Collector | Collects traces and metrics | session | 5 (#5) | built |
-| Dashboards | Saved queries on the workspaces, no Grafana | persistent | 5 (#5) | planned |
+| Dashboards | One Azure Monitor workbook on the workspaces, no Grafana (ADR 0032) | persistent | 5 (#5) | built |
 | Pull request plan identity | Reads Azure and state so a pull request can run `terraform plan` | persistent | 6 (#6) | built |
 | Policy checks | Block unsafe changes | n/a | 6 (#6) | built (Trivy scans in the Security scans workflow) |
 | Runbooks and postmortems | Incident handling | n/a | 7 (#7) | runbooks written, three exercised in Session 2 ([docs/runbooks/](runbooks/README.md)); incident process and postmortem template written, one postmortem written ([docs/incident-process.md](incident-process.md), [docs/postmortems/](postmortems/README.md)) |
@@ -254,7 +254,7 @@ Argo CD generates its admin credential when it starts. It is read at run time an
 
 ## 11. Observability and SLOs
 
-The persistent layer (workspaces, Application Insights, action group, alerts) is applied. Managed Prometheus metrics and traces to Application Insights ran in Session 1. Dashboards are planned. See ADR 0008.
+The persistent layer (workspaces, Application Insights, action group, alerts) is applied. Managed Prometheus metrics and traces to Application Insights ran in Session 1. The dashboards are one Azure Monitor workbook, applied with the persistent layer (ADR 0032). See ADR 0008.
 
 - Metrics in Prometheus format go to an Azure Monitor workspace in the persistent layer. History survives cluster teardown.
 - Logs go to a Log Analytics workspace.

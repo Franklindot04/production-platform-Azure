@@ -10,7 +10,7 @@ ADR 0019 says there is no Grafana and that dashboards are saved queries stored u
 
 ## Decision
 
-The workbook is defined in `workbook.tf`. Each chart and table is one query item. It exists in Azure only after the persistent layer is applied.
+The workbook is defined in `workbook.tf`. Each chart and table is one query item. It is applied with the persistent layer.
 
 - One Azure Monitor workbook, defined in Terraform in the persistent layer, in `infrastructure/environments/dev/persistent/workbook.tf`, with the azurerm resource `azurerm_application_insights_workbook`.
 - Terraform reads the query text from the files in `monitoring/`, so each query exists in one place.
@@ -29,7 +29,11 @@ What stays from ADR 0019: no Grafana, and queries as files under `monitoring/`. 
 4. A NaN value (no requests in the window) is drawn as 0 on the time chart, so a 0 on the chart can also mean no requests in the window.
 5. Prometheus data stays in the Azure Monitor workspace for 18 months (Microsoft documentation), so the workbook can show data from earlier sessions while the cluster is destroyed.
 6. The portal lists the workbook in the Workbooks gallery of the Azure Monitor workspace when the "Use Workbooks Preview" switch is off. With the switch on, it is not listed.
-7. The charts and tables are checked in the portal after the apply of this definition. The charts show no data when no traffic runs, because the workspace has no samples in the selected range.
+7. Checked in the portal after the apply: opened from the Azure Monitor workspace `pp-dev-amw`, under Workbooks, with the "Use Workbooks Preview" switch off, all 8 sections load. None shows an "unsupported" warning or an error box.
+   - Request rate, Latency SLI and Latency p95 draw time charts. Slow requests draws a table. The portal limits the table to the first 250 rows.
+   - Availability SLI, Error ratio, Abandoned requests and Failed requests show "The query returned no results." in the 24 hour range.
+   - A section shows no result when its query returns no series in the 24 hour range. Each item uses a fixed range of 24 hours.
+   - `availability-sli` and `error-ratio` divide the rate of series with a 5xx code by the rate of all `/work` series. `abandoned-requests` takes the rate of series with code 499. When the range holds no series with that code, the numerator is empty and the query returns no result. So `availability-sli` shows no result, and not 1, when no 5xx series exists in the range.
 
 ## Alternatives considered
 
