@@ -4,7 +4,9 @@ This page lists what is on `main`. Release notes are in [release-notes.md](relea
 
 ## v0.2.0
 
-The tag is created when the maintainer approves the release. The release notes are in [release-notes.md](release-notes.md#v020).
+Released 2026-11-14
+
+The release notes are in [release-notes.md](release-notes.md#v020).
 
 ### Infrastructure
 
