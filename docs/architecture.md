@@ -337,6 +337,7 @@ The target subscription has a regional vCPU quota of 4, which limits node sizes 
 | [0029](adr/0029-workload-identity-and-vault-access.md) | Give the sample service access to Key Vault with workload identity | proposed |
 | [0030](adr/0030-incident-process-and-postmortems.md) | Set the incident process and write postmortems | proposed |
 | [0031](adr/0031-kql-saved-searches.md) | Deploy the KQL queries as saved searches | proposed |
+| [0032](adr/0032-workbook-for-dashboards.md) | Define the dashboards as an Azure Monitor workbook | proposed |
 
 Other open decisions are listed in section 15.
 

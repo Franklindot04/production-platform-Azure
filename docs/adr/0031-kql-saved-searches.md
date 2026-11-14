@@ -28,4 +28,4 @@ What stays from ADR 0027: queries as files under `monitoring/`, review in pull r
 ## Alternatives considered
 
 - Keeping the KQL files as files that are run by hand (ADR 0027). Not chosen for the KQL files.
-- An Azure workbook. Not evaluated.
+- An Azure workbook. Chosen for the dashboards in ADR 0032. The three saved searches stay.

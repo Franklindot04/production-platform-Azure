@@ -26,4 +26,4 @@ ADR 0019 ruled out Grafana and said dashboards are saved queries on the workspac
 
 - Grafana. Ruled out by ADR 0019.
 - KQL saved searches through Terraform. Chosen for the KQL files in ADR 0031.
-- Azure workbooks. Not evaluated.
+- Azure workbooks. Chosen for the dashboards in ADR 0032.
