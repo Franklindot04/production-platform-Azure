@@ -338,6 +338,7 @@ The target subscription has a regional vCPU quota of 4, which limits node sizes 
 | [0030](adr/0030-incident-process-and-postmortems.md) | Set the incident process and write postmortems | proposed |
 | [0031](adr/0031-kql-saved-searches.md) | Deploy the KQL queries as saved searches | proposed |
 | [0032](adr/0032-workbook-for-dashboards.md) | Define the dashboards as an Azure Monitor workbook | proposed |
+| [0033](adr/0033-missing-data-alert.md) | Alert on missing request data in the session layer | proposed |
 
 Other open decisions are listed in section 15.
 
