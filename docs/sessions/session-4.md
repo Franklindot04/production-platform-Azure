@@ -56,6 +56,8 @@ Times are not promised. L is the moment the sample service is healthy after the 
 | Wrap up | Cost snapshot, saved output | The commands in [cost.md](../cost.md) (planned, not run) | Files saved |
 | Teardown | Destroy and check | See Teardown | The output of `check` |
 
+Auto sync on `root` and `cluster-rules` is switched off in experiment 5 and back on at the end of experiment 6.
+
 The order puts the cheap experiments first. Experiments 7 and 8 come last, because both use the room that the two nodes have, and a failure there can leave pods pending. Every stop rule below ends in the teardown.
 
 ## Experiments
@@ -72,23 +74,23 @@ Each experiment has five fields: trigger, expected result, what is recorded, the
 
 ### 2. Edit a resource by hand
 
-1. Trigger: a hand edit of the Deployment `sample-service` with `kubectl` (command to be confirmed). The expected revert is by Argo CD self-heal.
+1. Trigger: `kubectl scale deployment sample-service -n apps --replicas=3` (planned, not run). The chart sets `replicaCount` to 2 in `helm/sample-service/values.yaml`, and Argo CD self-heal on the Application `sample-service` reverts the change. The quota of `apps` allows the third pod: three pods request 75m CPU and 96Mi memory against 500m and 1Gi, and the quota allows 20 pods (`kubernetes/quotas/apps.yaml`).
 2. Expected: the Application goes `OutOfSync` and back to `Synced`, and the value returns to the one in Git ([argocd-drift.md](../runbooks/argocd-drift.md)). A change on `main` was synced in up to about 3 minutes in Session 1.
-3. Recorded: `kubectl get application sample-service -n argocd -w`, the time until `Synced`, and the value read in Verify step 2.
+3. Recorded: `kubectl get application sample-service -n argocd -w`, the time until `Synced`, the time until the Deployment shows 2 replicas again, and the value read in Verify step 2.
 4. Runbook step: First checks 1 to 3, Fix step 1, Verify 1 and 2. Fix step 3 (the refresh annotation) is run only if the Application stays `OutOfSync`.
 5. Stop rule: if the Application stays `OutOfSync` after Fix step 3, record it and go to the teardown.
 
 ### 3. Key Vault mount
 
-1. Trigger: none. A fault is not staged in the first pass. The read-only First checks 3 to 6 of [key-vault-mount-fails.md](../runbooks/key-vault-mount-fails.md) run on the healthy cluster. A way to stage a fault is to be confirmed.
+1. Trigger: none. No fault is staged on this page. The read-only First checks 3 to 6 of [key-vault-mount-fails.md](../runbooks/key-vault-mount-fails.md) run on the healthy cluster.
 2. Expected: the checks show the Helm parameter names, the `SecretProviderClass`, the service account annotation and the driver. Check 7 shows the secret ID and not the value.
 3. Recorded: for each check, whether the output matches what the runbook says. Where a command differs, the line to change in the runbook.
-4. Runbook step: First checks 1 to 7. Fix steps are not run unless a fault is staged. Verify step 2 (`ls /mnt/secrets`) is run, and its result is recorded, because the runbook says it may fail on this image.
+4. Runbook step: First checks 1 to 7. Fix steps are not run, because no fault is staged. Verify step 2 (`ls /mnt/secrets`) is run, and its result is recorded, because the runbook says it may fail on this image.
 5. Stop rule: the first pass changes nothing, so there is nothing to stop.
 
 ### 4. Image pull
 
-1. Trigger: none in the first pass. The read-only First checks 1 to 4 of [image-pull-refused.md](../runbooks/image-pull-refused.md) run on the healthy cluster. A way to stage a refusal is to be confirmed. [bad-image-tag.md](../runbooks/bad-image-tag.md) was exercised in Session 2 with a bad tag.
+1. Trigger: none in the first pass. The read-only First checks 1 to 4 of [image-pull-refused.md](../runbooks/image-pull-refused.md) run on the healthy cluster. No refusal is staged on this page. [bad-image-tag.md](../runbooks/bad-image-tag.md) was exercised in Session 2 with a bad tag.
 2. Expected: the checks show the image and the tag that the pods asked for, and when the tag changed. Check 5 (`docker manifest inspect`) is marked unsure in the runbook. It is run only if `docker` is available on the maintainer's machine.
 3. Recorded: for each check, whether the output matches the runbook, and whether check 5 ran.
 4. Runbook step: First checks 1 to 5. Fix steps are not run.
@@ -96,24 +98,25 @@ Each experiment has five fields: trigger, expected result, what is recorded, the
 
 ### 5. Missing data alert
 
-1. Trigger: stop the `/readyz` series of the sample service in the workspace. The command is to be confirmed. Two candidates are named here without a command:
-   - Remove the path of the metrics scrape, the policy `allow-metrics-scrape` in `kubernetes/network-policies/apps.yaml`. Argo CD restores a policy that is in Git ([network-policy-blocks-service.md](../runbooks/network-policy-blocks-service.md)), so the revert would have to be held back. How is to be confirmed.
-   - Stop the pods. Argo CD self-heal and the Deployment replace them.
-2. Expected: [MissingRequestData](../adr/0033-missing-data-alert.md) (severity 2, `for` of `PT15M`) fires after the series has been absent for the 15 minute wait, and the mail arrives through the action group. It resolves by itself (`time_to_resolve` is `PT10M` in `infrastructure/environments/dev/session/alerts.tf`). The expression is `absent_over_time(http_requests_total{route="/readyz"}[5m])`.
+1. Trigger: stop the scrape of the sample service, so that the `/readyz` series stops arriving in the workspace. Three steps, each planned, not run:
+   1. Switch off auto sync on the Application `root`: `kubectl patch application root -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":null}}}'` (planned, not run).
+   2. Switch off auto sync on the Application `cluster-rules`: `kubectl patch application cluster-rules -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":null}}}'` (planned, not run). `root` goes first, because `root` restores the sync policy of `cluster-rules` from `gitops/dev/apps` while its own auto sync is on.
+   3. Delete the policy: `kubectl delete networkpolicy allow-metrics-scrape -n apps` (planned, not run). The policy allows ingress to port 8081 of the sample service pods from the metrics agent pods (`rsName: ama-metrics` in `kube-system`), so deleting it stops the scrape of the sample service (`kubernetes/network-policies/apps.yaml`, `helm/sample-service/templates/podmonitor.yaml`).
+2. Expected (a hypothesis): once no sample has been seen in the 5 minute range, the expression `absent_over_time(http_requests_total{route="/readyz"}[5m])` can return a value. [MissingRequestData](../adr/0033-missing-data-alert.md) (severity 2) fires after `for` of `PT15M`, plus the evaluation interval, which `infrastructure/environments/dev/session/alerts.tf` sets to `PT1M`. Calculated from these values, the earliest firing is 5 + 15 + 1 minutes after the last sample. The mail arrives through the action group. The alert resolves by itself (`time_to_resolve` is `PT10M` in `alerts.tf`).
 3. Recorded:
    - the time from L to the first `/readyz` series (from the run sheet), because a new cluster reached Healthy in 772 seconds in [Session 2 results](session-2-results.md) and the wait is 15 minutes;
    - whether the alert fired before the data was stopped (at session start);
-   - the time the data stopped, the time the alert fired, the time the mail arrived and the time the alert resolved.
-4. Runbook step: all First checks of [missing-request-data.md](../runbooks/missing-request-data.md), Fix step 1 and step 2, Verify 1 and 2.
-5. Stop rule: if the alert has not fired when the series has been absent for the wait plus a margin (the margin is to be confirmed), record it, restore the data and go on to experiment 6. If the alert fired at session start, the `for` value is raised in a later change ([ADR 0033](../adr/0033-missing-data-alert.md)).
+   - the time of the delete, the time the alert fired, the time the mail arrived and the time the alert resolved.
+4. Runbook step: First checks 1 to 5 of [missing-request-data.md](../runbooks/missing-request-data.md), Fix step 2 (it points to [network-policy-blocks-service.md](../runbooks/network-policy-blocks-service.md)) and Verify 1 and 2. The experiment removes a policy and holds auto sync off, so the restore is `kubectl apply -f kubernetes/network-policies/apps.yaml` (planned, not run) and not the steps of that runbook.
+5. Stop rule: the wait margin is 10 minutes past the earliest firing time given in Expected. The margin is a value chosen for this plan. If the alert has not fired by then, record it, restore the policy with `kubectl apply -f kubernetes/network-policies/apps.yaml` (planned, not run), and go on to experiment 6 with auto sync still off. If it fired, restore the policy the same way once the firing and the mail are recorded, then record the resolution, which needs the data back. If the alert fired at session start, the `for` value is raised in a later change ([ADR 0033](../adr/0033-missing-data-alert.md)).
 
 ### 6. Network policy block
 
-1. Trigger: apply a policy that blocks the sample service. The repository has no manifest for it, and which policy is applied is not known ([network-policy-blocks-service.md](../runbooks/network-policy-blocks-service.md)). The manifest is to be confirmed and is written before the session.
-2. Expected: the probes of the pods and the requests through the ingress change as the policy selects. One fact is not known: whether an alert fires when no request reaches the pods. The runbook records that probe traffic was not blocked by the default-deny policy in Session 1.
+1. Trigger: with auto sync still off from experiment 5, `kubectl delete networkpolicy allow-ingress-controller -n apps` (planned, not run). A NetworkPolicy cannot deny by itself, because `default-deny` and the allow policies add up, so the block is the removal of an allow policy. `allow-ingress-controller` allows ingress to port 8080 of the sample service pods from the namespace `app-routing-system`, which is the path of the managed ingress (`kubernetes/network-policies/apps.yaml`).
+2. Expected: requests through the ingress stop reaching the pods. The runbook records that probe traffic was not blocked by the default-deny policy in Session 1. One fact is not known: whether an alert fires when no request reaches the pods.
 3. Recorded: the state of the pods and of the endpoints, the result of `SCENARIO=smoke` through the ingress, and whether MissingRequestData or a burn-rate alert fires.
-4. Runbook step: First checks 1 to 6, Fix step 1 and step 4, Verify 1 to 3.
-5. Stop rule: delete the policy (Fix step 1) before the next experiment. If the pods are not ready after that, go to the teardown.
+4. Runbook step: First checks 1 to 6 and Verify 1 to 3 of [network-policy-blocks-service.md](../runbooks/network-policy-blocks-service.md). Its Fix step 1 deletes a policy that was added by hand. This experiment removes a policy instead, so the fix is `kubectl apply -f kubernetes/network-policies/apps.yaml` (planned, not run). Fix step 2 does not apply, because auto sync is off. Fix step 4 (do not delete `default-deny`) applies.
+5. Stop rule: restore the policy with `kubectl apply -f kubernetes/network-policies/apps.yaml` (planned, not run). Then switch auto sync back on with `kubectl patch application root -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":{"prune":true,"selfHeal":true}}}}'` (planned, not run), the block that `gitops/dev/root-application.yaml` holds, so that `root` restores `cluster-rules` from Git. Check with `kubectl get application -n argocd` (planned, not run) that `root` and `cluster-rules` show auto sync again. If the pods are not ready after that, go to the teardown.
 
 ### 7. Node drain
 
@@ -174,11 +177,5 @@ Planned, not done:
 Each item below is a command or a value that the repository does not give. It is confirmed or replaced before the session.
 
 1. The time box and the stop point for teardown.
-2. The hand edit of experiment 2 (the `kubectl` command and the field).
-3. A way to stage a Key Vault mount fault (experiment 3), if a second pass is wanted.
-4. A way to stage an image pull refusal (experiment 4), if a second pass is wanted.
-5. The command that stops the `/readyz` series for experiment 5, and how Argo CD is held back from restoring it.
-6. The margin to wait after the 15 minute wait in experiment 5.
-7. The manifest of the blocking policy for experiment 6.
-8. The command that removes a node instance (experiment 8).
-9. A way to cause a failed destroy (#89).
+2. The command that removes a node instance (experiment 8).
+3. A way to cause a failed destroy (#89).
