@@ -22,6 +22,7 @@ The session layer bills until it is destroyed (ADR 0009). A cluster that remains
 
 - `down --yes` was not run, or it stopped with an error before it finished.
 - The destroy failed part way. Terraform keeps what remains in the state.
+- A destroy can need more than one run. In Session 4 a cluster was left in the state Failed with `ResourceGroupDeletionBlocked` on the node resource group, and the cause was not found. Running `down --yes` again cleared it.
 - The destroy stopped on a public IP that the load balancer still holds (`PublicIPAddressCannotBeDeleted`). Azure refuses to delete the IP while the cluster is being deleted. `down --yes` now repeats once after a wait. If both attempts fail, run it again.
 - A state lock error ("Error acquiring the state lock") stops the command. The cause is not confirmed (`infrastructure/README.md`).
 - A resource exists in Azure that is not in the Terraform state. The repository has no procedure for this case. It is not known what would create one.
@@ -34,7 +35,8 @@ Other causes are not known from the repository.
 2. `./infrastructure/session.sh down --yes`. It destroys the session root. `down` needs no authorized range and no admin group value.
 3. If it stops with a state lock error, run the command again. Whether that clears the error is not known.
    If it stops on a public IP (`PublicIPAddressCannotBeDeleted`), run it again. A second run cleared this error in Session 1.
-4. `./infrastructure/session.sh check`. Repeat until it exits 0.
+   If the cluster delete fails with `ResourceGroupDeletionBlocked`, run it again. The next run cleared it in Session 4.
+4. `./infrastructure/session.sh check`. Repeat until it exits 0. `check` decides when the session is done, not the exit code of `down --yes`.
 5. If something remains that Terraform does not know, the repository gives no way to remove it. Look at the names in the `check` output, decide by hand, and run `check` again. Do not remove `pp-shared-state-rg`, `pp-dev-persistent-rg`, `NetworkWatcherRG` or `MA_pp-dev-amw_swedencentral_managed`: `check` does not count them, and the first two hold state and persistent resources.
 
 ## Verify
@@ -51,4 +53,4 @@ A destroy cannot be undone. The session layer is created again with `./infrastru
 
 ## Status
 
-not exercised
+exercised in Session 4

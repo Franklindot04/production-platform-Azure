@@ -6,7 +6,7 @@ A resource that Argo CD manages is edited by hand with `kubectl`, and the cluste
 
 ## Impact
 
-All Applications under `gitops/dev/apps/` use automated sync with prune and self-heal: `cluster-rules`, `sample-service` and `opentelemetry-collector`, and the `root` Application that creates them. Self-heal restores the state in Git when a resource changes. A hand edit is therefore expected to be undone. Session 1 showed that self-heal reverted a manual change to the Ingress.
+All Applications under `gitops/dev/apps/` use automated sync with prune and self-heal: `cluster-rules`, `sample-service` and `opentelemetry-collector`, and the `root` Application that creates them. Self-heal restores the state in Git when a resource changes. A change made to the Deployment with `kubectl` is therefore expected to be undone. Session 1 showed that self-heal reverted a manual change to the Ingress.
 
 ## First checks
 
@@ -26,7 +26,7 @@ The edit was not reverted because:
 - The Application cannot sync. For example the chart does not render, or the repository cannot be read. The Application status shows the error.
 - The Argo CD components are not running.
 - The resource is not in Git. Argo CD does not remove a resource it does not manage. A resource that someone created by hand in `apps` stays.
-- Argo CD has not noticed yet. A change on `main` was synced in up to about 3 minutes in Session 1.
+- Argo CD has not noticed yet. In Session 4 it reverted a changed Deployment in 3 seconds. A change on `main` was synced in Session 1 by the refresh cycle ([session-1-results.md](../sessions/session-1-results.md)).
 
 ## Fix
 
@@ -34,7 +34,7 @@ The edit was not reverted because:
 2. If the Application is `OutOfSync` and does not sync, read the error in `kubectl describe application sample-service -n argocd` (planned, not run) and fix the cause named there.
 3. To ask for a refresh: `kubectl annotate application sample-service -n argocd argocd.argoproj.io/refresh=hard --overwrite` (planned, not run). It tells Argo CD to compare again.
 4. To sync from the UI, press Sync on the Application.
-5. For a change that should stay, make it in Git through a pull request. A hand edit does not last.
+5. For a change that should stay, make it in Git through a pull request. A change made with `kubectl` does not last.
 
 Unsure: the refresh annotation in step 3. It is the documented Argo CD way to ask for a refresh. It is not used anywhere in this repository.
 
@@ -53,4 +53,4 @@ Session 2 experiment 5, ADR 0017, `gitops/README.md`, `gitops/dev/root-applicati
 
 ## Status
 
-not exercised
+exercised in Session 4. The revert of a changed Deployment was observed. Which other steps were run is not recorded

@@ -19,6 +19,8 @@ The hypothesis of experiment 6 is that the probes fail and the alert fires. Prob
 
 - Whether an alert fires. If no request reaches the pods, the service counts no requests and the alert expressions return no data. A service that receives no requests produces no alert (`docs/slos.md`).
 
+In Session 4, deleting the policy `allow-metrics-scrape` alone did not stop a scrape that was already running: the series kept arriving after the delete. Deleting the sample service pods stopped the data.
+
 The repository has no manifest for the experiment policy. Which policy the experiment applies is not known.
 
 ## First checks
@@ -62,4 +64,4 @@ Session 2 experiment 6, ADR 0015, `kubernetes/README.md`, `kubernetes/network-po
 
 ## Status
 
-not exercised
+exercised in Session 4 for the deletion of `allow-metrics-scrape`. Which other steps were run is not recorded

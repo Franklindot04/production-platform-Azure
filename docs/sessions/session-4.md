@@ -28,7 +28,7 @@ The node instance removal (experiment 8) and the destroy repeat (#89) have no ru
 ## Before the session
 
 1. This plan is merged and `main` is clean.
-2. `./infrastructure/session.sh check` exits 0 and vCPU use is 0 of 4 ([session-leftovers.md](../runbooks/session-leftovers.md) explains the output).
+2. `./infrastructure/session.sh check` exits 0. The output lists the session layer groups, compute, public IP addresses, load balancers, managed disks and unexpected resource groups as none ([session-leftovers.md](../runbooks/session-leftovers.md) explains the output).
 3. The persistent layer is applied: the rule group `pp-dev-slo-alerts`, the action group and the Key Vault exist. The alert email address is set in `TF_VAR_alert_email` for any persistent apply, and it is not written to a file (`infrastructure/README.md`).
 4. The authorized range is in `TF_VAR_api_authorized_ip_ranges` and the admin group is in `TF_VAR_cluster_admin_group_object_id`. Both are set at run time.
 5. The secret `sample-service-secret` is set in the vault, so the pods can mount it ([key-vault-mount-fails.md](../runbooks/key-vault-mount-fails.md), Fix step 1).
@@ -182,10 +182,3 @@ Planned, not done:
 4. The v0.3.0 row in [plan.md](../plan.md) lists what is done and what is not.
 5. #98, #89, #46 and #136 close only for what was run.
 6. A release is created only when the maintainer says.
-
-## To be confirmed
-
-Each item below is a fact that the repository does not give. It is confirmed before the session, or the step that uses it is replaced.
-
-1. Whether `az aks nodepool delete-machines` takes the node name as the machine name on the pool `system` (experiment 8).
-2. Whether the account that runs the session can create and delete a resource group lock (Teardown, item 2).
