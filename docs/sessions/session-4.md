@@ -4,7 +4,7 @@ Status: planned. Nothing on this page has been run. Issue #141 holds this plan. 
 
 Goal: exercise the seven runbooks that are not yet exercised, try the node drain again (#98), run the destroy repeat against a failed destroy if one can be caused (#89), remove one node instance, run the network policy block experiment, test the alert for missing data (#136, [ADR 0033](../adr/0033-missing-data-alert.md)), and destroy everything.
 
-Time box: to be confirmed. [Session 2](session-2.md) used a box of about 2 hours with teardown at 1:45. [Session 3](session-3.md) started teardown one hour after the load started. This page has more experiments than either, and the alert test alone waits 15 minutes.
+Time box: 4 hours, counted from the start of `./infrastructure/session.sh up --apply` to the start of the teardown. [Session 2](session-2.md) used a box of about 2 hours with teardown at 1:45. [Session 3](session-3.md) started teardown one hour after the load started. This page has more experiments than either, and the alert test alone waits 15 minutes.
 
 Rules are the same as in [Session 1](session-1.md) ([results](session-1-results.md)), [Session 2](session-2.md) ([results](session-2-results.md)) and [Session 3](session-3.md) ([results](session-3-results.md)): approved plans, masked output, no stored credentials.
 
@@ -34,7 +34,7 @@ The node instance removal (experiment 8) and the destroy repeat (#89) have no ru
 5. The secret `sample-service-secret` is set in the vault, so the pods can mount it ([key-vault-mount-fails.md](../runbooks/key-vault-mount-fails.md), Fix step 1).
 6. k6 is installed on the maintainer's machine (`tests/load/README.md`).
 7. The budget of `dev` and its spend are read before the session with the commands in [cost.md](../cost.md). The cost per hour of cluster time is not calculated there.
-8. The item in the list at the end of this page is confirmed or replaced.
+8. The two facts in the list at the end of this page are confirmed, or the steps that use them are replaced.
 
 ## Run sheet
 
@@ -160,7 +160,7 @@ Each experiment has five fields: trigger, expected result, what is recorded, the
 6. The destroy repeat (#89) is exercised by the test in item 2, or by a destroy that fails by itself. Record whether the repeat ran and whether it recovered. If no destroy fails, the repeat stays untested and #89 stays open.
 7. The runbook [session-leftovers.md](../runbooks/session-leftovers.md) is exercised for its First checks (`check`, the `== result` lines and `down`). Its Fix steps are exercised only if something remains.
 
-A teardown that is not finished is the largest cost risk ([ADR 0009](../adr/0009-cost-guardrails.md)). Teardown starts at the stop point of the time box, whatever is unfinished.
+A teardown that is not finished is the largest cost risk ([ADR 0009](../adr/0009-cost-guardrails.md)). Teardown starts when the time box of 4 hours ends, whatever is unfinished.
 
 ## What is recorded
 
@@ -185,6 +185,7 @@ Planned, not done:
 
 ## To be confirmed
 
-The item below is a value that the repository does not give. It is confirmed or replaced before the session.
+Each item below is a fact that the repository does not give. It is confirmed before the session, or the step that uses it is replaced.
 
-1. The time box and the stop point for teardown.
+1. Whether `az aks nodepool delete-machines` takes the node name as the machine name on the pool `system` (experiment 8).
+2. Whether the account that runs the session can create and delete a resource group lock (Teardown, item 2).
