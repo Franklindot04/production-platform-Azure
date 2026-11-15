@@ -21,7 +21,7 @@ What stays from ADR 0028: the four burn-rate alerts, their thresholds and their 
 1. The alert exists only while the cluster exists. It cannot detect an outage between sessions, because no cluster runs then.
 2. The 15 minute wait delays the alert for a real outage by the same time.
 3. The rule group is applied by `session.sh up --apply`, not by an apply of the persistent layer. It is destroyed with the session layer.
-4. The alert is written. It is not yet applied or exercised. Session 4 exercises it (planned).
+4. The alert was applied and exercised in Session 4. The session apply created the rule group. The alert did not fire at the start of the session. It fired after the sample service pods were deleted and the data stopped, and the mail was sent. It resolved after the data returned, and the resolved mail was sent. The results are in [session-4-results.md](../sessions/session-4-results.md), experiment 5.
 
 ## Alternatives considered
 
