@@ -66,8 +66,4 @@ In the workbook, Availability SLI draws 1 where requests arrive and no 5xx serie
 
 The time charts draw a NaN value (no requests in the window) as 0. A range of 24 hours returns one point every 30 minutes.
 
-## Not built
-
-- Applying and exercising the alert for missing data. It is written in the session layer (ADR 0033, #136).
-
 The alert rules are defined in `infrastructure/environments/dev/persistent/alerts.tf` (ADR 0028, `docs/slos.md`). They exist in Azure only after the persistent layer is applied.
