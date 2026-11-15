@@ -34,7 +34,7 @@ The node instance removal (experiment 8) and the destroy repeat (#89) have no ru
 5. The secret `sample-service-secret` is set in the vault, so the pods can mount it ([key-vault-mount-fails.md](../runbooks/key-vault-mount-fails.md), Fix step 1).
 6. k6 is installed on the maintainer's machine (`tests/load/README.md`).
 7. The budget of `dev` and its spend are read before the session with the commands in [cost.md](../cost.md). The cost per hour of cluster time is not calculated there.
-8. The commands marked "to be confirmed" in the list at the end of this page are confirmed or replaced.
+8. The item in the list at the end of this page is confirmed or replaced.
 
 ## Run sheet
 
@@ -134,20 +134,31 @@ Each experiment has five fields: trigger, expected result, what is recorded, the
 
 ### 8. Remove a node instance
 
-1. Trigger: remove one node instance of the node pool and watch AKS repair it. The command is to be confirmed. The repository names no command for it. [Session 2](session-2.md) planned it as optional, because all 4 vCPU are in use and a retry can fail.
-2. Expected: AKS creates a replacement instance, and the pods return. Stated as a hypothesis.
-3. Recorded: the command used, the time until the node is `Ready`, and the state of the pods.
-4. Runbook step: none. The step is new. If it works, a short runbook is a later change.
-5. Stop rule: this is the last experiment. If the cluster does not recover, go to the teardown at once.
+1. Trigger, in three steps, each planned, not run:
+   1. `kubectl get nodes` reads the node names (planned, not run).
+   2. `az aks nodepool delete-machines --resource-group pp-dev-session-rg --cluster-name pp-dev-aks --name system --machine-names <node name>` (planned, not run), with `<node name>` taken from step 1. The removal goes through AKS. The node resource group `pp-dev-aks-nodes-rg` is not changed directly. The resource group, the cluster name and the pool name are in `infrastructure/environments/dev/session/main.tf`.
+   3. `az aks nodepool show --resource-group pp-dev-session-rg --cluster-name pp-dev-aks --name system --query count -o tsv` (planned, not run) reads the node count of the pool.
+2. Expected (a hypothesis): the removed node is no longer in `kubectl get nodes`, and the pods that ran on it are placed on the other node as far as its requests allow. Whether AKS creates a replacement node is not known.
+3. Recorded: the command used, the node count of the pool, `kubectl get nodes`, the state of the pods, and, if the count is 1, the restore command with the time until the new node is `Ready`.
+4. Restore, only if the count is 1: `az aks nodepool scale --resource-group pp-dev-session-rg --cluster-name pp-dev-aks --name system --node-count 2` (planned, not run). Two nodes of 2 vCPU stay within the regional quota of 4 vCPU ([ADR 0003](../adr/0003-region-and-naming-convention.md)).
+5. Runbook step: none. The step is new. If it works, a short runbook is a later change.
+6. Stop rule: this is the last experiment. If the cluster does not recover, go to the teardown at once. [Session 2](session-2.md) planned the step as optional, because all 4 vCPU are in use. The removal frees 2 vCPU before any restore.
 
 ## Teardown
 
 1. `./infrastructure/session.sh down` shows the destroy plan (planned, not run).
-2. `./infrastructure/session.sh down --yes` destroys the session root. If the destroy fails, it waits and runs once more. The wait is set by `PP_DESTROY_RETRY_WAIT`, in seconds (planned, not run, documented in the header of `infrastructure/session.sh`).
-3. `./infrastructure/session.sh check` (planned, not run). The session ends when it exits 0.
-4. If a step fails or `check` exits 1, follow [session-leftovers.md](../runbooks/session-leftovers.md): read the `== result` lines, run `down` and `down --yes` again, and repeat `check`. A state lock error and a public IP that the load balancer still holds (`PublicIPAddressCannotBeDeleted`) are named there.
-5. The destroy repeat (#89) is exercised only if a destroy fails. A way to cause a failed destroy on purpose is to be confirmed. Record whether the repeat ran and whether it recovered. If no destroy fails, the repeat stays untested and #89 stays open.
-6. The runbook [session-leftovers.md](../runbooks/session-leftovers.md) is exercised for its First checks (`check`, the `== result` lines and `down`). Its Fix steps are exercised only if something remains.
+2. The destroy repeat test (#89), run once, before the first destroy of the session. Four steps, each planned, not run:
+   1. Create a lock before the destroy: `az lock create --name session-test-lock --lock-type CanNotDelete --resource-group pp-dev-session-rg` (planned, not run).
+   2. `./infrastructure/session.sh down --yes` (planned, not run). Expected (a hypothesis, from the header of `infrastructure/session.sh`): the destroy fails on the locked resources, the script waits for `PP_DESTROY_RETRY_WAIT` and runs once more, and that run fails as well.
+   3. Remove the lock: `az lock delete --name session-test-lock --resource-group pp-dev-session-rg` (planned, not run).
+   4. `./infrastructure/session.sh down --yes` again, then `./infrastructure/session.sh check` (planned, not run).
+
+   Recorded: whether the first destroy failed, the error text with identifiers masked, whether the second run recovered, and the exit code of `check`. The session layer bills while the lock is in place, so step 3 follows step 2 at once.
+3. `./infrastructure/session.sh down --yes` destroys the session root. If the test in item 2 was run, step 4 of that test is this destroy and the check that follows. If the destroy fails, it waits and runs once more. The wait is set by `PP_DESTROY_RETRY_WAIT`, in seconds (planned, not run, documented in the header of `infrastructure/session.sh`).
+4. `./infrastructure/session.sh check` (planned, not run). The session ends when it exits 0.
+5. If a step fails or `check` exits 1, follow [session-leftovers.md](../runbooks/session-leftovers.md): read the `== result` lines, run `down` and `down --yes` again, and repeat `check`. A state lock error and a public IP that the load balancer still holds (`PublicIPAddressCannotBeDeleted`) are named there.
+6. The destroy repeat (#89) is exercised by the test in item 2, or by a destroy that fails by itself. Record whether the repeat ran and whether it recovered. If no destroy fails, the repeat stays untested and #89 stays open.
+7. The runbook [session-leftovers.md](../runbooks/session-leftovers.md) is exercised for its First checks (`check`, the `== result` lines and `down`). Its Fix steps are exercised only if something remains.
 
 A teardown that is not finished is the largest cost risk ([ADR 0009](../adr/0009-cost-guardrails.md)). Teardown starts at the stop point of the time box, whatever is unfinished.
 
@@ -174,8 +185,6 @@ Planned, not done:
 
 ## To be confirmed
 
-Each item below is a command or a value that the repository does not give. It is confirmed or replaced before the session.
+The item below is a value that the repository does not give. It is confirmed or replaced before the session.
 
 1. The time box and the stop point for teardown.
-2. The command that removes a node instance (experiment 8).
-3. A way to cause a failed destroy (#89).
