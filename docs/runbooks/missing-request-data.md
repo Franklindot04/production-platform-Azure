@@ -8,7 +8,7 @@ The alert MissingRequestData (severity 2) in the rule group `pp-dev-session-aler
 
 The burn-rate alerts (ADR 0028) have no data and cannot fire. A service that is down looks quiet. The probes call `/readyz`, so the series exists whenever a pod runs. No series means that no pod runs, or that the metrics do not reach the workspace.
 
-The alert is written. It is not yet applied or exercised.
+The alert is applied. It fired and resolved in Session 4 when the sample service pods were deleted, and it did not fire at the start of the session.
 
 ## First checks
 
@@ -48,4 +48,4 @@ The alert MissingRequestData, ADR 0033, `docs/slos.md`, `helm/sample-service/tem
 
 ## Status
 
-not exercised
+exercised in Session 4. The alert fired, sent mail and resolved. Which steps of the First checks and Verify were run is not recorded

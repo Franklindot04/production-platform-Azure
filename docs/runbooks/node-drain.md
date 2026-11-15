@@ -6,7 +6,7 @@ A node of the session cluster is drained, and sample service pods stay pending o
 
 ## Impact
 
-The cluster has two nodes and the regional quota is 4 vCPU, so there is no spare capacity for a third node (ADR 0003, ADR 0012). The hypothesis of experiment 2 is that the pods move to the other node, or stay pending if it has no room. In Session 2 seven pods stayed Pending with insufficient CPU on the remaining node: one sample service replica, three Argo CD pods, the second metrics-server pod, retina-agent and the collector. The drain did not complete (#98). Pods of other tools on the node are evicted too.
+The cluster has two nodes and the regional quota is 4 vCPU, so there is no spare capacity for a third node (ADR 0003, ADR 0012). The hypothesis of experiment 2 is that the pods move to the other node, or stay pending if it has no room. In Session 2 seven pods stayed Pending with insufficient CPU on the remaining node: one sample service replica, three Argo CD pods, the second metrics-server pod, retina-agent and the collector. In Session 4 the drain completed with exit 0, and four pods stayed Pending until the node was uncordoned. The cluster showed the cause: not enough CPU on the remaining node. Each node is a Standard_D2s_v5 with 1900m CPU allocatable, and the DaemonSets request 604m on each. Pods of other tools on the node are evicted too.
 
 The chart has a PodDisruptionBudget with `minAvailable: 1` and 2 replicas. The pods are spread over nodes with `whenUnsatisfiable: ScheduleAnyway`, so both can land on one node.
 
@@ -28,7 +28,7 @@ Other causes are not known from the repository.
 
 ## Fix
 
-1. Start the drain for the experiment: `kubectl drain <node name> --ignore-daemonsets` (planned, not run). It evicts the pods of the node and marks it unschedulable. The drain does not complete on the two node cluster today (#98).
+1. Start the drain for the experiment: `kubectl drain <node name> --ignore-daemonsets` (planned, not run). It evicts the pods of the node and marks it unschedulable. The drain completes, and pods that do not fit on the other node stay Pending for lack of CPU until the node is uncordoned (#98).
 2. When the experiment ends, make the node schedulable again: `kubectl uncordon <node name>` (planned, not run). Pending pods can then be placed on it.
 3. If a pod is still pending after the uncordon, delete it: `kubectl delete pod -n apps <pod name>` (planned, not run). The Deployment creates a new one.
 4. Do not add a node. The quota of 4 vCPU is in use (`docs/sessions/session-2.md`).
@@ -51,4 +51,4 @@ Session 2 experiment 2, ADR 0003, ADR 0012, `helm/sample-service/templates/pdb.y
 
 ## Status
 
-exercised in Session 2. The drain did not complete (#98)
+exercised in Session 4. The drain completed with exit 0. Four pods stayed Pending for lack of CPU until the uncordon (#98)
