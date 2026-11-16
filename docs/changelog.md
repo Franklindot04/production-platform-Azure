@@ -2,6 +2,35 @@
 
 This page lists what is on `main`. Release notes are in [release-notes.md](release-notes.md). Status text carries no dates. Each release entry carries its release date under its heading, in the form YYYY-MM-DD. Anything not built is marked planned.
 
+## v0.3.0
+
+Not released yet
+
+The release notes are in [release-notes.md](release-notes.md#v030).
+
+### Infrastructure
+
+- The session layer holds the rule group `pp-dev-session-alerts` with the rule MissingRequestData, defined in `infrastructure/environments/dev/session/alerts.tf` and applied by `session.sh up --apply` (ADR 0033).
+- The persistent layer holds the Azure Monitor workbook for the sample service, defined in `infrastructure/environments/dev/persistent/workbook.tf` and applied (ADR 0032).
+- The destroy repeat was tested against a failed destroy in Session 4. A destroy can need more than one run of `session.sh down --yes`.
+
+### Observability
+
+- MissingRequestData did not fire at the start of Session 4. It fired after the sample service pods were deleted, sent mail and resolved ([sessions/session-4-results.md](sessions/session-4-results.md)).
+- `availability-sli.promql` and `error-ratio.promql` return 1 and 0 when no 5xx series exists.
+
+### Incident management
+
+- The runbooks argocd-drift, missing-request-data, network-policy-blocks-service and session-leftovers were exercised in Session 4, and node-drain was exercised again. Eight of the eleven runbooks are exercised. See [runbooks/README.md](runbooks/README.md).
+- The node drain completed with exit 0 in Session 4. Four pods stayed Pending for lack of CPU until the uncordon.
+- A node instance was removed with `az aks nodepool delete-machines` and the pool was scaled back.
+
+### Documentation
+
+- The Session 4 plan and results, ADR 0032 and ADR 0033, and the runbook for MissingRequestData.
+- The home page has a Session 4 results button, and the Session 4 plan and results are in the list of live sessions.
+- The documentation site pins the Mermaid version, and tables keep their natural cell width on narrow screens.
+
 ## v0.2.0
 
 Released 2026-11-14
