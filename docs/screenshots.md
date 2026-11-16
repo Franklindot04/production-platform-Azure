@@ -2,6 +2,8 @@
 
 These are portal screenshots of the Azure Monitor alert MissingRequestData and of the "Sample service" workbook in the Azure Monitor workspace `pp-dev-amw`. The images are in `assets/screenshots/`.
 
+Click an image to enlarge it. Press Esc or click again to close it.
+
 ## Alert fired
 
 ![The Azure Monitor alerts list with one alert, MissingRequestData in the rule group pp-dev-session-alerts, severity 2 - Warning, affected resource pp-dev-amw, alert condition Fired](assets/screenshots/alert-fired.png)
