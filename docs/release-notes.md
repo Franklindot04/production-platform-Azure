@@ -39,8 +39,8 @@ Decision records: ADR 0001 to ADR 0033, listed on the [home page](index.md).
 
 - The runbooks pod-not-ready, key-vault-mount-fails and image-pull-refused were run in Session 4 and are not marked as exercised. Their corrections are tracked in #151.
 - The cause of the block on the node resource group `pp-dev-aks-nodes-rg` during a destroy was not found.
-- The results page does not record: the rebuild time and the state of the Applications after the bootstrap, the steps run in experiments 1 to 5, the result of experiment 6, the time of the data stop in experiment 5, the names of the four Pending pods, the requests per node before the drain, the time to placement after the uncordon, and the time until the restored node was `Ready`.
-- The network policy block experiment on `allow-ingress-controller` has no recorded result. Deleting `allow-metrics-scrape` alone did not stop a running scrape.
+- Not recorded on the results page: the time taken by `session.sh bootstrap` and the state of the Applications after it, the steps run and the results of experiments 2 to 4, the steps run in experiment 5, the time of the data stop in the missing data test, the requests per node before the drain, and the time until the restored node was `Ready`.
+- Deleting `allow-metrics-scrape` alone did not stop a running scrape.
 - The pod state during the single node phase of the node removal was not measured.
 - The limits of v0.2.0 that Session 4 did not change stay: the expression value at fire for LatencySlowBurn is not recorded, the observed firing order of the latency alerts differs from the calculated order with no cause established, and the request count in the log table (34145) differs from the k6 count (36001).
 - The cost page covers Session 1 and Session 2. The costs of Session 3 and Session 4 are not in it.

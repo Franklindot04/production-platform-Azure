@@ -46,7 +46,7 @@ Every runbook has these headings, in this order.
 | [node-drain.md](node-drain.md) | A node is drained and pods stay pending or move | exercised in Session 4. The drain completed with exit 0. Four pods stayed Pending for lack of CPU until the uncordon (#98) |
 | [bad-image-tag.md](bad-image-tag.md) | A bad image tag is deployed | exercised in Session 2 |
 | [argocd-drift.md](argocd-drift.md) | A resource is edited by hand | exercised in Session 4. The revert was observed. Which other steps were run is not recorded |
-| [network-policy-blocks-service.md](network-policy-blocks-service.md) | Probes fail because a policy blocks the service | exercised in Session 4 for the deletion of `allow-metrics-scrape`. Which other steps were run is not recorded |
+| [network-policy-blocks-service.md](network-policy-blocks-service.md) | Probes fail because a policy blocks the service | exercised in Session 4 for the deletion of `allow-ingress-controller` and of `allow-metrics-scrape`. For `allow-ingress-controller`, First checks 1 to 6 and Verify 1 to 3 were run. Which steps were run for `allow-metrics-scrape` is not recorded |
 | [key-vault-mount-fails.md](key-vault-mount-fails.md) | Sample service pods stay in ContainerCreating because the secret mount fails | not exercised |
 | [image-pull-refused.md](image-pull-refused.md) | The image cannot be pulled from `ghcr.io` | not exercised |
 | [session-leftovers.md](session-leftovers.md) | `session.sh check` exits 1 | exercised in Session 4 |
