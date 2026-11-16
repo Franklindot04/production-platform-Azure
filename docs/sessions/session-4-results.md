@@ -60,6 +60,14 @@ Runbook: [missing-request-data.md](../runbooks/missing-request-data.md). Issue #
 - The steps of the runbook that were run were not recorded.
 - No decision on the `for` value of 15 minutes was made.
 
+![The Azure Monitor alerts list with the alert MissingRequestData, severity 2 - Warning, on pp-dev-amw, with the alert condition Fired](../assets/screenshots/alert-fired.png)
+
+The alert in the Fired condition.
+
+![The Azure Monitor alerts list with the alert MissingRequestData, severity 2 - Warning, on pp-dev-amw, with the alert condition Resolved](../assets/screenshots/alert-resolved.png)
+
+The same alert in the Resolved condition.
+
 ### 6. Network policy block
 
 Runbook: [network-policy-blocks-service.md](../runbooks/network-policy-blocks-service.md).

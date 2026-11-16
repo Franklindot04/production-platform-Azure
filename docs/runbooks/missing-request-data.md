@@ -10,6 +10,16 @@ The burn-rate alerts (ADR 0028) have no data and cannot fire. A service that is 
 
 The alert is applied. It fired and resolved in Session 4 when the sample service pods were deleted, and it did not fire at the start of the session.
 
+## What the alert looks like
+
+![The Azure Monitor alerts list with the alert MissingRequestData, severity 2 - Warning, on pp-dev-amw, with the alert condition Fired](../assets/screenshots/alert-fired.png)
+
+The alert in the Fired condition.
+
+![The Azure Monitor alerts list with the alert MissingRequestData, severity 2 - Warning, on pp-dev-amw, with the alert condition Resolved](../assets/screenshots/alert-resolved.png)
+
+The same alert in the Resolved condition. More screenshots are on the [screenshots page](../screenshots.md).
+
 ## First checks
 
 1. Run `monitoring/prometheus/request-rate.promql` in the Prometheus explorer of the Azure Monitor workspace `pp-dev-amw` (planned, not run). It shows the rate by route. No `/readyz` series confirms the alert.
