@@ -64,4 +64,4 @@ Session 2 experiment 6, ADR 0015, `kubernetes/README.md`, `kubernetes/network-po
 
 ## Status
 
-exercised in Session 4 for the deletion of `allow-metrics-scrape`. Which other steps were run is not recorded
+exercised in Session 4 for the deletion of `allow-ingress-controller` and of `allow-metrics-scrape`. For `allow-ingress-controller`, First checks 1 to 6 and Verify 1 to 3 were run. Which steps were run for `allow-metrics-scrape` is not recorded
