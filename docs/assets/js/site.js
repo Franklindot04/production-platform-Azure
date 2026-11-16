@@ -15,7 +15,8 @@ const MERMAID_VERSION = "11.17.2";
   function currentMode() {
     var m = root.getAttribute("data-theme");
     if (m === "light" || m === "dark") { return m; }
-    var dark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var dark = false;
+    try { dark = !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches); } catch (e) { /* light */ }
     return dark ? "dark" : "light";
   }
 
@@ -27,6 +28,15 @@ const MERMAID_VERSION = "11.17.2";
       btn.setAttribute("aria-label", "Switch to " + next + " mode");
     }
     label();
+    /* With no saved choice the page follows the system setting, so the label follows it too. */
+    try {
+      var query = window.matchMedia("(prefers-color-scheme: dark)");
+      var onSystem = function () {
+        var m = root.getAttribute("data-theme");
+        if (m !== "light" && m !== "dark") { label(); }
+      };
+      if (query.addEventListener) { query.addEventListener("change", onSystem); }
+    } catch (e) { /* the label stays as it is */ }
     btn.addEventListener("click", function () {
       var next = currentMode() === "dark" ? "light" : "dark";
       root.setAttribute("data-theme", next);
