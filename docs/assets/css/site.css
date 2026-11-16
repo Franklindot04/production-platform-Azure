@@ -458,6 +458,11 @@ th { background: var(--surface); border-top: 1px solid var(--line); border-botto
   border: 2px solid var(--stage); border-radius: 4px;
 }
 .start-link:hover, .start-link:focus-visible { background: var(--stage-tint); color: var(--ink); }
+/* 560px and wider: the buttons in 3 columns of equal width. Below 560px the 2 column rule near the end applies. */
+@media (min-width: 560px) {
+  .start-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .start-link { justify-content: center; text-align: center; }
+}
 .layout-home .content > p { margin-top: 1rem; }
 .layout-home .content > .hero + p { margin-top: 0; }
 .hero-ring { justify-self: center; margin-top: 24px; }
