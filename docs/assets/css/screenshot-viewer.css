@@ -1,0 +1,17 @@
+/* Screenshot viewer. The script is assets/js/screenshot-viewer.js. */
+img.shot { cursor: zoom-in; }
+html.shot-open { overflow: hidden; scrollbar-gutter: stable; }
+.shot-overlay {
+  position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, 0.82); cursor: zoom-out; outline: none;
+}
+.shot-overlay-img {
+  display: block; width: auto; height: auto;
+  max-width: 96vw; max-height: 96vh; max-height: 96dvh;
+  object-fit: contain; cursor: zoom-out;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .shot-overlay { animation: shot-fade 150ms ease-out; }
+}
+@keyframes shot-fade { from { opacity: 0; } to { opacity: 1; } }
