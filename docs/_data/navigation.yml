@@ -9,6 +9,7 @@ groups:
       - path: cost.md
       - path: plan.md
       - path: history.md
+      - path: screenshots.md
   - title: Delivery and security
     stage: deploy
     url: /#delivery-and-security

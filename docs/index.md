@@ -49,6 +49,7 @@ The repository is at [github.com/Franklindot04/production-platform-Azure](https:
 - [Cost](cost.md): the cost after Session 1 and Session 2, compared with the budget.
 - [Plan](plan.md): the plan for the remaining epics and the live sessions.
 - [Project history](history.md): how the repository was built and why its history is short.
+- [Screenshots](screenshots.md): portal screenshots of the missing data alert and the Sample service workbook.
 - [Saved plans](plans/README.md): the saved Terraform plans of the `dev` roots.
 
 ## Delivery and security
