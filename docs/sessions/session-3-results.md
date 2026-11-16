@@ -49,6 +49,18 @@ Workspace `pp-dev-amw`, range 19:45 to 20:40. Each value is read from the circle
 - `latency-p95` is an estimate inside a histogram bucket. With every request between 0.5 s and 1 s the estimate falls near 0.975 s, so it does not read the injected 800 ms.
 - The 0 before and after is a value below the smallest bucket (0.005 s) shown as 0.
 
+![The Prometheus explorer with the request rate query, summed by route, showing a line for /work near 10 and two lines near 0](../assets/screenshots/prometheus-request-rate-by-route.png)
+
+The request rate query in the explorer.
+
+![The Prometheus explorer with the latency SLI query for /work, showing a line at 1 that falls to 0 and returns to 1](../assets/screenshots/prometheus-latency-sli.png)
+
+The latency SLI query in the explorer.
+
+![The Prometheus explorer with the histogram_quantile 0.95 query for /work, showing a line at 0 that rises to near 1 and falls back to 0](../assets/screenshots/prometheus-latency-p95.png)
+
+The latency p95 query in the explorer.
+
 ## slow-requests.kql
 
 Workspace `pp-dev-law`, range 19:42 to 20:42, threshold 500 ms. The editor lists 1000 rows at most.
