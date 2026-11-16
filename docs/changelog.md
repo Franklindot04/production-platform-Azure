@@ -4,7 +4,7 @@ This page lists what is on `main`. Release notes are in [release-notes.md](relea
 
 ## v0.3.0
 
-Not released yet
+Released 2026-11-16
 
 The release notes are in [release-notes.md](release-notes.md#v030).
 

@@ -4,7 +4,7 @@ v0.1.0 is the first release. v0.2.0 and v0.3.0 follow it.
 
 ## v0.3.0
 
-Not released yet
+Released 2026-11-16
 
 v0.3.0 adds the alert for missing data, the workbook, and the results of a fourth live session to v0.2.0. It is the same `dev` environment. The environment was created, checked and destroyed in a fourth live session. The cluster exists only while a live session runs.
 
