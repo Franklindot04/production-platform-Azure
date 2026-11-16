@@ -1,6 +1,58 @@
 # Release notes
 
-v0.1.0 is the first release. v0.2.0 follows it.
+v0.1.0 is the first release. v0.2.0 and v0.3.0 follow it.
+
+## v0.3.0
+
+Not released yet
+
+v0.3.0 adds the alert for missing data, the workbook, and the results of a fourth live session to v0.2.0. It is the same `dev` environment. The environment was created, checked and destroyed in a fourth live session. The cluster exists only while a live session runs.
+
+### What is in this release
+
+Tested in Session 4 ([results](sessions/session-4-results.md)):
+
+- The alert MissingRequestData (rule group `pp-dev-session-alerts` in the session layer, ADR 0033). It did not fire at the start of the session. It fired after the sample service pods were deleted and the data stopped, the mail was sent, and it resolved after the data returned with a resolved mail.
+- The node drain completes with exit 0. Four pods stayed Pending for lack of CPU on the remaining node until the uncordon (#98).
+- The destroy repeat test (#89) used a `CanNotDelete` lock on the session resource group. The destroy took three runs of `session.sh down --yes`. The first two exited 1, and the third destroyed the rest and exited 0, and `check` then exited 0.
+- Removal of a node instance: `az aks nodepool delete-machines` with the node name as the value of `--machine-names` removed the node. AKS did not recreate it within 3 minutes. `az aks nodepool scale` restored it.
+- Eight of the eleven runbooks are exercised, as the status lines in the [runbook index](runbooks/README.md) show: availability-burn, bad-image-tag, latency-burn, node-drain, argocd-drift, missing-request-data, network-policy-blocks-service and session-leftovers. Session 4 exercised argocd-drift, missing-request-data, network-policy-blocks-service, node-drain and session-leftovers.
+
+Platform changes since v0.2.0:
+
+- The session layer holds the rule group `pp-dev-session-alerts` with the rule MissingRequestData, severity 2. It is created by `session.sh up --apply` and destroyed with the session layer (ADR 0033). The runbook is [runbooks/missing-request-data.md](runbooks/missing-request-data.md).
+- The persistent layer holds one Azure Monitor workbook for the sample service, defined in `infrastructure/environments/dev/persistent/workbook.tf` (ADR 0032).
+- The queries `availability-sli.promql` and `error-ratio.promql` return 1 and 0 when no 5xx series exists.
+- The documentation site pins the Mermaid version, and tables keep their natural cell width on narrow screens.
+- The admin config examples in the load test README and in the availability-burn runbook send the `Content-Type` header.
+
+Documentation: the Session 4 plan and results, ADR 0032 and ADR 0033, the runbook for MissingRequestData, and the status lines of the exercised runbooks.
+
+Decision records: ADR 0001 to ADR 0033, listed on the [home page](index.md).
+
+### What is not in this release
+
+- The budget with alerts for `dev` is set in Azure. Defining it in Terraform is planned.
+- The environments `staging` and `prod` are planned.
+
+### Known limitations
+
+- The runbooks pod-not-ready, key-vault-mount-fails and image-pull-refused were run in Session 4 and are not marked as exercised. Their corrections are tracked in #151.
+- The cause of the block on the node resource group `pp-dev-aks-nodes-rg` during a destroy was not found.
+- The results page does not record: the rebuild time and the state of the Applications after the bootstrap, the steps run in experiments 1 to 5, the result of experiment 6, the time of the data stop in experiment 5, the names of the four Pending pods, the requests per node before the drain, the time to placement after the uncordon, and the time until the restored node was `Ready`.
+- The network policy block experiment on `allow-ingress-controller` has no recorded result. Deleting `allow-metrics-scrape` alone did not stop a running scrape.
+- The pod state during the single node phase of the node removal was not measured.
+- The limits of v0.2.0 that Session 4 did not change stay: the expression value at fire for LatencySlowBurn is not recorded, the observed firing order of the latency alerts differs from the calculated order with no cause established, and the request count in the log table (34145) differs from the k6 count (36001).
+- The cost page covers Session 1 and Session 2. The costs of Session 3 and Session 4 are not in it.
+- The range test from a second address and a screenshot of the Argo CD UI have not been done. The regional quota is 4 vCPU, and the node pool has two nodes ([architecture.md](architecture.md)).
+
+### Rebuild steps
+
+The steps are the same as for v0.1.0 (see [v0.1.0](#v010)), and `session.sh up --apply` now also creates the rule group `pp-dev-session-alerts`. The run sheet of the latest session is in [session-4.md](sessions/session-4.md). In Session 4 `session.sh up --apply` added 11 resources. A destroy can need more than one run of `session.sh down --yes`: repeat it and `session.sh check` until `check` exits 0 ([runbooks/session-leftovers.md](runbooks/session-leftovers.md)).
+
+### Where to read more
+
+The full list of changes is in the [changelog](changelog.md). The sessions are documented in [Session 1](sessions/session-1.md), [Session 2](sessions/session-2.md), [Session 3](sessions/session-3.md) and [Session 4](sessions/session-4.md), with their results in [Session 1 results](sessions/session-1-results.md), [Session 2 results](sessions/session-2-results.md), [Session 3 results](sessions/session-3-results.md) and [Session 4 results](sessions/session-4-results.md).
 
 ## v0.2.0
 

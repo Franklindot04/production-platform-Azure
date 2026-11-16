@@ -159,7 +159,7 @@ Other folders: `infrastructure/` for Terraform, `applications/` for the sample s
 
 ## 8. Delivery flow
 
-Flow from a code change to a running pod. The merge, sync, health check and revert steps ran in Session 1 and Session 2. The image tag bump pull request has not been tested. Section 6 shows where each piece sits.
+Flow from a code change to a running pod. The merge, sync, health check and revert steps ran in Session 1 and Session 2. The workflow that opens the image tag pull request has run: `main` holds commits by the workflow that change the tag in `gitops/dev/values/sample-service.yaml`. Section 6 shows where each piece sits.
 
 ```mermaid
 flowchart TD
