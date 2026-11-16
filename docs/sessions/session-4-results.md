@@ -11,10 +11,10 @@ The session created the `dev` session layer, ran the experiments of the plan, an
 | Step | Result |
 |---|---|
 | `session.sh up` | Planned 11 to add, 0 to change and 0 to destroy |
-| `session.sh up --apply` | Added 11 resources. The cluster `pp-dev-aks` took 6 min 9 s to create. The rule group `pp-dev-session-alerts` was created in the same apply |
+| `session.sh up --apply` | Added 11 resources. The cluster `pp-dev-aks` took 6 min 9 s to create. The rule group `pp-dev-session-alerts` was created in the same apply. The command took 7 min 34 s from start to exit 0. |
 | `session.sh bootstrap` | Installed Argo CD and applied the `root` Application. It also set the ingress source range and created the secret `appinsights-connection` in the namespace `observability` |
 
-The rebuild time and the state of the Applications after the bootstrap were not recorded.
+The time taken by `session.sh bootstrap` and the state of the Applications after it were not recorded.
 
 ## Experiments
 
@@ -23,7 +23,10 @@ The rebuild time and the state of the Applications after the bootstrap were not 
 Runbook: [pod-not-ready.md](../runbooks/pod-not-ready.md).
 
 - The `kubectl get endpoints` command in the runbook prints a deprecation warning.
-- The steps run and the result of each were not recorded.
+- First checks 1 to 4 and Verify 1 and 2 of the runbook were run and recorded. No other step of this runbook was recorded.
+- One of the two sample service pods was deleted. Its replacement was created on the other node. It was listed as Running 3 s after the delete command, and both pods were ready 11 s after it.
+- The events of the deleted pod show a readiness probe failure with HTTP status 503. The events of the replacement show Scheduled, Pulled, Created and Started.
+- The Service endpoints listed two pod addresses at First check 4 and at Verify 2.
 
 ### 2. Change a resource with kubectl
 
@@ -73,7 +76,12 @@ The same alert in the Resolved condition.
 Runbook: [network-policy-blocks-service.md](../runbooks/network-policy-blocks-service.md).
 
 - The deletion of `allow-metrics-scrape` and its result are under experiment 5.
-- The result of the experiment was not recorded.
+- First checks 1 to 6 and Verify 1 to 3 of the runbook were run and recorded. The policy `allow-ingress-controller` was deleted for the experiment.
+- After the delete, `default-deny` was still present. `kubectl describe networkpolicy default-deny` shows that it selects all pods and isolates them for ingress and egress.
+- Both sample service pods stayed `1/1` Running, and the Service endpoints still listed two pod addresses.
+- The k6 smoke test through the ingress passed 0 of 50 checks, and the average request duration was 15.08 s.
+- The policy was restored with `kubectl apply -f kubernetes/network-policies/apps.yaml`, 29 s after the delete. The same smoke test then passed all 51 checks, with an average request duration of 83.15 ms and a p95 of 85.97 ms.
+- Automated sync on `root` was switched on again with a patch of the `syncPolicy`. After 40 s the Applications `cluster-rules`, `opentelemetry-collector`, `root` and `sample-service` were Synced and Healthy.
 
 ### 7. Node drain
 
@@ -83,7 +91,10 @@ Runbook: [node-drain.md](../runbooks/node-drain.md). Issue #98.
 - Four pods stayed Pending until the node was uncordoned.
 - The cause shown by the cluster was not enough CPU on the remaining node. The nodes are two Standard_D2s_v5 with 1900m CPU allocatable on each, and the DaemonSets request 604m on each.
 - Two drain runs were logged. Both end with the node drained. The first shows evictions held back by the disruption budgets of metrics-server and konnectivity-agent.
-- The names of the four Pending pods, the requests per node before the drain and the time until the pods were placed after the uncordon were not recorded.
+- The four Pending pods were `nginx-668c89f4c-txp9z` in `app-routing-system`, and `argocd-application-controller-0`, `argocd-repo-server-75c6987d7d-rw5dr` and `argocd-server-6b5fc579f-m594b` in `argocd`.
+- After the drain, `kubectl describe nodes` showed CPU requests of 604m (31%) on the drained node and 1877m (98%) on the other node. The requests per node before the drain were not recorded.
+- The drain took 1 min 17 s and exited 0. Both sample service pods ran on the other node after it.
+- The first check that found no Pending pod ran 17 s after the uncordon. The check runs every 5 seconds.
 
 ### 8. Remove a node instance
 
