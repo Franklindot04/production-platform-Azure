@@ -16,6 +16,9 @@ start:
   - title: Session 3 results
     url: /sessions/session-3-results.html
     stage: break
+  - title: Session 4 results
+    url: /sessions/session-4-results.html
+    stage: break
 lead: "A personal project to build and operate a platform on Microsoft Azure: infrastructure as code, a Kubernetes cluster, delivery pipelines, monitoring, incident handling and cost control."
 ---
 # Production Platform / Azure
@@ -68,6 +71,8 @@ The repository is at [github.com/Franklindot04/production-platform-Azure](https:
 - [Session 2 results](sessions/session-2-results.md): the measured results of the second live session.
 - [Session 3](sessions/session-3.md): the plan for the latency alerts test.
 - [Session 3 results](sessions/session-3-results.md): the measured results of the third live session.
+- [Session 4](sessions/session-4.md): the plan for the runbooks, the node drain and the missing data alert.
+- [Session 4 results](sessions/session-4-results.md): the measured results of the fourth live session.
 
 ## Changes
 
